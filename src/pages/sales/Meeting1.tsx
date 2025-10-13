@@ -27,7 +27,7 @@ const Meeting1 = () => {
   const [state, setState] = useState("TX");
   const [zip, setZip] = useState("75001");
   const [effectiveDate, setEffectiveDate] = useState("2024-01-01");
-  const [renewalDate, setRenewalDate] = useState("2025-01-01");
+  const [renewalMonth, setRenewalMonth] = useState("1");
   const [totalEmployees, setTotalEmployees] = useState("150");
   const [totalEnrolled, setTotalEnrolled] = useState("120");
   const [fundingType, setFundingType] = useState("Self Insured");
@@ -280,17 +280,29 @@ const Meeting1 = () => {
               </div>
 
               <div>
-                <Label htmlFor="renewal" className="flex items-center gap-2">
+                <Label htmlFor="renewalMonth" className="flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
-                  Renewal Date
+                  Renewal Month
                 </Label>
-                <Input
-                  id="renewal"
-                  type="date"
-                  value={renewalDate}
-                  onChange={(e) => setRenewalDate(e.target.value)}
-                  className="mt-2"
-                />
+                <Select value={renewalMonth} onValueChange={setRenewalMonth}>
+                  <SelectTrigger className="mt-2">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">January</SelectItem>
+                    <SelectItem value="2">February</SelectItem>
+                    <SelectItem value="3">March</SelectItem>
+                    <SelectItem value="4">April</SelectItem>
+                    <SelectItem value="5">May</SelectItem>
+                    <SelectItem value="6">June</SelectItem>
+                    <SelectItem value="7">July</SelectItem>
+                    <SelectItem value="8">August</SelectItem>
+                    <SelectItem value="9">September</SelectItem>
+                    <SelectItem value="10">October</SelectItem>
+                    <SelectItem value="11">November</SelectItem>
+                    <SelectItem value="12">December</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div>
