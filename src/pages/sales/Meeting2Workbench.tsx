@@ -436,18 +436,14 @@ export default function Meeting2Workbench() {
           </div>
         </div>
 
-        {/* Show message if no company selected */}
-        {!companyId && (
-          <Card className="mb-8 border-meeting2-royal/20">
-            <CardContent className="py-12 text-center">
-              <p className="text-muted-foreground">Please select a company to begin working.</p>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Only show workbench if company is selected */}
-        {companyId && (
-          <div className="space-y-6">
+        <div className="space-y-6">
+          {!companyId && (
+            <Card className="mb-4 border-meeting2-royal/20 bg-muted/50">
+              <CardContent className="py-4 text-center">
+                <p className="text-sm text-muted-foreground">💡 Select a company above to save your work to the database</p>
+              </CardContent>
+            </Card>
+          )}
             <div className="flex gap-3">
               <Button 
                 onClick={handleRunSimulation}
@@ -665,8 +661,7 @@ export default function Meeting2Workbench() {
             </CardContent>
           </Card>
         </div>
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );
