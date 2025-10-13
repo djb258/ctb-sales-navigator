@@ -79,7 +79,7 @@ export default function Meeting2Workbench() {
 
   const loadConstants = async () => {
     const { data, error } = await supabase
-      .from('montecarlo_constants')
+      .from('montecarlo_constants' as any)
       .select('*')
       .order('category');
     
@@ -89,7 +89,7 @@ export default function Meeting2Workbench() {
     }
     
     if (data) {
-      setConstants(data);
+      setConstants(data as unknown as MonteCarloConstant[]);
     }
   };
 
@@ -106,25 +106,26 @@ export default function Meeting2Workbench() {
 
   const loadMeetingData = async (compId: string) => {
     const { data, error } = await supabase
-      .from('meeting2_master')
+      .from('meeting2_master' as any)
       .select('*')
       .eq('company_id', compId)
-      .single();
+      .maybeSingle();
 
     if (data) {
-      setMeetingId(data.meeting_id);
-      setPresentationMode(data.presentation_mode || false);
+      const meetingData = data as any;
+      setMeetingId(meetingData.meeting_id);
+      setPresentationMode(meetingData.presentation_mode || false);
       
-      if (data.montecarlo_results) {
-        setMcResults(data.montecarlo_results);
+      if (meetingData.montecarlo_results) {
+        setMcResults(meetingData.montecarlo_results);
       }
       
-      if (data.compliance_status) {
-        setComplianceItems(data.compliance_status);
+      if (meetingData.compliance_status) {
+        setComplianceItems(meetingData.compliance_status);
       }
       
-      if (data.marketing_copy) {
-        setMarketingCopy(data.marketing_copy);
+      if (meetingData.marketing_copy) {
+        setMarketingCopy(meetingData.marketing_copy);
       }
     }
   };
@@ -138,7 +139,7 @@ export default function Meeting2Workbench() {
     const constant = updated.find(c => c.id === id);
     if (constant) {
       await supabase
-        .from('montecarlo_constants')
+        .from('montecarlo_constants' as any)
         .update({ active: constant.active })
         .eq('id', id);
     }
@@ -159,7 +160,7 @@ export default function Meeting2Workbench() {
     if (!companyId || !mcResults) return;
 
     const { error } = await supabase
-      .from('meeting2_master')
+      .from('meeting2_master' as any)
       .upsert({
         company_id: companyId,
         montecarlo_results: mcResults,
@@ -183,7 +184,7 @@ export default function Meeting2Workbench() {
     if (!companyId) return;
 
     const { error } = await supabase
-      .from('meeting2_master')
+      .from('meeting2_master' as any)
       .upsert({
         company_id: companyId,
         compliance_status: complianceItems,
@@ -207,7 +208,7 @@ export default function Meeting2Workbench() {
     if (!companyId) return;
 
     const { error } = await supabase
-      .from('meeting2_master')
+      .from('meeting2_master' as any)
       .upsert({
         company_id: companyId,
         marketing_copy: marketingCopy,
@@ -231,7 +232,7 @@ export default function Meeting2Workbench() {
     if (!companyId) return;
 
     const { error } = await supabase
-      .from('meeting2_master')
+      .from('meeting2_master' as any)
       .upsert({
         company_id: companyId,
         montecarlo_results: mcResults,
