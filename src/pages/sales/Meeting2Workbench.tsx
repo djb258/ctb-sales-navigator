@@ -211,6 +211,7 @@ export default function Meeting2Workbench() {
   const [badYearIncreaseMin, setBadYearIncreaseMin] = useState<number>(30);
   const [badYearIncreaseMax, setBadYearIncreaseMax] = useState<number>(40);
   const [mcResults, setMcResults] = useState<MonteCarloResults | null>(null);
+  const [showRawOutput, setShowRawOutput] = useState<boolean>(false);
 
   // Auto-compute historical costs from renewals (reverse engineering)
   useEffect(() => {
@@ -1015,6 +1016,194 @@ export default function Meeting2Workbench() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Simulation Results Preview - Review & Adjust Panel */}
+        {mcResults && (
+          <Card className="mt-6 border-meeting2-royal/30 shadow-lg">
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <CardTitle className="text-meeting2-royal">Simulation Results Preview</CardTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowRawOutput(!showRawOutput)}
+                  className="text-xs"
+                >
+                  {showRawOutput ? "Hide Raw Output" : "Show Raw Output"}
+                </Button>
+              </div>
+              <CardDescription>Review and adjust results before presenting</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Editable Summary Table */}
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm border">
+                  <thead className="bg-muted">
+                    <tr>
+                      <th className="p-2 text-left">Scenario</th>
+                      <th className="p-2 text-right">Mean Cost ($)</th>
+                      <th className="p-2 text-right">5% Low</th>
+                      <th className="p-2 text-right">95% High</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-t">
+                      <td className="p-2 font-medium">Baseline</td>
+                      <td className="p-2 text-right">
+                        <Input
+                          type="number"
+                          className="w-32 h-8 text-right text-sm"
+                          value={Number(mcResults.baseline.mean || 0).toFixed(0)}
+                          onChange={(e) => {
+                            const val = Number(e.target.value);
+                            setMcResults({
+                              ...mcResults,
+                              baseline: { ...mcResults.baseline, mean: val }
+                            });
+                          }}
+                        />
+                      </td>
+                      <td className="p-2 text-right text-muted-foreground">
+                        ${mcResults.baseline.p5.toFixed(0)}
+                      </td>
+                      <td className="p-2 text-right text-muted-foreground">
+                        ${mcResults.baseline.p95.toFixed(0)}
+                      </td>
+                    </tr>
+                    <tr className="border-t">
+                      <td className="p-2 font-medium">Self-Insured</td>
+                      <td className="p-2 text-right">
+                        <Input
+                          type="number"
+                          className="w-32 h-8 text-right text-sm"
+                          value={Number(mcResults.self_insured.mean || 0).toFixed(0)}
+                          onChange={(e) => {
+                            const val = Number(e.target.value);
+                            setMcResults({
+                              ...mcResults,
+                              self_insured: { ...mcResults.self_insured, mean: val }
+                            });
+                          }}
+                        />
+                      </td>
+                      <td className="p-2 text-right text-muted-foreground">
+                        ${mcResults.self_insured.p5.toFixed(0)}
+                      </td>
+                      <td className="p-2 text-right text-muted-foreground">
+                        ${mcResults.self_insured.p95.toFixed(0)}
+                      </td>
+                    </tr>
+                    <tr className="border-t">
+                      <td className="p-2 font-medium">Reference-Based</td>
+                      <td className="p-2 text-right">
+                        <Input
+                          type="number"
+                          className="w-32 h-8 text-right text-sm"
+                          value={Number(mcResults.reference_based.mean || 0).toFixed(0)}
+                          onChange={(e) => {
+                            const val = Number(e.target.value);
+                            setMcResults({
+                              ...mcResults,
+                              reference_based: { ...mcResults.reference_based, mean: val }
+                            });
+                          }}
+                        />
+                      </td>
+                      <td className="p-2 text-right text-muted-foreground">
+                        ${mcResults.reference_based.p5.toFixed(0)}
+                      </td>
+                      <td className="p-2 text-right text-muted-foreground">
+                        ${mcResults.reference_based.p95.toFixed(0)}
+                      </td>
+                    </tr>
+                    <tr className="border-t">
+                      <td className="p-2 font-medium">MAP Drugs</td>
+                      <td className="p-2 text-right">
+                        <Input
+                          type="number"
+                          className="w-32 h-8 text-right text-sm"
+                          value={Number(mcResults.map_drug.mean || 0).toFixed(0)}
+                          onChange={(e) => {
+                            const val = Number(e.target.value);
+                            setMcResults({
+                              ...mcResults,
+                              map_drug: { ...mcResults.map_drug, mean: val }
+                            });
+                          }}
+                        />
+                      </td>
+                      <td className="p-2 text-right text-muted-foreground">
+                        ${mcResults.map_drug.p5.toFixed(0)}
+                      </td>
+                      <td className="p-2 text-right text-muted-foreground">
+                        ${mcResults.map_drug.p95.toFixed(0)}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Narrative Paragraph */}
+              <div className="p-4 bg-muted/50 rounded-lg">
+                <Label className="text-sm font-semibold mb-2 block">Generated Narrative</Label>
+                <p className="text-sm text-foreground whitespace-pre-line">
+                  {mcResults.narrative}
+                </p>
+              </div>
+
+              {/* Historical Savings Summary */}
+              {mcResults.total_historical_savings_if_in_place > 0 && (
+                <div className="p-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg">
+                  <div className="text-sm font-semibold text-green-700 dark:text-green-400 mb-1">
+                    Historical "What-If" Savings
+                  </div>
+                  <div className="text-2xl font-bold text-green-600 dark:text-green-500">
+                    ${mcResults.total_historical_savings_if_in_place.toFixed(0)}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    If programs had been in place over past {mcResults.historical.length} year(s)
+                  </p>
+                </div>
+              )}
+
+              {/* Raw JSON Toggle */}
+              {showRawOutput && (
+                <div>
+                  <Label className="text-sm font-semibold mb-2 block">Raw Output (Debug)</Label>
+                  <pre className="bg-muted border rounded p-3 text-xs overflow-auto max-h-64 font-mono">
+                    {JSON.stringify(mcResults, null, 2)}
+                  </pre>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex justify-end gap-3 pt-4 border-t">
+                <Button
+                  variant="outline"
+                  onClick={() => setMcResults(null)}
+                >
+                  Reset
+                </Button>
+                <Button
+                  onClick={handleSaveMonteCarlo}
+                  variant="outline"
+                  className="border-meeting2-royal text-meeting2-royal hover:bg-meeting2-royal hover:text-white"
+                  disabled={!companyId}
+                >
+                  <Save className="w-4 h-4 mr-2" />
+                  Save to Database
+                </Button>
+                <Button
+                  onClick={handleEnterPresentation}
+                  className="bg-meeting4-gold hover:bg-meeting4-gold/90 text-white"
+                >
+                  <Presentation className="w-4 h-4 mr-2" />
+                  Enter Presentation Mode
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
         </div>
       </div>
     </div>
