@@ -26,10 +26,11 @@ interface MonteCarloConstant {
 }
 
 interface MonteCarloResults {
-  mean: number;
-  p5: number;
-  p95: number;
-  distribution: number[];
+  baseline: { mean: number; p5: number; p95: number };
+  self_insured: { mean: number; p5: number; p95: number };
+  reference_based: { mean: number; p5: number; p95: number };
+  map_drug: { mean: number; p5: number; p95: number };
+  narrative: string;
 }
 
 interface ComplianceItem {
@@ -38,17 +39,80 @@ interface ComplianceItem {
   status: string;
 }
 
-function runMonteCarlo(baseline: number, volatility: number, iterations = 1000): MonteCarloResults {
-  const results: number[] = [];
-  for (let i = 0; i < iterations; i++) {
+interface MonteCarloInputs {
+  renewal1?: number;
+  renewal2?: number;
+  renewal3?: number;
+  current_cost?: number;
+  iterations?: number;
+  volatility_pct?: number;
+  self_insured_active: boolean;
+  reference_active: boolean;
+  map_active: boolean;
+}
+
+function runMonteCarlo(inputs: MonteCarloInputs): MonteCarloResults {
+  // --- Input unpacking ---
+  const renewals = [
+    parseFloat(String(inputs.renewal1 || 0)) / 100,
+    parseFloat(String(inputs.renewal2 || 0)) / 100,
+    parseFloat(String(inputs.renewal3 || 0)) / 100
+  ].filter(n => !isNaN(n) && n !== 0);
+
+  const baseCost = parseFloat(String(inputs.current_cost || 0));
+  const iterations = Number(inputs.iterations) || 1000;
+
+  // --- Derived volatility (standard deviation of renewals) ---
+  const meanRenewal = renewals.length > 0 ? renewals.reduce((a,b)=>a+b,0)/renewals.length : 0;
+  const volatility = inputs.volatility_pct ?? Math.sqrt(
+    renewals.length > 0
+      ? renewals.map(r => Math.pow(r - meanRenewal, 2)).reduce((a,b)=>a+b,0) / renewals.length
+      : 0.15
+  );
+
+  // --- Doctrine constants (can be toggled off in UI) ---
+  const drugPct = 0.60;
+  const hospitalPct = 0.40;
+  const selfDiscount = inputs.self_insured_active ? 0.25 : 0;
+  const refDiscount  = inputs.reference_active ? 0.15 : 0;
+  const mapDiscount  = inputs.map_active ? 0.40 : 0;
+
+  // --- Monte Carlo loop ---
+  const baseline=[], selfArr=[], refArr=[], mapArr=[];
+  for(let i=0;i<iterations;i++){
     const rand = 1 + (Math.random() - 0.5) * 2 * volatility;
-    results.push(baseline * rand);
+    const cost = baseCost * rand;
+    baseline.push(cost);
+    selfArr.push(cost * (1 - selfDiscount));
+    refArr.push(cost * (1 - refDiscount * (drugPct + hospitalPct)));
+    mapArr.push(cost * (1 - mapDiscount * drugPct));
   }
-  const mean = results.reduce((a, b) => a + b, 0) / results.length;
-  results.sort((a, b) => a - b);
-  const p5 = results[Math.floor(iterations * 0.05)];
-  const p95 = results[Math.floor(iterations * 0.95)];
-  return { mean, p5, p95, distribution: results };
+
+  // --- Helper for summary stats ---
+  function stats(arr: number[]){
+    const sorted=[...arr].sort((a,b)=>a-b);
+    const mean=sorted.reduce((a,b)=>a+b,0)/arr.length;
+    const p5 = sorted[Math.floor(arr.length*0.05)];
+    const p95=sorted[Math.floor(arr.length*0.95)];
+    return {mean,p5,p95};
+  }
+
+  // --- Results object ---
+  const result: MonteCarloResults = {
+    baseline:        stats(baseline),
+    self_insured:    stats(selfArr),
+    reference_based: stats(refArr),
+    map_drug:        stats(mapArr),
+    narrative: ''
+  };
+
+  // --- Narrative helper ---
+  result.narrative = `Current projected spend ≈ $${result.baseline.mean.toFixed(0)}.
+Self-insured saves about $${(result.baseline.mean - result.self_insured.mean).toFixed(0)}.
+Reference-based saves about $${(result.baseline.mean - result.reference_based.mean).toFixed(0)}.
+MAP Drugs saves about $${(result.baseline.mean - result.map_drug.mean).toFixed(0)}.`;
+
+  return result;
 }
 
 export default function Meeting2Workbench() {
@@ -62,9 +126,14 @@ export default function Meeting2Workbench() {
   
   // Monte Carlo State
   const [constants, setConstants] = useState<MonteCarloConstant[]>([]);
-  const [baseline, setBaseline] = useState<number>(100000);
-  const [volatility, setVolatility] = useState<number>(0.15);
+  const [renewal1, setRenewal1] = useState<number>(5);
+  const [renewal2, setRenewal2] = useState<number>(7);
+  const [renewal3, setRenewal3] = useState<number>(6);
+  const [currentCost, setCurrentCost] = useState<number>(100000);
   const [iterations, setIterations] = useState<number>(1000);
+  const [selfInsuredActive, setSelfInsuredActive] = useState<boolean>(true);
+  const [referenceActive, setReferenceActive] = useState<boolean>(true);
+  const [mapActive, setMapActive] = useState<boolean>(true);
   const [mcResults, setMcResults] = useState<MonteCarloResults | null>(null);
   
   // Compliance State
@@ -171,12 +240,22 @@ export default function Meeting2Workbench() {
   };
 
   const handleRunSimulation = () => {
-    const results = runMonteCarlo(baseline, volatility, iterations);
+    const results = runMonteCarlo({
+      renewal1,
+      renewal2,
+      renewal3,
+      current_cost: currentCost,
+      iterations,
+      self_insured_active: selfInsuredActive,
+      reference_active: referenceActive,
+      map_active: mapActive,
+    });
     setMcResults(results);
+    setMarketingCopy(results.narrative); // Auto-populate marketing copy
     
     toast({
       title: "Simulation Complete",
-      description: `Mean: $${results.mean.toFixed(0)} | P5: $${results.p5.toFixed(0)} | P95: $${results.p95.toFixed(0)}`,
+      description: `Baseline: $${results.baseline.mean.toFixed(0)} | Best savings: $${(results.baseline.mean - results.map_drug.mean).toFixed(0)}`,
       className: "bg-meeting2-royal/10 border-meeting2-royal/30",
     });
   };
@@ -324,33 +403,28 @@ export default function Meeting2Workbench() {
                 <CardTitle className="text-meeting2-royal">Cost Projection Analysis</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-3 gap-6 mb-6">
+                <div className="grid grid-cols-4 gap-4 mb-6">
                   <div className="text-center p-4 bg-muted rounded-lg">
-                    <div className="text-2xl font-bold text-meeting2-royal">${mcResults.mean.toFixed(0)}</div>
-                    <div className="text-sm text-muted-foreground">Mean Cost</div>
+                    <div className="text-xl font-bold text-meeting2-royal">${mcResults.baseline.mean.toFixed(0)}</div>
+                    <div className="text-xs text-muted-foreground">Baseline Mean</div>
+                    <div className="text-xs mt-1">P5: ${mcResults.baseline.p5.toFixed(0)}</div>
+                    <div className="text-xs">P95: ${mcResults.baseline.p95.toFixed(0)}</div>
                   </div>
-                  <div className="text-center p-4 bg-muted rounded-lg">
-                    <div className="text-2xl font-bold text-meeting2-royal">${mcResults.p5.toFixed(0)}</div>
-                    <div className="text-sm text-muted-foreground">5th Percentile</div>
+                  <div className="text-center p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
+                    <div className="text-xl font-bold text-green-600">${mcResults.self_insured.mean.toFixed(0)}</div>
+                    <div className="text-xs text-muted-foreground">Self-Insured</div>
+                    <div className="text-xs mt-1 text-green-600">Save: ${(mcResults.baseline.mean - mcResults.self_insured.mean).toFixed(0)}</div>
                   </div>
-                  <div className="text-center p-4 bg-muted rounded-lg">
-                    <div className="text-2xl font-bold text-meeting2-royal">${mcResults.p95.toFixed(0)}</div>
-                    <div className="text-sm text-muted-foreground">95th Percentile</div>
+                  <div className="text-center p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                    <div className="text-xl font-bold text-blue-600">${mcResults.reference_based.mean.toFixed(0)}</div>
+                    <div className="text-xs text-muted-foreground">Reference-Based</div>
+                    <div className="text-xs mt-1 text-blue-600">Save: ${(mcResults.baseline.mean - mcResults.reference_based.mean).toFixed(0)}</div>
                   </div>
-                </div>
-                
-                <div className="h-64 flex items-end gap-1">
-                  {mcResults.distribution.slice(0, 50).map((value, idx) => {
-                    const maxVal = Math.max(...mcResults.distribution);
-                    const height = (value / maxVal) * 100;
-                    return (
-                      <div 
-                        key={idx} 
-                        className="flex-1 bg-meeting2-royal/60 rounded-t"
-                        style={{ height: `${height}%` }}
-                      />
-                    );
-                  })}
+                  <div className="text-center p-4 bg-purple-500/10 border border-purple-500/20 rounded-lg">
+                    <div className="text-xl font-bold text-purple-600">${mcResults.map_drug.mean.toFixed(0)}</div>
+                    <div className="text-xs text-muted-foreground">MAP Drugs</div>
+                    <div className="text-xs mt-1 text-purple-600">Save: ${(mcResults.baseline.mean - mcResults.map_drug.mean).toFixed(0)}</div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -510,24 +584,43 @@ export default function Meeting2Workbench() {
 
               {/* Inputs */}
               <div>
-                <Label htmlFor="baseline">Baseline Cost ($)</Label>
+                <Label htmlFor="current-cost">Current Cost ($)</Label>
                 <Input 
-                  id="baseline"
+                  id="current-cost"
                   type="number" 
-                  value={baseline}
-                  onChange={(e) => setBaseline(Number(e.target.value))}
+                  value={currentCost}
+                  onChange={(e) => setCurrentCost(Number(e.target.value))}
                 />
               </div>
 
-              <div>
-                <Label htmlFor="volatility">Volatility</Label>
-                <Input 
-                  id="volatility"
-                  type="number" 
-                  step="0.01"
-                  value={volatility}
-                  onChange={(e) => setVolatility(Number(e.target.value))}
-                />
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <Label htmlFor="renewal1">Renewal 1 (%)</Label>
+                  <Input 
+                    id="renewal1"
+                    type="number" 
+                    value={renewal1}
+                    onChange={(e) => setRenewal1(Number(e.target.value))}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="renewal2">Renewal 2 (%)</Label>
+                  <Input 
+                    id="renewal2"
+                    type="number" 
+                    value={renewal2}
+                    onChange={(e) => setRenewal2(Number(e.target.value))}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="renewal3">Renewal 3 (%)</Label>
+                  <Input 
+                    id="renewal3"
+                    type="number" 
+                    value={renewal3}
+                    onChange={(e) => setRenewal3(Number(e.target.value))}
+                  />
+                </div>
               </div>
 
               <div>
@@ -540,6 +633,34 @@ export default function Meeting2Workbench() {
                 />
               </div>
 
+              <div className="space-y-2">
+                <Label className="text-sm font-semibold">Doctrine Options</Label>
+                <div className="flex items-center gap-2">
+                  <Checkbox 
+                    id="self-insured"
+                    checked={selfInsuredActive}
+                    onCheckedChange={(checked) => setSelfInsuredActive(checked as boolean)}
+                  />
+                  <Label htmlFor="self-insured" className="text-sm">Self-Insured (25% discount)</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Checkbox 
+                    id="reference"
+                    checked={referenceActive}
+                    onCheckedChange={(checked) => setReferenceActive(checked as boolean)}
+                  />
+                  <Label htmlFor="reference" className="text-sm">Reference-Based (15% discount)</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Checkbox 
+                    id="map"
+                    checked={mapActive}
+                    onCheckedChange={(checked) => setMapActive(checked as boolean)}
+                  />
+                  <Label htmlFor="map" className="text-sm">MAP Drugs (40% discount)</Label>
+                </div>
+              </div>
+
               <Button 
                 onClick={handleRunSimulation}
                 className="w-full bg-meeting2-royal hover:bg-meeting2-royal/90"
@@ -549,16 +670,32 @@ export default function Meeting2Workbench() {
 
               {/* Results */}
               {mcResults && (
-                <div className="space-y-2 p-4 bg-muted rounded-lg">
-                  <div className="text-sm">
-                    <span className="font-semibold">Mean:</span> ${mcResults.mean.toFixed(2)}
+                <div className="space-y-2 p-4 bg-muted rounded-lg max-h-80 overflow-y-auto">
+                  <div className="text-xs font-semibold mb-2">Baseline</div>
+                  <div className="text-sm space-y-1 mb-3">
+                    <div><span className="font-semibold">Mean:</span> ${mcResults.baseline.mean.toFixed(0)}</div>
+                    <div><span className="font-semibold">P5:</span> ${mcResults.baseline.p5.toFixed(0)}</div>
+                    <div><span className="font-semibold">P95:</span> ${mcResults.baseline.p95.toFixed(0)}</div>
                   </div>
-                  <div className="text-sm">
-                    <span className="font-semibold">P5:</span> ${mcResults.p5.toFixed(2)}
+
+                  <div className="text-xs font-semibold mb-2 text-green-600">Self-Insured</div>
+                  <div className="text-sm space-y-1 mb-3">
+                    <div><span className="font-semibold">Mean:</span> ${mcResults.self_insured.mean.toFixed(0)}</div>
+                    <div className="text-green-600">Saves: ${(mcResults.baseline.mean - mcResults.self_insured.mean).toFixed(0)}</div>
                   </div>
-                  <div className="text-sm">
-                    <span className="font-semibold">P95:</span> ${mcResults.p95.toFixed(2)}
+
+                  <div className="text-xs font-semibold mb-2 text-blue-600">Reference-Based</div>
+                  <div className="text-sm space-y-1 mb-3">
+                    <div><span className="font-semibold">Mean:</span> ${mcResults.reference_based.mean.toFixed(0)}</div>
+                    <div className="text-blue-600">Saves: ${(mcResults.baseline.mean - mcResults.reference_based.mean).toFixed(0)}</div>
                   </div>
+
+                  <div className="text-xs font-semibold mb-2 text-purple-600">MAP Drugs</div>
+                  <div className="text-sm space-y-1 mb-3">
+                    <div><span className="font-semibold">Mean:</span> ${mcResults.map_drug.mean.toFixed(0)}</div>
+                    <div className="text-purple-600">Saves: ${(mcResults.baseline.mean - mcResults.map_drug.mean).toFixed(0)}</div>
+                  </div>
+
                   <Button 
                     onClick={handleSaveMonteCarlo}
                     variant="outline"
@@ -652,10 +789,12 @@ export default function Meeting2Workbench() {
 
               {mcResults && (
                 <div className="p-3 bg-muted rounded-lg text-sm">
-                  <div className="font-semibold mb-2">Quick Stats for Copy:</div>
-                  <div>• Avg Savings: ${(baseline - mcResults.mean).toFixed(0)}</div>
-                  <div>• Best Case: ${(baseline - mcResults.p5).toFixed(0)}</div>
-                  <div>• Compliance: {calculateComplianceScore()}%</div>
+                  <div className="font-semibold mb-2">Auto-Generated Narrative:</div>
+                  <p className="text-xs text-muted-foreground whitespace-pre-wrap">{mcResults.narrative}</p>
+                  <div className="mt-3 pt-3 border-t">
+                    <div className="font-semibold mb-1">Quick Stats:</div>
+                    <div>• Compliance: {calculateComplianceScore()}%</div>
+                  </div>
                 </div>
               )}
             </CardContent>
