@@ -14,7 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      meeting_1_verification: {
+        Row: {
+          business_issues: Json | null
+          company_id: string
+          compliance_info: Json | null
+          created_at: string
+          id: string
+          renewal_verification: Json | null
+          updated_at: string
+        }
+        Insert: {
+          business_issues?: Json | null
+          company_id: string
+          compliance_info?: Json | null
+          created_at?: string
+          id?: string
+          renewal_verification?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          business_issues?: Json | null
+          company_id?: string
+          compliance_info?: Json | null
+          created_at?: string
+          id?: string
+          renewal_verification?: Json | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
