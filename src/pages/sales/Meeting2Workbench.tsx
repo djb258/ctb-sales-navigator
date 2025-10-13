@@ -30,6 +30,19 @@ interface MonteCarloResults {
   self_insured: { mean: number; p5: number; p95: number };
   reference_based: { mean: number; p5: number; p95: number };
   map_drug: { mean: number; p5: number; p95: number };
+  historical: Array<{
+    yearCost: number;
+    self_if_in_place: number;
+    ref_if_in_place: number;
+    map_if_in_place: number;
+  }>;
+  total_historical_savings_if_in_place: number;
+  projection: {
+    baseline: number;
+    self_insured: number;
+    reference: number;
+    map_drug: number;
+  };
   narrative: string;
 }
 
@@ -49,38 +62,43 @@ interface MonteCarloInputs {
   self_insured_active: boolean;
   reference_active: boolean;
   map_active: boolean;
+  hist_cost1?: number;
+  hist_cost2?: number;
+  hist_cost3?: number;
 }
 
 function runMonteCarlo(inputs: MonteCarloInputs): MonteCarloResults {
-  // --- Input unpacking ---
+  // ---------- INPUTS ----------
   const renewals = [
-    parseFloat(String(inputs.renewal1 || 0)) / 100,
-    parseFloat(String(inputs.renewal2 || 0)) / 100,
-    parseFloat(String(inputs.renewal3 || 0)) / 100
-  ].filter(n => !isNaN(n) && n !== 0);
+    parseFloat(String(inputs.renewal1 || 0))/100,
+    parseFloat(String(inputs.renewal2 || 0))/100,
+    parseFloat(String(inputs.renewal3 || 0))/100
+  ].filter(n => !isNaN(n));
 
   const baseCost = parseFloat(String(inputs.current_cost || 0));
   const iterations = Number(inputs.iterations) || 1000;
 
-  // --- Derived volatility (standard deviation of renewals) ---
+  // ---------- DERIVED VOLATILITY ----------
   const meanRenewal = renewals.length > 0 ? renewals.reduce((a,b)=>a+b,0)/renewals.length : 0;
-  const volatility = inputs.volatility_pct ?? Math.sqrt(
-    renewals.length > 0
-      ? renewals.map(r => Math.pow(r - meanRenewal, 2)).reduce((a,b)=>a+b,0) / renewals.length
-      : 0.15
-  );
+  const volatility =
+    inputs.volatility_pct ??
+    Math.sqrt(
+      renewals.length > 0
+        ? renewals.map(r => Math.pow(r - meanRenewal, 2)).reduce((a,b)=>a+b,0) / renewals.length
+        : 0.15
+    );
 
-  // --- Doctrine constants (can be toggled off in UI) ---
+  // ---------- DOCTRINE CONSTANTS ----------
   const drugPct = 0.60;
   const hospitalPct = 0.40;
   const selfDiscount = inputs.self_insured_active ? 0.25 : 0;
-  const refDiscount  = inputs.reference_active ? 0.15 : 0;
-  const mapDiscount  = inputs.map_active ? 0.40 : 0;
+  const refDiscount  = inputs.reference_active    ? 0.15 : 0;
+  const mapDiscount  = inputs.map_active          ? 0.40 : 0;
 
-  // --- Monte Carlo loop ---
+  // ---------- BASELINE MONTE CARLO ----------
   const baseline=[], selfArr=[], refArr=[], mapArr=[];
   for(let i=0;i<iterations;i++){
-    const rand = 1 + (Math.random() - 0.5) * 2 * volatility;
+    const rand = 1 + (Math.random()-0.5)*2*volatility;
     const cost = baseCost * rand;
     baseline.push(cost);
     selfArr.push(cost * (1 - selfDiscount));
@@ -88,7 +106,7 @@ function runMonteCarlo(inputs: MonteCarloInputs): MonteCarloResults {
     mapArr.push(cost * (1 - mapDiscount * drugPct));
   }
 
-  // --- Helper for summary stats ---
+  // ---------- STATS FUNCTION ----------
   function stats(arr: number[]){
     const sorted=[...arr].sort((a,b)=>a-b);
     const mean=sorted.reduce((a,b)=>a+b,0)/arr.length;
@@ -97,20 +115,54 @@ function runMonteCarlo(inputs: MonteCarloInputs): MonteCarloResults {
     return {mean,p5,p95};
   }
 
-  // --- Results object ---
+  const baselineStats = stats(baseline);
+  const selfStats     = stats(selfArr);
+  const refStats      = stats(refArr);
+  const mapStats      = stats(mapArr);
+
+  // ---------- HISTORICAL "WHAT-IF" SAVINGS ----------
+  // 3 years of actual spend (if available)
+  const hist = [
+    parseFloat(String(inputs.hist_cost1 || 0)),
+    parseFloat(String(inputs.hist_cost2 || 0)),
+    parseFloat(String(inputs.hist_cost3 || 0))
+  ].filter(v => v>0);
+
+  const histSavings = hist.map(c => ({
+    yearCost: c,
+    self_if_in_place: c * (1 - selfDiscount),
+    ref_if_in_place:  c * (1 - refDiscount),
+    map_if_in_place:  c * (1 - mapDiscount * drugPct)
+  }));
+
+  const totalHistSavings = histSavings.reduce((a,b)=>a + (b.yearCost - b.self_if_in_place),0);
+
+  // ---------- FORWARD PROJECTION ----------
+  const avgGrowth = meanRenewal;
+  const nextYearProjection = baseCost * (1 + avgGrowth);
+
+  const proj = {
+    baseline: nextYearProjection,
+    self_insured: nextYearProjection * (1 - selfDiscount),
+    reference:    nextYearProjection * (1 - refDiscount),
+    map_drug:     nextYearProjection * (1 - mapDiscount * drugPct)
+  };
+
+  // ---------- COMBINE RESULTS ----------
   const result: MonteCarloResults = {
-    baseline:        stats(baseline),
-    self_insured:    stats(selfArr),
-    reference_based: stats(refArr),
-    map_drug:        stats(mapArr),
+    baseline: baselineStats,
+    self_insured: selfStats,
+    reference_based: refStats,
+    map_drug: mapStats,
+    historical: histSavings,
+    total_historical_savings_if_in_place: totalHistSavings,
+    projection: proj,
     narrative: ''
   };
 
-  // --- Narrative helper ---
-  result.narrative = `Current projected spend ≈ $${result.baseline.mean.toFixed(0)}.
-Self-insured saves about $${(result.baseline.mean - result.self_insured.mean).toFixed(0)}.
-Reference-based saves about $${(result.baseline.mean - result.reference_based.mean).toFixed(0)}.
-MAP Drugs saves about $${(result.baseline.mean - result.map_drug.mean).toFixed(0)}.`;
+  // ---------- NARRATIVE OUTPUT ----------
+  result.narrative = `Had these programs been active over the past 3 years, total savings ≈ $${totalHistSavings.toFixed(0)}.
+Looking ahead, current projection ≈ $${proj.baseline.toFixed(0)}; with self-insured ≈ $${proj.self_insured.toFixed(0)} (-${((selfDiscount)*100).toFixed(0)}%); reference ≈ $${proj.reference.toFixed(0)}; MAP Drug ≈ $${proj.map_drug.toFixed(0)}.`;
 
   return result;
 }
@@ -134,6 +186,9 @@ export default function Meeting2Workbench() {
   const [selfInsuredActive, setSelfInsuredActive] = useState<boolean>(true);
   const [referenceActive, setReferenceActive] = useState<boolean>(true);
   const [mapActive, setMapActive] = useState<boolean>(true);
+  const [histCost1, setHistCost1] = useState<number>(0);
+  const [histCost2, setHistCost2] = useState<number>(0);
+  const [histCost3, setHistCost3] = useState<number>(0);
   const [mcResults, setMcResults] = useState<MonteCarloResults | null>(null);
   
   // Compliance State
@@ -249,13 +304,16 @@ export default function Meeting2Workbench() {
       self_insured_active: selfInsuredActive,
       reference_active: referenceActive,
       map_active: mapActive,
+      hist_cost1: histCost1,
+      hist_cost2: histCost2,
+      hist_cost3: histCost3,
     });
     setMcResults(results);
     setMarketingCopy(results.narrative); // Auto-populate marketing copy
     
     toast({
       title: "Simulation Complete",
-      description: `Baseline: $${results.baseline.mean.toFixed(0)} | Best savings: $${(results.baseline.mean - results.map_drug.mean).toFixed(0)}`,
+      description: `Baseline: $${results.baseline.mean.toFixed(0)} | Historical savings if in place: $${results.total_historical_savings_if_in_place.toFixed(0)}`,
       className: "bg-meeting2-royal/10 border-meeting2-royal/30",
     });
   };
