@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Search, Download, ExternalLink, Calendar, Mail, Phone, MapPin, Users } from "lucide-react";
+import { Search, Download, ExternalLink, Calendar, Mail, Phone, MapPin, Users, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface Company {
@@ -27,6 +27,7 @@ const CRMIntakeGateway = () => {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(false);
   const [importing, setImporting] = useState(false);
+  const [syncing, setSyncing] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [importedCompany, setImportedCompany] = useState<string>("");
   const { toast } = useToast();
@@ -151,6 +152,83 @@ const CRMIntakeGateway = () => {
     }
   };
 
+  const handleSyncUpdates = async () => {
+    setSyncing(true);
+    try {
+      // Fetch all companies from Supabase
+      const { data: existingCompanies, error: fetchError } = await supabase
+        .from('company_profiles')
+        .select('company_id, company_name');
+
+      if (fetchError) throw fetchError;
+
+      if (!existingCompanies || existingCompanies.length === 0) {
+        toast({
+          title: "No companies to sync",
+          description: "Import companies first before syncing updates",
+        });
+        return;
+      }
+
+      let updatedCount = 0;
+
+      // Sync each company
+      for (const company of existingCompanies) {
+        try {
+          const { data: detailData, error: detailError } = await supabase.functions.invoke('composio-activecamp', {
+            body: {
+              action: 'getCompanyDetails',
+              payload: {
+                companyId: company.company_id,
+              },
+            },
+          });
+
+          if (detailError || !detailData?.success) {
+            console.error(`Failed to fetch details for ${company.company_name}:`, detailError);
+            continue;
+          }
+
+          // Update the company record
+          const companyData = {
+            company_id: company.company_id,
+            company_name: detailData.data?.name || company.company_name,
+            contact_name: detailData.data?.contact_name,
+            contact_email: detailData.data?.contact_email,
+            total_employees: detailData.data?.total_employees || null,
+            renewal_date: detailData.data?.renewal_date || null,
+          };
+
+          const { error: updateError } = await supabase
+            .from('company_profiles')
+            .update(companyData)
+            .eq('company_id', company.company_id);
+
+          if (!updateError) {
+            updatedCount++;
+          }
+        } catch (err) {
+          console.error(`Error syncing ${company.company_name}:`, err);
+        }
+      }
+
+      toast({
+        title: "Company profiles refreshed from ActiveCampaign",
+        description: `Successfully updated ${updatedCount} of ${existingCompanies.length} companies`,
+        className: "bg-meeting2-royal/10 border-meeting2-royal/30",
+      });
+    } catch (error: any) {
+      console.error('Sync error:', error);
+      toast({
+        title: "Sync failed",
+        description: error.message || "Failed to sync company updates",
+        variant: "destructive",
+      });
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted">
       <div className="container mx-auto px-6 py-12">
@@ -173,8 +251,21 @@ const CRMIntakeGateway = () => {
         {/* Search Bar */}
         <Card className="mb-8 border-hub-teal/20">
           <CardHeader>
-            <CardTitle className="text-hub-teal">Search ActiveCampaign Companies</CardTitle>
-            <CardDescription>Enter a company name to search the CRM</CardDescription>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-hub-teal">Search ActiveCampaign Companies</CardTitle>
+                <CardDescription>Enter a company name to search the CRM</CardDescription>
+              </div>
+              <Button 
+                onClick={handleSyncUpdates} 
+                disabled={syncing}
+                variant="outline"
+                className="border-meeting4-gold text-meeting4-gold hover:bg-meeting4-gold hover:text-white"
+              >
+                <RefreshCw className={`w-4 h-4 mr-2 ${syncing ? 'animate-spin' : ''}`} />
+                {syncing ? 'Syncing...' : 'Sync Updates from ActiveCampaign'}
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="flex gap-3">
