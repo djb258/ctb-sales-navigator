@@ -439,6 +439,26 @@ const Meeting1 = () => {
               </div>
             </div>
 
+            {/* Solving Business Issues Section Divider */}
+            <div className="flex items-center gap-4 my-8">
+              <div className="flex-1 h-px bg-border"></div>
+              <span className="text-sm font-semibold text-meeting3-crimson uppercase tracking-wide">Solving Business Issues</span>
+              <div className="flex-1 h-px bg-border"></div>
+            </div>
+
+            {/* Solving Business Issues Section */}
+            <div className="grid grid-cols-1 gap-6">
+              <div className="bg-meeting3-crimson/5 p-6 rounded-lg border border-meeting3-crimson/20">
+                <h3 className="font-semibold text-meeting3-crimson mb-4 flex items-center gap-2">
+                  <Target className="h-5 w-5" />
+                  Business Challenges & Solutions
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Identify key business challenges and document proposed solutions.
+                </p>
+              </div>
+            </div>
+
             <div className="flex justify-between items-center mt-8 pt-6 border-t">
               <Button
                 onClick={handleSave}
