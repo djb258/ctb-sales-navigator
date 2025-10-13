@@ -68,6 +68,9 @@ interface MonteCarloInputs {
   bad_year_frequency?: number;
   bad_year_increase_min?: number;
   bad_year_increase_max?: number;
+  use_self_insured?: boolean;
+  use_rbp?: boolean;
+  use_map?: boolean;
 }
 
 function runMonteCarlo(inputs: MonteCarloInputs): MonteCarloResults {
@@ -93,17 +96,16 @@ function runMonteCarlo(inputs: MonteCarloInputs): MonteCarloResults {
 
   // ---------- DOCTRINE CONSTANTS ----------
   const drugPct = 0.60;
-  const hospitalPct = 0.40;
-  const selfDiscount = inputs.self_insured_active ? 0.25 : 0;
-  const refDiscount  = inputs.reference_active    ? 0.15 : 0;
-  const mapDiscount  = inputs.map_active          ? 0.40 : 0;
+  const selfDisc = 0.25;
+  const rbpDisc  = 0.15;
+  const mapDisc  = 0.60;
 
   // ---------- BAD-YEAR SETTINGS ----------
   const badFreq = Number(inputs.bad_year_frequency) || 5;
   const badMin  = (Number(inputs.bad_year_increase_min) || 30) / 100;
   const badMax  = (Number(inputs.bad_year_increase_max) || 40) / 100;
 
-  // ---------- BASELINE MONTE CARLO ----------
+  // ---------- BASELINE MONTE CARLO WITH SEQUENTIAL SAVINGS ----------
   const baseline=[], selfArr=[], refArr=[], mapArr=[];
   for(let i=0;i<iterations;i++){
     const rand = 1 + (Math.random()-0.5)*2*volatility;
@@ -115,10 +117,28 @@ function runMonteCarlo(inputs: MonteCarloInputs): MonteCarloResults {
       cost = cost * spike;
     }
 
+    // Baseline = current fully-insured scenario
     baseline.push(cost);
-    selfArr.push(cost * (1 - selfDiscount));
-    refArr.push(cost * (1 - refDiscount * (drugPct + hospitalPct)));
-    mapArr.push(cost * (1 - mapDiscount * drugPct));
+
+    let currentScenarioCost = cost;
+
+    // Step 1: Self-Insured (applies only if toggled)
+    if (inputs.use_self_insured) {
+      currentScenarioCost *= (1 - selfDisc);
+    }
+    selfArr.push(currentScenarioCost);
+
+    // Step 2: Reference-Based Pricing (adds RBP layer if checked)
+    if (inputs.use_rbp) {
+      currentScenarioCost *= (1 - rbpDisc);
+    }
+    refArr.push(currentScenarioCost);
+
+    // Step 3: MAP (applies only to drug portion)
+    if (inputs.use_map) {
+      currentScenarioCost *= (1 - drugPct * mapDisc);
+    }
+    mapArr.push(currentScenarioCost);
   }
 
   // ---------- STATS FUNCTION ----------
@@ -143,24 +163,50 @@ function runMonteCarlo(inputs: MonteCarloInputs): MonteCarloResults {
     parseFloat(String(inputs.hist_cost3 || 0))
   ].filter(v => v>0);
 
-  const histSavings = hist.map(c => ({
-    yearCost: c,
-    self_if_in_place: c * (1 - selfDiscount),
-    ref_if_in_place:  c * (1 - refDiscount),
-    map_if_in_place:  c * (1 - mapDiscount * drugPct)
-  }));
+  const histSavings = hist.map(c => {
+    let currentCost = c;
+    
+    if (inputs.use_self_insured) currentCost *= (1 - selfDisc);
+    const self_if_in_place = currentCost;
+    
+    if (inputs.use_rbp) currentCost *= (1 - rbpDisc);
+    const ref_if_in_place = currentCost;
+    
+    if (inputs.use_map) currentCost *= (1 - drugPct * mapDisc);
+    const map_if_in_place = currentCost;
 
-  const totalHistSavings = histSavings.reduce((a,b)=>a + (b.yearCost - b.self_if_in_place),0);
+    return {
+      yearCost: c,
+      self_if_in_place,
+      ref_if_in_place,
+      map_if_in_place
+    };
+  });
+
+  const totalHistSavings = histSavings.reduce((a,b)=>a + (b.yearCost - b.map_if_in_place),0);
 
   // ---------- FORWARD PROJECTION ----------
   const avgGrowth = meanRenewal;
-  const nextYearProjection = baseCost * (1 + avgGrowth);
+  let nextYearProjection = baseCost * (1 + avgGrowth);
+
+  const projections = {
+    baseline: nextYearProjection
+  };
+
+  if (inputs.use_self_insured) nextYearProjection *= (1 - selfDisc);
+  const self_insured = nextYearProjection;
+  
+  if (inputs.use_rbp) nextYearProjection *= (1 - rbpDisc);
+  const reference = nextYearProjection;
+  
+  if (inputs.use_map) nextYearProjection *= (1 - drugPct * mapDisc);
+  const map_drug = nextYearProjection;
 
   const proj = {
-    baseline: nextYearProjection,
-    self_insured: nextYearProjection * (1 - selfDiscount),
-    reference:    nextYearProjection * (1 - refDiscount),
-    map_drug:     nextYearProjection * (1 - mapDiscount * drugPct)
+    baseline: projections.baseline,
+    self_insured,
+    reference,
+    map_drug
   };
 
   // ---------- COMBINE RESULTS ----------
@@ -176,9 +222,15 @@ function runMonteCarlo(inputs: MonteCarloInputs): MonteCarloResults {
   };
 
   // ---------- NARRATIVE OUTPUT ----------
+  let programs = [];
+  if (inputs.use_self_insured) programs.push("Self-Insured (-25%)");
+  if (inputs.use_rbp) programs.push("Reference-Based Pricing (-15%)");
+  if (inputs.use_map) programs.push("MAP Drug Savings (-60% of 60% drug spend)");
+  
   const badImpact = `${(badMin*100).toFixed(0)}–${(badMax*100).toFixed(0)}% spike every ${badFreq} years`;
-  result.narrative = `Had these programs been active over the past 3 years, total savings ≈ $${totalHistSavings.toFixed(0)}.
-Looking ahead, current projection ≈ $${proj.baseline.toFixed(0)}; with self-insured ≈ $${proj.self_insured.toFixed(0)} (-${((selfDiscount)*100).toFixed(0)}%); reference ≈ $${proj.reference.toFixed(0)}; MAP Drug ≈ $${proj.map_drug.toFixed(0)}.
+  
+  result.narrative = `Applied programs: ${programs.join(", ") || "None"}.\n\nHad these programs been active over the past 3 years, total savings ≈ $${totalHistSavings.toFixed(0)}.
+Looking ahead, current projection ≈ $${proj.baseline.toFixed(0)}; with sequential savings: self-insured ≈ $${proj.self_insured.toFixed(0)}; reference ≈ $${proj.reference.toFixed(0)}; MAP Drug ≈ $${proj.map_drug.toFixed(0)}.
 Historically, one out of every ${badFreq} years experiences a ${badImpact}.`;
 
   return result;
@@ -210,6 +262,9 @@ export default function Meeting2Workbench() {
   const [badYearFrequency, setBadYearFrequency] = useState<number>(5);
   const [badYearIncreaseMin, setBadYearIncreaseMin] = useState<number>(30);
   const [badYearIncreaseMax, setBadYearIncreaseMax] = useState<number>(40);
+  const [useSelfInsured, setUseSelfInsured] = useState<boolean>(true);
+  const [useRbp, setUseRbp] = useState<boolean>(true);
+  const [useMap, setUseMap] = useState<boolean>(true);
   const [mcResults, setMcResults] = useState<MonteCarloResults | null>(null);
   const [showRawOutput, setShowRawOutput] = useState<boolean>(false);
 
@@ -359,6 +414,9 @@ export default function Meeting2Workbench() {
       bad_year_frequency: badYearFrequency,
       bad_year_increase_min: badYearIncreaseMin,
       bad_year_increase_max: badYearIncreaseMax,
+      use_self_insured: useSelfInsured,
+      use_rbp: useRbp,
+      use_map: useMap,
     });
     setMcResults(results);
     setMarketingCopy(results.narrative); // Auto-populate marketing copy
@@ -846,6 +904,51 @@ export default function Meeting2Workbench() {
                       <p className="text-xs text-muted-foreground mt-1">Maximum</p>
                     </div>
                   </div>
+                </CardContent>
+              </Card>
+
+              {/* Program Selection Section */}
+              <Card className="bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm text-blue-600 dark:text-blue-400">Program Selection</CardTitle>
+                  <CardDescription className="text-xs">
+                    Select which programs to apply sequentially
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <Checkbox 
+                      id="use-self-insured"
+                      checked={useSelfInsured}
+                      onCheckedChange={(checked) => setUseSelfInsured(checked as boolean)}
+                    />
+                    <Label htmlFor="use-self-insured" className="text-sm cursor-pointer">
+                      Apply Self-Insured (-25%)
+                    </Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Checkbox 
+                      id="use-rbp"
+                      checked={useRbp}
+                      onCheckedChange={(checked) => setUseRbp(checked as boolean)}
+                    />
+                    <Label htmlFor="use-rbp" className="text-sm cursor-pointer">
+                      Apply Reference-Based Pricing (-15%)
+                    </Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Checkbox 
+                      id="use-map"
+                      checked={useMap}
+                      onCheckedChange={(checked) => setUseMap(checked as boolean)}
+                    />
+                    <Label htmlFor="use-map" className="text-sm cursor-pointer">
+                      Apply MAP Drug Savings (-60% of 60% drug spend)
+                    </Label>
+                  </div>
+                  <p className="text-xs text-muted-foreground pt-2 border-t">
+                    💡 Programs apply sequentially in order. Uncheck any that the client already has in place.
+                  </p>
                 </CardContent>
               </Card>
 
