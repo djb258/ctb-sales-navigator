@@ -189,7 +189,35 @@ export default function Meeting2Workbench() {
   const [histCost1, setHistCost1] = useState<number>(0);
   const [histCost2, setHistCost2] = useState<number>(0);
   const [histCost3, setHistCost3] = useState<number>(0);
+  const [allowEditHistory, setAllowEditHistory] = useState<boolean>(false);
   const [mcResults, setMcResults] = useState<MonteCarloResults | null>(null);
+
+  // Auto-compute historical costs from renewals (reverse engineering)
+  useEffect(() => {
+    if (!currentCost || !renewal1) return;
+    
+    const renewals = [renewal1, renewal2, renewal3].filter(r => r > 0);
+    if (renewals.length === 0) return;
+
+    // Normalize to decimal (e.g., 10% -> 0.10)
+    const normalized = renewals.map(r => r > 1 ? r / 100 : r);
+    
+    // Compute backwards from current cost
+    const results: number[] = [];
+    let prev = currentCost;
+    for (const r of normalized) {
+      const last = prev / (1 + r);
+      results.push(last);
+      prev = last;
+    }
+
+    // Only update if not in edit mode
+    if (!allowEditHistory) {
+      setHistCost1(results[0] || 0);
+      setHistCost2(results[1] || 0);
+      setHistCost3(results[2] || 0);
+    }
+  }, [currentCost, renewal1, renewal2, renewal3, allowEditHistory]);
   
   // Compliance State
   const [complianceItems, setComplianceItems] = useState<ComplianceItem[]>([
@@ -671,7 +699,7 @@ export default function Meeting2Workbench() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="renewal3">Renewal 3 (%)</Label>
+                  <Label htmlFor="renewal3">Renewal 3 (%) <span className="text-xs text-muted-foreground">(optional)</span></Label>
                   <Input 
                     id="renewal3"
                     type="number" 
@@ -680,6 +708,65 @@ export default function Meeting2Workbench() {
                   />
                 </div>
               </div>
+
+              {/* Reverse-Engineered History Section */}
+              <Card className="bg-muted/50 border-meeting2-royal/10">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-sm text-meeting2-royal">Reverse-Engineered History</CardTitle>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 text-xs"
+                      onClick={() => setAllowEditHistory(!allowEditHistory)}
+                    >
+                      {allowEditHistory ? "🔒 Lock" : "✏️ Edit"}
+                    </Button>
+                  </div>
+                  <CardDescription className="text-xs">
+                    Computed from current cost + renewals
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label htmlFor="hist-cost1" className="text-xs">Last Year Cost</Label>
+                      <Input 
+                        id="hist-cost1"
+                        type="number" 
+                        value={histCost1}
+                        onChange={(e) => setHistCost1(Number(e.target.value))}
+                        disabled={!allowEditHistory}
+                        className="h-8 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="hist-cost2" className="text-xs">Prior Year Cost</Label>
+                      <Input 
+                        id="hist-cost2"
+                        type="number" 
+                        value={histCost2}
+                        onChange={(e) => setHistCost2(Number(e.target.value))}
+                        disabled={!allowEditHistory}
+                        className="h-8 text-sm"
+                      />
+                    </div>
+                  </div>
+                  {histCost3 > 0 && (
+                    <div>
+                      <Label htmlFor="hist-cost3" className="text-xs">Year 3 Cost</Label>
+                      <Input 
+                        id="hist-cost3"
+                        type="number" 
+                        value={histCost3}
+                        onChange={(e) => setHistCost3(Number(e.target.value))}
+                        disabled={!allowEditHistory}
+                        className="h-8 text-sm"
+                      />
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
 
               <div>
                 <Label htmlFor="iterations">Iterations</Label>
