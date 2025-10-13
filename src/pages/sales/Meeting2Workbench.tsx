@@ -65,6 +65,9 @@ interface MonteCarloInputs {
   hist_cost1?: number;
   hist_cost2?: number;
   hist_cost3?: number;
+  bad_year_frequency?: number;
+  bad_year_increase_min?: number;
+  bad_year_increase_max?: number;
 }
 
 function runMonteCarlo(inputs: MonteCarloInputs): MonteCarloResults {
@@ -95,11 +98,23 @@ function runMonteCarlo(inputs: MonteCarloInputs): MonteCarloResults {
   const refDiscount  = inputs.reference_active    ? 0.15 : 0;
   const mapDiscount  = inputs.map_active          ? 0.40 : 0;
 
+  // ---------- BAD-YEAR SETTINGS ----------
+  const badFreq = Number(inputs.bad_year_frequency) || 5;
+  const badMin  = (Number(inputs.bad_year_increase_min) || 30) / 100;
+  const badMax  = (Number(inputs.bad_year_increase_max) || 40) / 100;
+
   // ---------- BASELINE MONTE CARLO ----------
   const baseline=[], selfArr=[], refArr=[], mapArr=[];
   for(let i=0;i<iterations;i++){
     const rand = 1 + (Math.random()-0.5)*2*volatility;
-    const cost = baseCost * rand;
+    let cost = baseCost * rand;
+
+    // Simulate 1-in-N bad year
+    if (i % badFreq === 0) {
+      const spike = 1 + (badMin + Math.random() * (badMax - badMin));
+      cost = cost * spike;
+    }
+
     baseline.push(cost);
     selfArr.push(cost * (1 - selfDiscount));
     refArr.push(cost * (1 - refDiscount * (drugPct + hospitalPct)));
@@ -161,8 +176,10 @@ function runMonteCarlo(inputs: MonteCarloInputs): MonteCarloResults {
   };
 
   // ---------- NARRATIVE OUTPUT ----------
+  const badImpact = `${(badMin*100).toFixed(0)}–${(badMax*100).toFixed(0)}% spike every ${badFreq} years`;
   result.narrative = `Had these programs been active over the past 3 years, total savings ≈ $${totalHistSavings.toFixed(0)}.
-Looking ahead, current projection ≈ $${proj.baseline.toFixed(0)}; with self-insured ≈ $${proj.self_insured.toFixed(0)} (-${((selfDiscount)*100).toFixed(0)}%); reference ≈ $${proj.reference.toFixed(0)}; MAP Drug ≈ $${proj.map_drug.toFixed(0)}.`;
+Looking ahead, current projection ≈ $${proj.baseline.toFixed(0)}; with self-insured ≈ $${proj.self_insured.toFixed(0)} (-${((selfDiscount)*100).toFixed(0)}%); reference ≈ $${proj.reference.toFixed(0)}; MAP Drug ≈ $${proj.map_drug.toFixed(0)}.
+Historically, one out of every ${badFreq} years experiences a ${badImpact}.`;
 
   return result;
 }
@@ -190,6 +207,9 @@ export default function Meeting2Workbench() {
   const [histCost2, setHistCost2] = useState<number>(0);
   const [histCost3, setHistCost3] = useState<number>(0);
   const [allowEditHistory, setAllowEditHistory] = useState<boolean>(false);
+  const [badYearFrequency, setBadYearFrequency] = useState<number>(5);
+  const [badYearIncreaseMin, setBadYearIncreaseMin] = useState<number>(30);
+  const [badYearIncreaseMax, setBadYearIncreaseMax] = useState<number>(40);
   const [mcResults, setMcResults] = useState<MonteCarloResults | null>(null);
 
   // Auto-compute historical costs from renewals (reverse engineering)
@@ -335,6 +355,9 @@ export default function Meeting2Workbench() {
       hist_cost1: histCost1,
       hist_cost2: histCost2,
       hist_cost3: histCost3,
+      bad_year_frequency: badYearFrequency,
+      bad_year_increase_min: badYearIncreaseMin,
+      bad_year_increase_max: badYearIncreaseMax,
     });
     setMcResults(results);
     setMarketingCopy(results.narrative); // Auto-populate marketing copy
@@ -777,6 +800,53 @@ export default function Meeting2Workbench() {
                   onChange={(e) => setIterations(Number(e.target.value))}
                 />
               </div>
+
+              {/* Bad-Year Factor Section */}
+              <Card className="bg-muted/50 border-orange-500/20">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm text-orange-600">Bad-Year Factor</CardTitle>
+                  <CardDescription className="text-xs">
+                    Simulate catastrophic claims years (1-in-N)
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="grid grid-cols-3 gap-3">
+                    <div>
+                      <Label htmlFor="bad-freq" className="text-xs">Frequency</Label>
+                      <Input 
+                        id="bad-freq"
+                        type="number" 
+                        value={badYearFrequency}
+                        onChange={(e) => setBadYearFrequency(Number(e.target.value))}
+                        className="h-8 text-sm"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">Every N years</p>
+                    </div>
+                    <div>
+                      <Label htmlFor="bad-min" className="text-xs">Min Spike %</Label>
+                      <Input 
+                        id="bad-min"
+                        type="number" 
+                        value={badYearIncreaseMin}
+                        onChange={(e) => setBadYearIncreaseMin(Number(e.target.value))}
+                        className="h-8 text-sm"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">Minimum</p>
+                    </div>
+                    <div>
+                      <Label htmlFor="bad-max" className="text-xs">Max Spike %</Label>
+                      <Input 
+                        id="bad-max"
+                        type="number" 
+                        value={badYearIncreaseMax}
+                        onChange={(e) => setBadYearIncreaseMax(Number(e.target.value))}
+                        className="h-8 text-sm"
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">Maximum</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
               <div className="space-y-2">
                 <Label className="text-sm font-semibold">Doctrine Options</Label>
