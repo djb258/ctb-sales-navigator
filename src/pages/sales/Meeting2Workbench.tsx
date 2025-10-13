@@ -11,6 +11,24 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Play, Save, Presentation, X, Download } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
+// Utility functions for number formatting
+const formatCurrency = (value: number): string => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }).format(value);
+};
+
+const formatNumber = (value: number): string => {
+  return new Intl.NumberFormat('en-US').format(value);
+};
+
+const formatPercent = (value: number): string => {
+  return `${value.toFixed(2)}%`;
+};
+
 interface CompanyOption {
   company_id: string;
   company_name: string;
@@ -229,9 +247,19 @@ function runMonteCarlo(inputs: MonteCarloInputs): MonteCarloResults {
   
   const badImpact = `${(badMin*100).toFixed(0)}–${(badMax*100).toFixed(0)}% spike every ${badFreq} years`;
   
-  result.narrative = `Applied programs: ${programs.join(", ") || "None"}.\n\nHad these programs been active over the past 3 years, total savings ≈ $${totalHistSavings.toFixed(0)}.
-Looking ahead, current projection ≈ $${proj.baseline.toFixed(0)}; with sequential savings: self-insured ≈ $${proj.self_insured.toFixed(0)}; reference ≈ $${proj.reference.toFixed(0)}; MAP Drug ≈ $${proj.map_drug.toFixed(0)}.
+  result.narrative = `Applied programs: ${programs.join(", ") || "None"}.\n\nHad these programs been active over the past 3 years, total savings ≈ ${formatCurrency(totalHistSavings)}.
+Looking ahead, current projection ≈ ${formatCurrency(proj.baseline)}; with sequential savings: self-insured ≈ ${formatCurrency(proj.self_insured)}; reference ≈ ${formatCurrency(proj.reference)}; MAP Drug ≈ ${formatCurrency(proj.map_drug)}.
 Historically, one out of every ${badFreq} years experiences a ${badImpact}.`;
+
+  // Helper function for formatting inside runMonteCarlo
+  function formatCurrency(value: number): string {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    }).format(value);
+  }
 
   return result;
 }
@@ -423,7 +451,7 @@ export default function Meeting2Workbench() {
     
     toast({
       title: "Simulation Complete",
-      description: `Baseline: $${results.baseline.mean.toFixed(0)} | Historical savings if in place: $${results.total_historical_savings_if_in_place.toFixed(0)}`,
+      description: `Baseline: ${formatCurrency(results.baseline.mean)} | Historical savings: ${formatCurrency(results.total_historical_savings_if_in_place)}`,
       className: "bg-meeting2-royal/10 border-meeting2-royal/30",
     });
   };
@@ -573,25 +601,25 @@ export default function Meeting2Workbench() {
               <CardContent>
                 <div className="grid grid-cols-4 gap-4 mb-6">
                   <div className="text-center p-4 bg-muted rounded-lg">
-                    <div className="text-xl font-bold text-meeting2-royal">${mcResults.baseline.mean.toFixed(0)}</div>
+                    <div className="text-xl font-bold text-meeting2-royal">{formatCurrency(mcResults.baseline.mean)}</div>
                     <div className="text-xs text-muted-foreground">Baseline Mean</div>
-                    <div className="text-xs mt-1">P5: ${mcResults.baseline.p5.toFixed(0)}</div>
-                    <div className="text-xs">P95: ${mcResults.baseline.p95.toFixed(0)}</div>
+                    <div className="text-xs mt-1">P5: {formatCurrency(mcResults.baseline.p5)}</div>
+                    <div className="text-xs">P95: {formatCurrency(mcResults.baseline.p95)}</div>
                   </div>
                   <div className="text-center p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
-                    <div className="text-xl font-bold text-green-600">${mcResults.self_insured.mean.toFixed(0)}</div>
+                    <div className="text-xl font-bold text-green-600">{formatCurrency(mcResults.self_insured.mean)}</div>
                     <div className="text-xs text-muted-foreground">Self-Insured</div>
-                    <div className="text-xs mt-1 text-green-600">Save: ${(mcResults.baseline.mean - mcResults.self_insured.mean).toFixed(0)}</div>
+                    <div className="text-xs mt-1 text-green-600">Save: {formatCurrency(mcResults.baseline.mean - mcResults.self_insured.mean)}</div>
                   </div>
                   <div className="text-center p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-                    <div className="text-xl font-bold text-blue-600">${mcResults.reference_based.mean.toFixed(0)}</div>
+                    <div className="text-xl font-bold text-blue-600">{formatCurrency(mcResults.reference_based.mean)}</div>
                     <div className="text-xs text-muted-foreground">Reference-Based</div>
-                    <div className="text-xs mt-1 text-blue-600">Save: ${(mcResults.baseline.mean - mcResults.reference_based.mean).toFixed(0)}</div>
+                    <div className="text-xs mt-1 text-blue-600">Save: {formatCurrency(mcResults.baseline.mean - mcResults.reference_based.mean)}</div>
                   </div>
                   <div className="text-center p-4 bg-purple-500/10 border border-purple-500/20 rounded-lg">
-                    <div className="text-xl font-bold text-purple-600">${mcResults.map_drug.mean.toFixed(0)}</div>
+                    <div className="text-xl font-bold text-purple-600">{formatCurrency(mcResults.map_drug.mean)}</div>
                     <div className="text-xs text-muted-foreground">MAP Drugs</div>
-                    <div className="text-xs mt-1 text-purple-600">Save: ${(mcResults.baseline.mean - mcResults.map_drug.mean).toFixed(0)}</div>
+                    <div className="text-xs mt-1 text-purple-600">Save: {formatCurrency(mcResults.baseline.mean - mcResults.map_drug.mean)}</div>
                   </div>
                 </div>
               </CardContent>
@@ -992,27 +1020,27 @@ export default function Meeting2Workbench() {
                 <div className="space-y-2 p-4 bg-muted rounded-lg max-h-80 overflow-y-auto">
                   <div className="text-xs font-semibold mb-2">Baseline</div>
                   <div className="text-sm space-y-1 mb-3">
-                    <div><span className="font-semibold">Mean:</span> ${mcResults.baseline.mean.toFixed(0)}</div>
-                    <div><span className="font-semibold">P5:</span> ${mcResults.baseline.p5.toFixed(0)}</div>
-                    <div><span className="font-semibold">P95:</span> ${mcResults.baseline.p95.toFixed(0)}</div>
+                    <div><span className="font-semibold">Mean:</span> {formatCurrency(mcResults.baseline.mean)}</div>
+                    <div><span className="font-semibold">P5:</span> {formatCurrency(mcResults.baseline.p5)}</div>
+                    <div><span className="font-semibold">P95:</span> {formatCurrency(mcResults.baseline.p95)}</div>
                   </div>
 
                   <div className="text-xs font-semibold mb-2 text-green-600">Self-Insured</div>
                   <div className="text-sm space-y-1 mb-3">
-                    <div><span className="font-semibold">Mean:</span> ${mcResults.self_insured.mean.toFixed(0)}</div>
-                    <div className="text-green-600">Saves: ${(mcResults.baseline.mean - mcResults.self_insured.mean).toFixed(0)}</div>
+                    <div><span className="font-semibold">Mean:</span> {formatCurrency(mcResults.self_insured.mean)}</div>
+                    <div className="text-green-600">Saves: {formatCurrency(mcResults.baseline.mean - mcResults.self_insured.mean)}</div>
                   </div>
 
                   <div className="text-xs font-semibold mb-2 text-blue-600">Reference-Based</div>
                   <div className="text-sm space-y-1 mb-3">
-                    <div><span className="font-semibold">Mean:</span> ${mcResults.reference_based.mean.toFixed(0)}</div>
-                    <div className="text-blue-600">Saves: ${(mcResults.baseline.mean - mcResults.reference_based.mean).toFixed(0)}</div>
+                    <div><span className="font-semibold">Mean:</span> {formatCurrency(mcResults.reference_based.mean)}</div>
+                    <div className="text-blue-600">Saves: {formatCurrency(mcResults.baseline.mean - mcResults.reference_based.mean)}</div>
                   </div>
 
                   <div className="text-xs font-semibold mb-2 text-purple-600">MAP Drugs</div>
                   <div className="text-sm space-y-1 mb-3">
-                    <div><span className="font-semibold">Mean:</span> ${mcResults.map_drug.mean.toFixed(0)}</div>
-                    <div className="text-purple-600">Saves: ${(mcResults.baseline.mean - mcResults.map_drug.mean).toFixed(0)}</div>
+                    <div><span className="font-semibold">Mean:</span> {formatCurrency(mcResults.map_drug.mean)}</div>
+                    <div className="text-purple-600">Saves: {formatCurrency(mcResults.baseline.mean - mcResults.map_drug.mean)}</div>
                   </div>
 
                   <Button 
@@ -1156,7 +1184,7 @@ export default function Meeting2Workbench() {
                         <Input
                           type="number"
                           className="w-32 h-8 text-right text-sm"
-                          value={Number(mcResults.baseline.mean || 0).toFixed(0)}
+                          value={Number(mcResults.baseline.mean || 0).toFixed(2)}
                           onChange={(e) => {
                             const val = Number(e.target.value);
                             setMcResults({
@@ -1167,10 +1195,10 @@ export default function Meeting2Workbench() {
                         />
                       </td>
                       <td className="p-2 text-right text-muted-foreground">
-                        ${mcResults.baseline.p5.toFixed(0)}
+                        {formatCurrency(mcResults.baseline.p5)}
                       </td>
                       <td className="p-2 text-right text-muted-foreground">
-                        ${mcResults.baseline.p95.toFixed(0)}
+                        {formatCurrency(mcResults.baseline.p95)}
                       </td>
                     </tr>
                     <tr className="border-t">
@@ -1179,7 +1207,7 @@ export default function Meeting2Workbench() {
                         <Input
                           type="number"
                           className="w-32 h-8 text-right text-sm"
-                          value={Number(mcResults.self_insured.mean || 0).toFixed(0)}
+                          value={Number(mcResults.self_insured.mean || 0).toFixed(2)}
                           onChange={(e) => {
                             const val = Number(e.target.value);
                             setMcResults({
@@ -1190,10 +1218,10 @@ export default function Meeting2Workbench() {
                         />
                       </td>
                       <td className="p-2 text-right text-muted-foreground">
-                        ${mcResults.self_insured.p5.toFixed(0)}
+                        {formatCurrency(mcResults.self_insured.p5)}
                       </td>
                       <td className="p-2 text-right text-muted-foreground">
-                        ${mcResults.self_insured.p95.toFixed(0)}
+                        {formatCurrency(mcResults.self_insured.p95)}
                       </td>
                     </tr>
                     <tr className="border-t">
@@ -1202,7 +1230,7 @@ export default function Meeting2Workbench() {
                         <Input
                           type="number"
                           className="w-32 h-8 text-right text-sm"
-                          value={Number(mcResults.reference_based.mean || 0).toFixed(0)}
+                          value={Number(mcResults.reference_based.mean || 0).toFixed(2)}
                           onChange={(e) => {
                             const val = Number(e.target.value);
                             setMcResults({
@@ -1213,10 +1241,10 @@ export default function Meeting2Workbench() {
                         />
                       </td>
                       <td className="p-2 text-right text-muted-foreground">
-                        ${mcResults.reference_based.p5.toFixed(0)}
+                        {formatCurrency(mcResults.reference_based.p5)}
                       </td>
                       <td className="p-2 text-right text-muted-foreground">
-                        ${mcResults.reference_based.p95.toFixed(0)}
+                        {formatCurrency(mcResults.reference_based.p95)}
                       </td>
                     </tr>
                     <tr className="border-t">
@@ -1225,7 +1253,7 @@ export default function Meeting2Workbench() {
                         <Input
                           type="number"
                           className="w-32 h-8 text-right text-sm"
-                          value={Number(mcResults.map_drug.mean || 0).toFixed(0)}
+                          value={Number(mcResults.map_drug.mean || 0).toFixed(2)}
                           onChange={(e) => {
                             const val = Number(e.target.value);
                             setMcResults({
@@ -1236,10 +1264,10 @@ export default function Meeting2Workbench() {
                         />
                       </td>
                       <td className="p-2 text-right text-muted-foreground">
-                        ${mcResults.map_drug.p5.toFixed(0)}
+                        {formatCurrency(mcResults.map_drug.p5)}
                       </td>
                       <td className="p-2 text-right text-muted-foreground">
-                        ${mcResults.map_drug.p95.toFixed(0)}
+                        {formatCurrency(mcResults.map_drug.p95)}
                       </td>
                     </tr>
                   </tbody>
@@ -1261,7 +1289,7 @@ export default function Meeting2Workbench() {
                     Historical "What-If" Savings
                   </div>
                   <div className="text-2xl font-bold text-green-600 dark:text-green-500">
-                    ${mcResults.total_historical_savings_if_in_place.toFixed(0)}
+                    {formatCurrency(mcResults.total_historical_savings_if_in_place)}
                   </div>
                   <p className="text-xs text-muted-foreground mt-1">
                     If programs had been in place over past {mcResults.historical.length} year(s)
