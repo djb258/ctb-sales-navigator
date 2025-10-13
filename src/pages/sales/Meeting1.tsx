@@ -26,6 +26,10 @@ const Meeting1 = () => {
   const [address, setAddress] = useState("123 Main Street");
   const [state, setState] = useState("TX");
   const [zip, setZip] = useState("75001");
+  const [contactName, setContactName] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [workPhone, setWorkPhone] = useState("");
+  const [mobilePhone, setMobilePhone] = useState("");
   const [renewalMonth, setRenewalMonth] = useState("1");
   const [totalEmployees, setTotalEmployees] = useState("150");
   const [totalEnrolled, setTotalEnrolled] = useState("120");
@@ -238,18 +242,11 @@ const Meeting1 = () => {
             </Accordion>
           </Card>
 
-          {/* Divider */}
-          <div className="flex items-center gap-4">
-            <div className="flex-1 h-px bg-border"></div>
-            <span className="text-sm font-semibold text-meeting1-emerald uppercase tracking-wide">Renewal Verification — Confirm Details Below</span>
-            <div className="flex-1 h-px bg-border"></div>
-          </div>
-
-          {/* Renewal Verification Form */}
+          {/* Company & Contact Information Section */}
           <Card className="p-8">
             <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
-              <FileText className="h-5 w-5 text-meeting1-emerald" />
-              Renewal & Census Verification
+              <Building2 className="h-5 w-5 text-meeting1-emerald" />
+              Company & Contact Information
             </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -307,6 +304,83 @@ const Meeting1 = () => {
                   placeholder="75001"
                 />
               </div>
+
+              <div className="md:col-span-2">
+                <Label htmlFor="contactName" className="flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Contact Name
+                </Label>
+                <Input
+                  id="contactName"
+                  value={contactName}
+                  onChange={(e) => setContactName(e.target.value)}
+                  className="mt-2"
+                  placeholder="Primary contact name"
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <Label htmlFor="contactEmail" className="flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Email
+                </Label>
+                <Input
+                  id="contactEmail"
+                  type="email"
+                  value={contactEmail}
+                  onChange={(e) => setContactEmail(e.target.value)}
+                  className="mt-2"
+                  placeholder="contact@company.com"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="workPhone" className="flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Work Phone
+                </Label>
+                <Input
+                  id="workPhone"
+                  type="tel"
+                  value={workPhone}
+                  onChange={(e) => setWorkPhone(e.target.value)}
+                  className="mt-2"
+                  placeholder="(555) 123-4567"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="mobilePhone" className="flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Mobile Phone
+                </Label>
+                <Input
+                  id="mobilePhone"
+                  type="tel"
+                  value={mobilePhone}
+                  onChange={(e) => setMobilePhone(e.target.value)}
+                  className="mt-2"
+                  placeholder="(555) 987-6543"
+                />
+              </div>
+            </div>
+          </Card>
+
+          {/* Divider */}
+          <div className="flex items-center gap-4">
+            <div className="flex-1 h-px bg-border"></div>
+            <span className="text-sm font-semibold text-meeting1-emerald uppercase tracking-wide">Renewal Verification — Confirm Details Below</span>
+            <div className="flex-1 h-px bg-border"></div>
+          </div>
+
+          {/* Renewal Verification Form */}
+          <Card className="p-8">
+            <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
+              <FileText className="h-5 w-5 text-meeting1-emerald" />
+              Renewal & Census Verification
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
               <div>
                 <Label htmlFor="broker" className="flex items-center gap-2">
