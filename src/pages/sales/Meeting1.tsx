@@ -471,7 +471,7 @@ const Meeting1 = () => {
               </div>
             </div>
 
-            <div className="flex justify-between items-center mt-8 pt-6 border-t">
+            <div className="flex justify-end items-center mt-8 pt-6 border-t">
               <Button
                 onClick={handleSave}
                 size="lg"
@@ -479,15 +479,6 @@ const Meeting1 = () => {
               >
                 Save Verification Data
               </Button>
-              
-              <Link to="/sales/meeting2">
-                <Button
-                  size="lg"
-                  className="bg-meeting4-gold hover:bg-meeting4-gold/90 text-foreground"
-                >
-                  Continue to Meeting 2 → Education & Simulation
-                </Button>
-              </Link>
             </div>
           </Card>
         </div>
