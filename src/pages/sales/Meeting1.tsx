@@ -81,6 +81,12 @@ const Meeting1 = () => {
     );
   };
 
+  const updateComplianceLabel = (id: string, label: string) => {
+    setComplianceItems(items =>
+      items.map(item => item.id === id ? { ...item, label } : item)
+    );
+  };
+
   const toggleNotesVisibility = (id: string) => {
     setComplianceItems(items =>
       items.map(item => item.id === id ? { ...item, showNotes: !item.showNotes } : item)
@@ -567,7 +573,16 @@ const Meeting1 = () => {
                     <div className="space-y-3">
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex-1">
-                          <p className="font-semibold text-sm">{item.label}</p>
+                          {(item.id === "8" || item.id === "9") ? (
+                            <Input
+                              value={item.label}
+                              onChange={(e) => updateComplianceLabel(item.id, e.target.value)}
+                              placeholder={`Enter custom compliance item ${item.id === "8" ? "1" : "2"}`}
+                              className="font-semibold text-sm h-8"
+                            />
+                          ) : (
+                            <p className="font-semibold text-sm">{item.label}</p>
+                          )}
                         </div>
                         <Button
                           variant="ghost"
