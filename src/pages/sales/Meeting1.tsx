@@ -26,7 +26,6 @@ const Meeting1 = () => {
   const [address, setAddress] = useState("123 Main Street");
   const [state, setState] = useState("TX");
   const [zip, setZip] = useState("75001");
-  const [effectiveDate, setEffectiveDate] = useState("2024-01-01");
   const [renewalMonth, setRenewalMonth] = useState("1");
   const [totalEmployees, setTotalEmployees] = useState("150");
   const [totalEnrolled, setTotalEnrolled] = useState("120");
@@ -261,20 +260,6 @@ const Meeting1 = () => {
                   id="broker"
                   value={broker}
                   onChange={(e) => setBroker(e.target.value)}
-                  className="mt-2"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="effective" className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  Effective Date
-                </Label>
-                <Input
-                  id="effective"
-                  type="date"
-                  value={effectiveDate}
-                  onChange={(e) => setEffectiveDate(e.target.value)}
                   className="mt-2"
                 />
               </div>
