@@ -189,76 +189,6 @@ const Meeting1 = () => {
             <div className="flex-1 h-px bg-border"></div>
           </div>
 
-          {/* Health Tier Costs */}
-          <Card className="p-8">
-            <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
-              <DollarSign className="h-5 w-5 text-meeting1-emerald" />
-              Health Tier Costs
-            </h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <Label htmlFor="tierEmployee" className="flex items-center gap-2">
-                  <DollarSign className="h-4 w-4" />
-                  Employee
-                </Label>
-                <Input
-                  id="tierEmployee"
-                  type="number"
-                  value={tierEmployee}
-                  onChange={(e) => setTierEmployee(e.target.value)}
-                  placeholder="0.00"
-                  className="mt-2"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="tierEmployeeSpouse" className="flex items-center gap-2">
-                  <DollarSign className="h-4 w-4" />
-                  Employee + Spouse
-                </Label>
-                <Input
-                  id="tierEmployeeSpouse"
-                  type="number"
-                  value={tierEmployeeSpouse}
-                  onChange={(e) => setTierEmployeeSpouse(e.target.value)}
-                  placeholder="0.00"
-                  className="mt-2"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="tierEmployeeChildren" className="flex items-center gap-2">
-                  <DollarSign className="h-4 w-4" />
-                  Employee + Child(ren)
-                </Label>
-                <Input
-                  id="tierEmployeeChildren"
-                  type="number"
-                  value={tierEmployeeChildren}
-                  onChange={(e) => setTierEmployeeChildren(e.target.value)}
-                  placeholder="0.00"
-                  className="mt-2"
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="tierFamily" className="flex items-center gap-2">
-                  <DollarSign className="h-4 w-4" />
-                  Family
-                </Label>
-                <Input
-                  id="tierFamily"
-                  type="number"
-                  value={tierFamily}
-                  onChange={(e) => setTierFamily(e.target.value)}
-                  placeholder="0.00"
-                  className="mt-2"
-                />
-              </div>
-            </div>
-          </Card>
-
           {/* Renewal Verification Form */}
           <Card className="p-8">
             <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
@@ -483,6 +413,75 @@ const Meeting1 = () => {
                   </div>
                 </>
               )}
+
+              {/* Health Tier Costs */}
+              <div className="md:col-span-2 mt-6">
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <DollarSign className="h-5 w-5 text-meeting1-emerald" />
+                  Health Tier Costs
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <Label htmlFor="tierEmployee" className="flex items-center gap-2">
+                      <DollarSign className="h-4 w-4" />
+                      Employee
+                    </Label>
+                    <Input
+                      id="tierEmployee"
+                      type="number"
+                      value={tierEmployee}
+                      onChange={(e) => setTierEmployee(e.target.value)}
+                      placeholder="0.00"
+                      className="mt-2"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="tierEmployeeSpouse" className="flex items-center gap-2">
+                      <DollarSign className="h-4 w-4" />
+                      Employee + Spouse
+                    </Label>
+                    <Input
+                      id="tierEmployeeSpouse"
+                      type="number"
+                      value={tierEmployeeSpouse}
+                      onChange={(e) => setTierEmployeeSpouse(e.target.value)}
+                      placeholder="0.00"
+                      className="mt-2"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="tierEmployeeChildren" className="flex items-center gap-2">
+                      <DollarSign className="h-4 w-4" />
+                      Employee + Child(ren)
+                    </Label>
+                    <Input
+                      id="tierEmployeeChildren"
+                      type="number"
+                      value={tierEmployeeChildren}
+                      onChange={(e) => setTierEmployeeChildren(e.target.value)}
+                      placeholder="0.00"
+                      className="mt-2"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="tierFamily" className="flex items-center gap-2">
+                      <DollarSign className="h-4 w-4" />
+                      Family
+                    </Label>
+                    <Input
+                      id="tierFamily"
+                      type="number"
+                      value={tierFamily}
+                      onChange={(e) => setTierFamily(e.target.value)}
+                      placeholder="0.00"
+                      className="mt-2"
+                    />
+                  </div>
+                </div>
+              </div>
 
               <div className="md:col-span-2">
                 <Label htmlFor="notes">Renewal Notes or Pending Items</Label>
