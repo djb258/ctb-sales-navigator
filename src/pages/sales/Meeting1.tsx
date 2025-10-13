@@ -419,6 +419,26 @@ const Meeting1 = () => {
               </div>
             </div>
 
+            {/* Compliance Section Divider */}
+            <div className="flex items-center gap-4 my-8">
+              <div className="flex-1 h-px bg-border"></div>
+              <span className="text-sm font-semibold text-meeting4-gold uppercase tracking-wide">Compliance Requirements</span>
+              <div className="flex-1 h-px bg-border"></div>
+            </div>
+
+            {/* Compliance Section */}
+            <div className="grid grid-cols-1 gap-6">
+              <div className="bg-meeting4-gold/5 p-6 rounded-lg border border-meeting4-gold/20">
+                <h3 className="font-semibold text-meeting4-gold mb-4 flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5" />
+                  Compliance Checklist
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Review compliance requirements and documentation status for this client.
+                </p>
+              </div>
+            </div>
+
             <div className="flex justify-between items-center mt-8 pt-6 border-t">
               <Button
                 onClick={handleSave}
