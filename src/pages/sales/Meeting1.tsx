@@ -377,7 +377,7 @@ const Meeting1 = () => {
           <Card className="p-8">
             <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
               <FileText className="h-5 w-5 text-meeting1-emerald" />
-              Renewal & Census Verification
+              Health Insurance Renewal Census Verification
             </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
