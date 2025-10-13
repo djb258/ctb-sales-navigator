@@ -110,6 +110,66 @@ export type Database = {
         }
         Relationships: []
       }
+      meeting2_master: {
+        Row: {
+          company_id: string
+          compliance_status: Json | null
+          marketing_copy: string | null
+          meeting_id: string
+          montecarlo_results: Json | null
+          presentation_mode: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          compliance_status?: Json | null
+          marketing_copy?: string | null
+          meeting_id?: string
+          montecarlo_results?: Json | null
+          presentation_mode?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          compliance_status?: Json | null
+          marketing_copy?: string | null
+          meeting_id?: string
+          montecarlo_results?: Json | null
+          presentation_mode?: boolean | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      montecarlo_constants: {
+        Row: {
+          active: boolean | null
+          category: string | null
+          constant_name: string
+          constant_value: number | null
+          description: string | null
+          id: string
+          last_updated: string
+        }
+        Insert: {
+          active?: boolean | null
+          category?: string | null
+          constant_name: string
+          constant_value?: number | null
+          description?: string | null
+          id?: string
+          last_updated?: string
+        }
+        Update: {
+          active?: boolean | null
+          category?: string | null
+          constant_name?: string
+          constant_value?: number | null
+          description?: string | null
+          id?: string
+          last_updated?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
