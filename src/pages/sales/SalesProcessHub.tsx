@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FileSearch, Calculator, Gauge, PresentationIcon } from "lucide-react";
+import { FileSearch, Calculator, Gauge, PresentationIcon, Search } from "lucide-react";
 import ClientSelector from "@/components/sales/ClientSelector";
 import MeetingCard from "@/components/sales/MeetingCard";
 import ProgressIndicator from "@/components/sales/ProgressIndicator";
@@ -80,6 +80,30 @@ const SalesProcessHub = () => {
               Navigate through the CTB sales process. Each module is designed to guide you 
               through a specific stage of client engagement.
             </p>
+          </div>
+
+          {/* CRM Intake Gateway Banner */}
+          <div className="mb-8">
+            <Link to="/sales/crm-intake">
+              <div className="bg-gradient-to-r from-hub-teal/10 to-meeting4-gold/10 border border-hub-teal/30 rounded-lg p-6 hover:border-hub-teal/50 transition-all cursor-pointer group">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-lg bg-hub-teal/20 flex items-center justify-center group-hover:bg-hub-teal/30 transition-colors">
+                      <Search className="w-6 h-6 text-hub-teal" />
+                    </div>
+                    <div className="text-left">
+                      <h3 className="font-semibold text-lg text-hub-teal mb-1">CRM Intake Gateway</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Import company data from ActiveCampaign to begin a new meeting
+                      </p>
+                    </div>
+                  </div>
+                  <Button className="bg-meeting4-gold hover:bg-meeting4-gold/90 text-white">
+                    Launch Gateway
+                  </Button>
+                </div>
+              </div>
+            </Link>
           </div>
 
           {!selectedClient && (

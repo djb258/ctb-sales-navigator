@@ -1,4 +1,7 @@
 project_id = "zfuvggonfjwqpnslhyfu"
 
 [functions.exportToNeon]
-verify_jwt = true
+verify_jwt = false
+
+[functions.composio-activecamp]
+verify_jwt = false
