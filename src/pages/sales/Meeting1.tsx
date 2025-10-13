@@ -27,7 +27,7 @@ const Meeting1 = () => {
   const [renewalDate, setRenewalDate] = useState("2025-01-01");
   const [totalEmployees, setTotalEmployees] = useState("150");
   const [totalEnrolled, setTotalEnrolled] = useState("120");
-  const [fundingType, setFundingType] = useState("Level Funded");
+  const [fundingType, setFundingType] = useState("Self Insured");
   const [avgMonthlyPremium, setAvgMonthlyPremium] = useState("85000");
   const [broker, setBroker] = useState("Smith Benefits Group");
   const [notes, setNotes] = useState("");
@@ -273,8 +273,7 @@ const Meeting1 = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Level Funded">Level Funded</SelectItem>
-                    <SelectItem value="Self Funded">Self Funded</SelectItem>
+                    <SelectItem value="Self Insured">Self Insured</SelectItem>
                     <SelectItem value="Fully Insured">Fully Insured</SelectItem>
                   </SelectContent>
                 </Select>
