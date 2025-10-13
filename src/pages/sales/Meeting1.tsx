@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, TrendingUp, CheckCircle2, Target, Calendar, Building2, Users, DollarSign, FileText } from "lucide-react";
+import { ArrowLeft, TrendingUp, CheckCircle2, Target, Calendar, Building2, Users, DollarSign, FileText, AlertCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -46,6 +46,57 @@ const Meeting1 = () => {
   const [tierEmployeeSpouse, setTierEmployeeSpouse] = useState("");
   const [tierEmployeeChildren, setTierEmployeeChildren] = useState("");
   const [tierFamily, setTierFamily] = useState("");
+
+  // Compliance checklist items
+  type ComplianceStatus = "Compliant" | "Pending" | "Missing";
+  type ComplianceItem = {
+    id: string;
+    label: string;
+    status: ComplianceStatus;
+    notes: string;
+    showNotes: boolean;
+  };
+
+  const [complianceItems, setComplianceItems] = useState<ComplianceItem[]>([
+    { id: "1", label: "ACA Reporting (1095-C)", status: "Compliant", notes: "", showNotes: false },
+    { id: "2", label: "ERISA Wrap Document", status: "Compliant", notes: "", showNotes: false },
+    { id: "3", label: "SPD Distribution to Employees", status: "Pending", notes: "", showNotes: false },
+    { id: "4", label: "COBRA Notices Current", status: "Compliant", notes: "", showNotes: false },
+    { id: "5", label: "Section 125 / Nondiscrimination Testing", status: "Pending", notes: "", showNotes: false },
+    { id: "6", label: "5500 Filed for Prior Plan Year", status: "Compliant", notes: "", showNotes: false },
+    { id: "7", label: "State-Specific Mandates (if applicable)", status: "Missing", notes: "", showNotes: false },
+    { id: "8", label: "Other 1 (Custom Input)", status: "Pending", notes: "", showNotes: false },
+    { id: "9", label: "Other 2 (Custom Input)", status: "Pending", notes: "", showNotes: false },
+  ]);
+
+  const updateComplianceStatus = (id: string, status: ComplianceStatus) => {
+    setComplianceItems(items =>
+      items.map(item => item.id === id ? { ...item, status } : item)
+    );
+  };
+
+  const updateComplianceNotes = (id: string, notes: string) => {
+    setComplianceItems(items =>
+      items.map(item => item.id === id ? { ...item, notes } : item)
+    );
+  };
+
+  const toggleNotesVisibility = (id: string) => {
+    setComplianceItems(items =>
+      items.map(item => item.id === id ? { ...item, showNotes: !item.showNotes } : item)
+    );
+  };
+
+  const getStatusColor = (status: ComplianceStatus) => {
+    switch (status) {
+      case "Compliant":
+        return "text-meeting1-emerald border-meeting1-emerald bg-meeting1-emerald/5";
+      case "Pending":
+        return "text-meeting4-gold border-meeting4-gold bg-meeting4-gold/5";
+      case "Missing":
+        return "text-meeting3-crimson border-meeting3-crimson bg-meeting3-crimson/5";
+    }
+  };
 
   const handleSave = () => {
     toast.success("Verification data saved", {
@@ -499,16 +550,99 @@ const Meeting1 = () => {
               <div className="flex-1 h-px bg-border"></div>
             </div>
 
-            {/* Compliance Section */}
-            <div className="grid grid-cols-1 gap-6">
-              <div className="bg-meeting4-gold/5 p-6 rounded-lg border border-meeting4-gold/20">
-                <h3 className="font-semibold text-meeting4-gold mb-4 flex items-center gap-2">
-                  <CheckCircle2 className="h-5 w-5" />
-                  Compliance Checklist
+            {/* Compliance Checklist Section */}
+            <div className="space-y-6">
+              <div className="bg-[hsl(var(--teal)/0.1)] p-4 rounded-lg border border-[hsl(var(--teal)/0.3)]">
+                <h3 className="font-bold text-lg text-white mb-2">
+                  Compliance Checklist — Confirm Required Items
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  Review compliance requirements and documentation status for this client.
+                  Review each compliance requirement and update status during your Zoom presentation.
                 </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {complianceItems.map((item) => (
+                  <Card key={item.id} className={`p-4 border-2 transition-all ${getStatusColor(item.status)}`}>
+                    <div className="space-y-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1">
+                          <p className="font-semibold text-sm">{item.label}</p>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={() => toggleNotesVisibility(item.id)}
+                          title="Add notes"
+                        >
+                          <AlertCircle className="h-4 w-4" />
+                        </Button>
+                      </div>
+
+                      <div className="flex gap-2">
+                        <Button
+                          variant={item.status === "Compliant" ? "default" : "outline"}
+                          size="sm"
+                          className={`flex-1 text-xs ${
+                            item.status === "Compliant"
+                              ? "bg-meeting1-emerald hover:bg-meeting1-emerald/90 text-white"
+                              : "hover:bg-meeting1-emerald/10"
+                          }`}
+                          onClick={() => updateComplianceStatus(item.id, "Compliant")}
+                        >
+                          Compliant
+                        </Button>
+                        <Button
+                          variant={item.status === "Pending" ? "default" : "outline"}
+                          size="sm"
+                          className={`flex-1 text-xs ${
+                            item.status === "Pending"
+                              ? "bg-meeting4-gold hover:bg-meeting4-gold/90 text-white"
+                              : "hover:bg-meeting4-gold/10"
+                          }`}
+                          onClick={() => updateComplianceStatus(item.id, "Pending")}
+                        >
+                          Pending
+                        </Button>
+                        <Button
+                          variant={item.status === "Missing" ? "default" : "outline"}
+                          size="sm"
+                          className={`flex-1 text-xs ${
+                            item.status === "Missing"
+                              ? "bg-meeting3-crimson hover:bg-meeting3-crimson/90 text-white"
+                              : "hover:bg-meeting3-crimson/10"
+                          }`}
+                          onClick={() => updateComplianceStatus(item.id, "Missing")}
+                        >
+                          Missing
+                        </Button>
+                      </div>
+
+                      {item.showNotes && (
+                        <Textarea
+                          value={item.notes}
+                          onChange={(e) => updateComplianceNotes(item.id, e.target.value)}
+                          placeholder="Add notes about this compliance item..."
+                          className="text-sm min-h-20"
+                        />
+                      )}
+                    </div>
+                  </Card>
+                ))}
+              </div>
+
+              <div className="flex justify-end">
+                <Button
+                  onClick={() => {
+                    toast.success("Compliance checklist saved", {
+                      description: "Data synced to: meeting_1_verification.compliance_info.checklist"
+                    });
+                  }}
+                  className="bg-[hsl(var(--teal))] hover:bg-[hsl(var(--teal)/0.9)] text-white"
+                >
+                  Save Compliance Checklist
+                </Button>
               </div>
             </div>
 
