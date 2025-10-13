@@ -40,6 +40,7 @@ const Meeting1 = () => {
   const [currentTPA, setCurrentTPA] = useState("");
   const [currentPBM, setCurrentPBM] = useState("");
   const [currentNetwork, setCurrentNetwork] = useState("");
+  const [businessIssuesTech, setBusinessIssuesTech] = useState("");
 
   const handleSave = () => {
     toast.success("Verification data saved", {
@@ -453,9 +454,20 @@ const Meeting1 = () => {
                   <Target className="h-5 w-5" />
                   Business Challenges & Solutions
                 </h3>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground mb-4">
                   Identify key business challenges and document proposed solutions.
                 </p>
+                
+                <div>
+                  <Label htmlFor="businessTech">Solving Business Issues with Tech</Label>
+                  <Textarea
+                    id="businessTech"
+                    value={businessIssuesTech}
+                    onChange={(e) => setBusinessIssuesTech(e.target.value)}
+                    placeholder="Describe how technology solutions can address the client's business challenges..."
+                    className="mt-2 min-h-32"
+                  />
+                </div>
               </div>
             </div>
 
