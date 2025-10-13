@@ -163,6 +163,13 @@ export default function Meeting2Workbench() {
     }
   };
 
+  const handleConstantValueChange = (id: string, value: number) => {
+    const updated = constants.map(c => 
+      c.id === id ? { ...c, constant_value: value } : c
+    );
+    setConstants(updated);
+  };
+
   const handleRunSimulation = () => {
     const results = runMonteCarlo(baseline, volatility, iterations);
     setMcResults(results);
@@ -478,17 +485,28 @@ export default function Meeting2Workbench() {
               {/* Constants */}
               <div>
                 <Label className="text-sm font-semibold mb-2 block">Active Constants</Label>
-                <div className="space-y-2 max-h-40 overflow-y-auto">
+                <div className="space-y-3 max-h-80 overflow-y-auto pr-2">
                   {constants.map(constant => (
-                    <div key={constant.id} className="flex items-start gap-2">
-                      <Checkbox 
-                        checked={constant.active}
-                        onCheckedChange={() => handleToggleConstant(constant.id)}
-                      />
-                      <div className="flex-1 text-sm">
-                        <div className="font-medium">{constant.constant_name}</div>
-                        <div className="text-xs text-muted-foreground">{constant.description}</div>
+                    <div key={constant.id} className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <Checkbox 
+                          checked={constant.active}
+                          onCheckedChange={() => handleToggleConstant(constant.id)}
+                        />
+                        <Label className="text-sm font-medium flex-1">{constant.constant_name}</Label>
                       </div>
+                      {constant.active && (
+                        <div className="ml-6 space-y-1">
+                          <Input 
+                            type="number"
+                            value={constant.constant_value}
+                            onChange={(e) => handleConstantValueChange(constant.id, Number(e.target.value))}
+                            className="h-8 text-sm"
+                            step="0.01"
+                          />
+                          <p className="text-xs text-muted-foreground">{constant.description}</p>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
