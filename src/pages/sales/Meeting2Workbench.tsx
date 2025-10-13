@@ -62,6 +62,14 @@ interface MonteCarloResults {
     map_drug: number;
   };
   narrative: string;
+  bad_year_stats: {
+    count: number;
+    frequency: number;
+    avg_spike_pct: number;
+    total_extra_cost: number;
+    avg_extra_per_bad_year: number;
+    iterations: number[];
+  };
 }
 
 interface ComplianceItem {
@@ -125,14 +133,22 @@ function runMonteCarlo(inputs: MonteCarloInputs): MonteCarloResults {
 
   // ---------- BASELINE MONTE CARLO WITH SEQUENTIAL SAVINGS ----------
   const baseline=[], selfArr=[], refArr=[], mapArr=[];
+  const badYearIterations: number[] = [];
+  const badYearSpikes: number[] = [];
+  const badYearExtraCosts: number[] = [];
+  
   for(let i=0;i<iterations;i++){
     const rand = 1 + (Math.random()-0.5)*2*volatility;
     let cost = baseCost * rand;
+    const normalCost = cost;
 
     // Simulate 1-in-N bad year
     if (i % badFreq === 0) {
-      const spike = 1 + (badMin + Math.random() * (badMax - badMin));
-      cost = cost * spike;
+      const spikeMultiplier = 1 + (badMin + Math.random() * (badMax - badMin));
+      cost = cost * spikeMultiplier;
+      badYearIterations.push(i);
+      badYearSpikes.push((spikeMultiplier - 1) * 100);
+      badYearExtraCosts.push(cost - normalCost);
     }
 
     // Baseline = current fully-insured scenario
@@ -227,6 +243,14 @@ function runMonteCarlo(inputs: MonteCarloInputs): MonteCarloResults {
     map_drug
   };
 
+  // ---------- BAD YEAR STATISTICS ----------
+  const badYearCount = badYearIterations.length;
+  const avgSpikePct = badYearSpikes.length > 0 
+    ? badYearSpikes.reduce((a,b) => a+b, 0) / badYearSpikes.length 
+    : 0;
+  const totalExtraCost = badYearExtraCosts.reduce((a,b) => a+b, 0);
+  const avgExtraPerBadYear = badYearCount > 0 ? totalExtraCost / badYearCount : 0;
+
   // ---------- COMBINE RESULTS ----------
   const result: MonteCarloResults = {
     baseline: baselineStats,
@@ -236,7 +260,15 @@ function runMonteCarlo(inputs: MonteCarloInputs): MonteCarloResults {
     historical: histSavings,
     total_historical_savings_if_in_place: totalHistSavings,
     projection: proj,
-    narrative: ''
+    narrative: '',
+    bad_year_stats: {
+      count: badYearCount,
+      frequency: badFreq,
+      avg_spike_pct: avgSpikePct,
+      total_extra_cost: totalExtraCost,
+      avg_extra_per_bad_year: avgExtraPerBadYear,
+      iterations: badYearIterations
+    }
   };
 
   // ---------- NARRATIVE OUTPUT ----------
@@ -245,11 +277,12 @@ function runMonteCarlo(inputs: MonteCarloInputs): MonteCarloResults {
   if (inputs.use_rbp) programs.push("Reference-Based Pricing (-15%)");
   if (inputs.use_map) programs.push("MAP Drug Savings (-60% of 60% drug spend)");
   
-  const badImpact = `${(badMin*100).toFixed(0)}–${(badMax*100).toFixed(0)}% spike every ${badFreq} years`;
+  const badYearPct = ((badYearCount / iterations) * 100).toFixed(1);
   
   result.narrative = `Applied programs: ${programs.join(", ") || "None"}.\n\nHad these programs been active over the past 3 years, total savings ≈ ${formatCurrency(totalHistSavings)}.
 Looking ahead, current projection ≈ ${formatCurrency(proj.baseline)}; with sequential savings: self-insured ≈ ${formatCurrency(proj.self_insured)}; reference ≈ ${formatCurrency(proj.reference)}; MAP Drug ≈ ${formatCurrency(proj.map_drug)}.
-Historically, one out of every ${badFreq} years experiences a ${badImpact}.`;
+
+Bad Year Impact: In ${badYearCount} of ${iterations} simulations (${badYearPct}%), costs spiked by an average of ${avgSpikePct.toFixed(1)}% (${(badMin*100).toFixed(0)}–${(badMax*100).toFixed(0)}% range). This added approximately ${formatCurrency(totalExtraCost)} in unexpected costs across all simulations, averaging ${formatCurrency(avgExtraPerBadYear)} per bad year event.`;
 
   // Helper function for formatting inside runMonteCarlo
   function formatCurrency(value: number): string {
@@ -1281,6 +1314,69 @@ export default function Meeting2Workbench() {
                   {mcResults.narrative}
                 </p>
               </div>
+
+              {/* Bad Year Analysis */}
+              {mcResults.bad_year_stats && mcResults.bad_year_stats.count > 0 && (
+                <div className="p-4 bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800 rounded-lg space-y-3">
+                  <div className="text-sm font-semibold text-orange-700 dark:text-orange-400 mb-2">
+                    🔥 Bad Year Impact Analysis
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <div className="text-xs text-muted-foreground">Bad Years in Simulation</div>
+                      <div className="text-xl font-bold text-orange-600">
+                        {mcResults.bad_year_stats.count} of {iterations}
+                      </div>
+                      <div className="text-xs text-orange-600/80">
+                        ({((mcResults.bad_year_stats.count / iterations) * 100).toFixed(1)}% of iterations)
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <div className="text-xs text-muted-foreground">Average Spike</div>
+                      <div className="text-xl font-bold text-orange-600">
+                        {formatPercent(mcResults.bad_year_stats.avg_spike_pct)}
+                      </div>
+                      <div className="text-xs text-orange-600/80">
+                        {formatPercent(badYearIncreaseMin)}–{formatPercent(badYearIncreaseMax)} range
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <div className="text-xs text-muted-foreground">Total Extra Cost (All Bad Years)</div>
+                      <div className="text-xl font-bold text-orange-600">
+                        {formatCurrency(mcResults.bad_year_stats.total_extra_cost)}
+                      </div>
+                      <div className="text-xs text-orange-600/80">
+                        Across {mcResults.bad_year_stats.count} bad year events
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <div className="text-xs text-muted-foreground">Avg Cost Per Bad Year</div>
+                      <div className="text-xl font-bold text-orange-600">
+                        {formatCurrency(mcResults.bad_year_stats.avg_extra_per_bad_year)}
+                      </div>
+                      <div className="text-xs text-orange-600/80">
+                        1 in {mcResults.bad_year_stats.frequency} year frequency
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-orange-200 dark:border-orange-800">
+                    <div className="text-xs font-medium text-orange-700 dark:text-orange-400 mb-1">
+                      3-Year Outlook
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Probability of experiencing at least 1 bad year in next 3 years: 
+                      <span className="font-bold text-orange-600 ml-1">
+                        {(100 * (1 - Math.pow((1 - 1/mcResults.bad_year_stats.frequency), 3))).toFixed(0)}%
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Historical Savings Summary */}
               {mcResults.total_historical_savings_if_in_place > 0 && (
