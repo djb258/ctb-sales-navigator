@@ -41,14 +41,21 @@ const Meeting1 = () => {
   
   // Other Benefits checkboxes
   const [dentalChecked, setDentalChecked] = useState(false);
+  const [dentalCarrier, setDentalCarrier] = useState("");
   const [visionChecked, setVisionChecked] = useState(false);
+  const [visionCarrier, setVisionCarrier] = useState("");
   const [lifeChecked, setLifeChecked] = useState(false);
+  const [lifeCarrier, setLifeCarrier] = useState("");
   const [stdChecked, setStdChecked] = useState(false);
+  const [stdCarrier, setStdCarrier] = useState("");
   const [ltdChecked, setLtdChecked] = useState(false);
+  const [ltdCarrier, setLtdCarrier] = useState("");
   const [other1Checked, setOther1Checked] = useState(false);
   const [other1Text, setOther1Text] = useState("");
+  const [other1Carrier, setOther1Carrier] = useState("");
   const [other2Checked, setOther2Checked] = useState(false);
   const [other2Text, setOther2Text] = useState("");
+  const [other2Carrier, setOther2Carrier] = useState("");
   
   // Conditional fields based on funding type
   const [currentCarrier, setCurrentCarrier] = useState("");
@@ -640,89 +647,150 @@ const Meeting1 = () => {
                   <CheckCircle2 className="h-5 w-5 text-meeting1-emerald" />
                   Other Benefits
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="flex items-center space-x-2">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
                     <Checkbox
                       id="dental"
                       checked={dentalChecked}
                       onCheckedChange={(checked) => setDentalChecked(checked as boolean)}
                     />
-                    <Label htmlFor="dental" className="cursor-pointer">Dental</Label>
+                    <Label htmlFor="dental" className="cursor-pointer min-w-[100px]">Dental</Label>
+                    <Input
+                      value={dentalCarrier}
+                      onChange={(e) => setDentalCarrier(e.target.value)}
+                      placeholder="Carrier name"
+                      className="flex-1"
+                      disabled={!dentalChecked}
+                    />
                   </div>
 
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center gap-3">
                     <Checkbox
                       id="vision"
                       checked={visionChecked}
                       onCheckedChange={(checked) => setVisionChecked(checked as boolean)}
                     />
-                    <Label htmlFor="vision" className="cursor-pointer">Vision</Label>
+                    <Label htmlFor="vision" className="cursor-pointer min-w-[100px]">Vision</Label>
+                    <Input
+                      value={visionCarrier}
+                      onChange={(e) => setVisionCarrier(e.target.value)}
+                      placeholder="Carrier name"
+                      className="flex-1"
+                      disabled={!visionChecked}
+                    />
                   </div>
 
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center gap-3">
                     <Checkbox
                       id="life"
                       checked={lifeChecked}
                       onCheckedChange={(checked) => setLifeChecked(checked as boolean)}
                     />
-                    <Label htmlFor="life" className="cursor-pointer">Life</Label>
+                    <Label htmlFor="life" className="cursor-pointer min-w-[100px]">Life</Label>
+                    <Input
+                      value={lifeCarrier}
+                      onChange={(e) => setLifeCarrier(e.target.value)}
+                      placeholder="Carrier name"
+                      className="flex-1"
+                      disabled={!lifeChecked}
+                    />
                   </div>
 
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center gap-3">
                     <Checkbox
                       id="std"
                       checked={stdChecked}
                       onCheckedChange={(checked) => setStdChecked(checked as boolean)}
                     />
-                    <Label htmlFor="std" className="cursor-pointer">Short-Term Disability (STD)</Label>
+                    <Label htmlFor="std" className="cursor-pointer min-w-[180px]">Short-Term Disability (STD)</Label>
+                    <Input
+                      value={stdCarrier}
+                      onChange={(e) => setStdCarrier(e.target.value)}
+                      placeholder="Carrier name"
+                      className="flex-1"
+                      disabled={!stdChecked}
+                    />
                   </div>
 
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center gap-3">
                     <Checkbox
                       id="ltd"
                       checked={ltdChecked}
                       onCheckedChange={(checked) => setLtdChecked(checked as boolean)}
                     />
-                    <Label htmlFor="ltd" className="cursor-pointer">Long-Term Disability (LTD)</Label>
+                    <Label htmlFor="ltd" className="cursor-pointer min-w-[180px]">Long-Term Disability (LTD)</Label>
+                    <Input
+                      value={ltdCarrier}
+                      onChange={(e) => setLtdCarrier(e.target.value)}
+                      placeholder="Carrier name"
+                      className="flex-1"
+                      disabled={!ltdChecked}
+                    />
                   </div>
 
-                  <div className="md:col-span-2 flex items-start gap-3 mt-2">
+                  <div className="flex items-start gap-3">
                     <Checkbox
                       id="other1"
                       checked={other1Checked}
                       onCheckedChange={(checked) => setOther1Checked(checked as boolean)}
                       className="mt-3"
                     />
-                    <div className="flex-1">
-                      <Label htmlFor="other1Input" className="cursor-pointer">Other 1</Label>
-                      <Input
-                        id="other1Input"
-                        value={other1Text}
-                        onChange={(e) => setOther1Text(e.target.value)}
-                        placeholder="Specify other benefit"
-                        className="mt-2"
-                        disabled={!other1Checked}
-                      />
+                    <div className="flex-1 grid grid-cols-2 gap-3">
+                      <div>
+                        <Label htmlFor="other1Input" className="cursor-pointer">Other 1</Label>
+                        <Input
+                          id="other1Input"
+                          value={other1Text}
+                          onChange={(e) => setOther1Text(e.target.value)}
+                          placeholder="Benefit type"
+                          className="mt-2"
+                          disabled={!other1Checked}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="other1Carrier" className="cursor-pointer">Carrier</Label>
+                        <Input
+                          id="other1Carrier"
+                          value={other1Carrier}
+                          onChange={(e) => setOther1Carrier(e.target.value)}
+                          placeholder="Carrier name"
+                          className="mt-2"
+                          disabled={!other1Checked}
+                        />
+                      </div>
                     </div>
                   </div>
 
-                  <div className="md:col-span-2 flex items-start gap-3">
+                  <div className="flex items-start gap-3">
                     <Checkbox
                       id="other2"
                       checked={other2Checked}
                       onCheckedChange={(checked) => setOther2Checked(checked as boolean)}
                       className="mt-3"
                     />
-                    <div className="flex-1">
-                      <Label htmlFor="other2Input" className="cursor-pointer">Other 2</Label>
-                      <Input
-                        id="other2Input"
-                        value={other2Text}
-                        onChange={(e) => setOther2Text(e.target.value)}
-                        placeholder="Specify other benefit"
-                        className="mt-2"
-                        disabled={!other2Checked}
-                      />
+                    <div className="flex-1 grid grid-cols-2 gap-3">
+                      <div>
+                        <Label htmlFor="other2Input" className="cursor-pointer">Other 2</Label>
+                        <Input
+                          id="other2Input"
+                          value={other2Text}
+                          onChange={(e) => setOther2Text(e.target.value)}
+                          placeholder="Benefit type"
+                          className="mt-2"
+                          disabled={!other2Checked}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="other2Carrier" className="cursor-pointer">Carrier</Label>
+                        <Input
+                          id="other2Carrier"
+                          value={other2Carrier}
+                          onChange={(e) => setOther2Carrier(e.target.value)}
+                          placeholder="Carrier name"
+                          className="mt-2"
+                          disabled={!other2Checked}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
