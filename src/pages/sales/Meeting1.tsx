@@ -23,6 +23,9 @@ import { toast } from "sonner";
 
 const Meeting1 = () => {
   const [companyName, setCompanyName] = useState("ABC Corporation");
+  const [address, setAddress] = useState("123 Main Street");
+  const [state, setState] = useState("TX");
+  const [zip, setZip] = useState("75001");
   const [effectiveDate, setEffectiveDate] = useState("2024-01-01");
   const [renewalDate, setRenewalDate] = useState("2025-01-01");
   const [totalEmployees, setTotalEmployees] = useState("150");
@@ -181,7 +184,7 @@ const Meeting1 = () => {
             </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
+              <div className="md:col-span-2">
                 <Label htmlFor="company" className="flex items-center gap-2">
                   <Building2 className="h-4 w-4" />
                   Company Name
@@ -191,6 +194,48 @@ const Meeting1 = () => {
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
                   className="mt-2"
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <Label htmlFor="address" className="flex items-center gap-2">
+                  <Building2 className="h-4 w-4" />
+                  Address
+                </Label>
+                <Input
+                  id="address"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  className="mt-2"
+                  placeholder="Street address"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="state" className="flex items-center gap-2">
+                  <Building2 className="h-4 w-4" />
+                  State
+                </Label>
+                <Input
+                  id="state"
+                  value={state}
+                  onChange={(e) => setState(e.target.value)}
+                  className="mt-2"
+                  placeholder="TX"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="zip" className="flex items-center gap-2">
+                  <Building2 className="h-4 w-4" />
+                  ZIP Code
+                </Label>
+                <Input
+                  id="zip"
+                  value={zip}
+                  onChange={(e) => setZip(e.target.value)}
+                  className="mt-2"
+                  placeholder="75001"
                 />
               </div>
 
