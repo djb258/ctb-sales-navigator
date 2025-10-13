@@ -319,20 +319,6 @@ const Meeting1 = () => {
               </div>
 
               <div>
-                <Label htmlFor="premium" className="flex items-center gap-2">
-                  <DollarSign className="h-4 w-4" />
-                  Average Monthly Premium (USD)
-                </Label>
-                <Input
-                  id="premium"
-                  type="number"
-                  value={avgMonthlyPremium}
-                  onChange={(e) => setAvgMonthlyPremium(e.target.value)}
-                  className="mt-2"
-                />
-              </div>
-
-              <div>
                 <Label htmlFor="funding" className="flex items-center gap-2">
                   <DollarSign className="h-4 w-4" />
                   Funding Type
@@ -474,6 +460,20 @@ const Meeting1 = () => {
                       value={tierFamily}
                       onChange={(e) => setTierFamily(e.target.value)}
                       placeholder="0.00"
+                      className="mt-2"
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <Label htmlFor="premium" className="flex items-center gap-2">
+                      <DollarSign className="h-4 w-4" />
+                      Average Monthly Premium (USD)
+                    </Label>
+                    <Input
+                      id="premium"
+                      type="number"
+                      value={avgMonthlyPremium}
+                      onChange={(e) => setAvgMonthlyPremium(e.target.value)}
                       className="mt-2"
                     />
                   </div>
