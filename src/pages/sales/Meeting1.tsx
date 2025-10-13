@@ -78,18 +78,19 @@ const Meeting1 = () => {
     status: ComplianceStatus;
     notes: string;
     showNotes: boolean;
+    files: File[];
   };
 
   const [complianceItems, setComplianceItems] = useState<ComplianceItem[]>([
-    { id: "1", label: "ACA Reporting (1095-C)", status: "Compliant", notes: "", showNotes: false },
-    { id: "2", label: "ERISA Wrap Document", status: "Compliant", notes: "", showNotes: false },
-    { id: "3", label: "SPD Distribution to Employees", status: "Pending", notes: "", showNotes: false },
-    { id: "4", label: "COBRA Notices Current", status: "Compliant", notes: "", showNotes: false },
-    { id: "5", label: "Section 125 / Nondiscrimination Testing", status: "Pending", notes: "", showNotes: false },
-    { id: "6", label: "5500 Filed for Prior Plan Year", status: "Compliant", notes: "", showNotes: false },
-    { id: "7", label: "State-Specific Mandates (if applicable)", status: "Missing", notes: "", showNotes: false },
-    { id: "8", label: "Other 1 (Custom Input)", status: "Pending", notes: "", showNotes: false },
-    { id: "9", label: "Other 2 (Custom Input)", status: "Pending", notes: "", showNotes: false },
+    { id: "1", label: "ACA Reporting (1095-C)", status: "Compliant", notes: "", showNotes: false, files: [] },
+    { id: "2", label: "ERISA Wrap Document", status: "Compliant", notes: "", showNotes: false, files: [] },
+    { id: "3", label: "SPD Distribution to Employees", status: "Pending", notes: "", showNotes: false, files: [] },
+    { id: "4", label: "COBRA Notices Current", status: "Compliant", notes: "", showNotes: false, files: [] },
+    { id: "5", label: "Section 125 / Nondiscrimination Testing", status: "Pending", notes: "", showNotes: false, files: [] },
+    { id: "6", label: "5500 Filed for Prior Plan Year", status: "Compliant", notes: "", showNotes: false, files: [] },
+    { id: "7", label: "State-Specific Mandates (if applicable)", status: "Missing", notes: "", showNotes: false, files: [] },
+    { id: "8", label: "Other 1 (Custom Input)", status: "Pending", notes: "", showNotes: false, files: [] },
+    { id: "9", label: "Other 2 (Custom Input)", status: "Pending", notes: "", showNotes: false, files: [] },
   ]);
 
   const updateComplianceStatus = (id: string, status: ComplianceStatus) => {
@@ -107,6 +108,12 @@ const Meeting1 = () => {
   const updateComplianceLabel = (id: string, label: string) => {
     setComplianceItems(items =>
       items.map(item => item.id === id ? { ...item, label } : item)
+    );
+  };
+
+  const updateComplianceFiles = (id: string, files: File[]) => {
+    setComplianceItems(items =>
+      items.map(item => item.id === id ? { ...item, files } : item)
     );
   };
 
@@ -890,6 +897,42 @@ const Meeting1 = () => {
                           className="text-sm min-h-20"
                         />
                       )}
+
+                      <div className="mt-2">
+                        <Label htmlFor={`file-${item.id}`} className="text-xs text-muted-foreground">
+                          Upload Documents
+                        </Label>
+                        <Input
+                          id={`file-${item.id}`}
+                          type="file"
+                          multiple
+                          onChange={(e) => {
+                            const files = Array.from(e.target.files || []);
+                            updateComplianceFiles(item.id, [...item.files, ...files]);
+                          }}
+                          className="mt-1 text-xs"
+                        />
+                        {item.files.length > 0 && (
+                          <div className="mt-2 space-y-1">
+                            {item.files.map((file, idx) => (
+                              <div key={idx} className="flex items-center justify-between text-xs p-2 bg-muted rounded">
+                                <span className="truncate flex-1">{file.name}</span>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6 w-6 p-0"
+                                  onClick={() => {
+                                    const newFiles = item.files.filter((_, i) => i !== idx);
+                                    updateComplianceFiles(item.id, newFiles);
+                                  }}
+                                >
+                                  ×
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </Card>
                 ))}
