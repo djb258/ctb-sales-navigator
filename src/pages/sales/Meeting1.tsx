@@ -34,6 +34,12 @@ const Meeting1 = () => {
   const [avgMonthlyPremium, setAvgMonthlyPremium] = useState("85000");
   const [broker, setBroker] = useState("Smith Benefits Group");
   const [notes, setNotes] = useState("");
+  
+  // Conditional fields based on funding type
+  const [currentCarrier, setCurrentCarrier] = useState("");
+  const [currentTPA, setCurrentTPA] = useState("");
+  const [currentPBM, setCurrentPBM] = useState("");
+  const [currentNetwork, setCurrentNetwork] = useState("");
 
   const handleSave = () => {
     toast.success("Verification data saved", {
@@ -323,6 +329,69 @@ const Meeting1 = () => {
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* Conditional fields based on funding type */}
+              {fundingType === "Fully Insured" && (
+                <div>
+                  <Label htmlFor="carrier" className="flex items-center gap-2">
+                    <Building2 className="h-4 w-4" />
+                    Current Carrier
+                  </Label>
+                  <Input
+                    id="carrier"
+                    value={currentCarrier}
+                    onChange={(e) => setCurrentCarrier(e.target.value)}
+                    placeholder="e.g., Blue Cross Blue Shield"
+                    className="mt-2"
+                  />
+                </div>
+              )}
+
+              {fundingType === "Self Insured" && (
+                <>
+                  <div>
+                    <Label htmlFor="tpa" className="flex items-center gap-2">
+                      <Building2 className="h-4 w-4" />
+                      Current TPA
+                    </Label>
+                    <Input
+                      id="tpa"
+                      value={currentTPA}
+                      onChange={(e) => setCurrentTPA(e.target.value)}
+                      placeholder="Third Party Administrator"
+                      className="mt-2"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="pbm" className="flex items-center gap-2">
+                      <Building2 className="h-4 w-4" />
+                      Current PBM
+                    </Label>
+                    <Input
+                      id="pbm"
+                      value={currentPBM}
+                      onChange={(e) => setCurrentPBM(e.target.value)}
+                      placeholder="Pharmacy Benefits Manager"
+                      className="mt-2"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="network" className="flex items-center gap-2">
+                      <Building2 className="h-4 w-4" />
+                      Current Network
+                    </Label>
+                    <Input
+                      id="network"
+                      value={currentNetwork}
+                      onChange={(e) => setCurrentNetwork(e.target.value)}
+                      placeholder="Provider Network"
+                      className="mt-2"
+                    />
+                  </div>
+                </>
+              )}
 
               <div>
                 <Label htmlFor="premium" className="flex items-center gap-2">
