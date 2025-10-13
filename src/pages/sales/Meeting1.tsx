@@ -1,162 +1,329 @@
 import { useState } from "react";
-import { ArrowLeft, FileSearch, Save, Sparkles } from "lucide-react";
+import { ArrowLeft, TrendingUp, CheckCircle2, Target, Calendar, Building2, Users, DollarSign, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import ClientSelector from "@/components/sales/ClientSelector";
-import ProgressIndicator from "@/components/sales/ProgressIndicator";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 
 const Meeting1 = () => {
-  const [selectedClient, setSelectedClient] = useState<string>();
-  const [discoveryNotes, setDiscoveryNotes] = useState("");
-  const [clientNeeds, setClientNeeds] = useState("");
-  const [budget, setBudget] = useState("");
-
-  const handleGenerateSummary = () => {
-    toast.success("Discovery summary generation triggered", {
-      description: "MCP endpoint: /generateDiscoverySummary"
-    });
-  };
+  const [companyName, setCompanyName] = useState("ABC Corporation");
+  const [effectiveDate, setEffectiveDate] = useState("2024-01-01");
+  const [renewalDate, setRenewalDate] = useState("2025-01-01");
+  const [totalEmployees, setTotalEmployees] = useState("150");
+  const [totalEnrolled, setTotalEnrolled] = useState("120");
+  const [fundingType, setFundingType] = useState("Level Funded");
+  const [avgMonthlyPremium, setAvgMonthlyPremium] = useState("85000");
+  const [broker, setBroker] = useState("Smith Benefits Group");
+  const [notes, setNotes] = useState("");
 
   const handleSave = () => {
-    toast.success("Discovery data saved", {
-      description: "Firebase path: sales_meeting_sessions/{client_uid}/discovery"
+    toast.success("Verification data saved", {
+      description: "Data synced to Firebase: meeting_1_verification"
     });
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-meeting1-emerald/5 to-background">
       {/* Header */}
-      <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Link to="/sales/hub">
-                <Button variant="ghost" size="icon">
-                  <ArrowLeft className="h-5 w-5" />
-                </Button>
-              </Link>
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-meeting1-emerald/10 flex items-center justify-center">
-                  <FileSearch className="h-5 w-5 text-meeting1-emerald" />
-                </div>
-                <div>
-                  <h1 className="text-xl font-bold">Meeting 1: Discovery</h1>
-                  <p className="text-sm text-muted-foreground">Client intake & needs analysis</p>
-                </div>
-              </div>
+      <header className="border-b border-border bg-card/95 backdrop-blur-sm sticky top-0 z-50">
+        <div className="container mx-auto px-6 py-6">
+          <div className="flex items-center gap-4">
+            <Link to="/sales/hub">
+              <Button variant="ghost" size="icon">
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+            </Link>
+            <div>
+              <h1 className="text-2xl font-bold text-meeting1-emerald">Meeting 1 — Discovery & Renewal Verification</h1>
+              <p className="text-muted-foreground mt-1">Review sample deliverables, then verify your group's core information.</p>
             </div>
-            <ClientSelector value={selectedClient} onValueChange={setSelectedClient} />
           </div>
         </div>
       </header>
 
-      {/* Progress Section */}
-      <div className="bg-muted/30 border-b border-border">
-        <div className="container mx-auto px-6 py-6">
-          <ProgressIndicator currentStep={1} />
-        </div>
-      </div>
-
       {/* Main Content */}
-      <main className="container mx-auto px-6 py-12">
-        <div className="max-w-4xl mx-auto space-y-6">
-          {/* Introduction Card */}
-          <Card className="p-6 border-l-4 border-l-meeting1-emerald">
-            <h2 className="text-lg font-semibold text-meeting1-emerald mb-2">Discovery Session</h2>
-            <p className="text-muted-foreground">
-              Capture client information, business needs, challenges, and objectives. 
-              This data forms the foundation for the entire sales process.
-            </p>
+      <main className="container mx-auto px-6 py-12 max-w-5xl">
+        <div className="space-y-8 animate-fade-in">
+          
+          {/* Example Previews Section */}
+          <Card className="p-6">
+            <h2 className="text-xl font-semibold mb-4">Example Deliverables</h2>
+            <p className="text-muted-foreground mb-6">Explore sample outputs from our process:</p>
+            
+            <Accordion type="single" collapsible className="w-full">
+              {/* Monte Carlo Example */}
+              <AccordionItem value="item-1" className="border rounded-lg mb-3 px-4">
+                <AccordionTrigger className="hover:no-underline">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-meeting2-royal/10 flex items-center justify-center">
+                      <TrendingUp className="h-5 w-5 text-meeting2-royal" />
+                    </div>
+                    <span className="font-semibold">Monte Carlo Simulation Example</span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="pt-4">
+                  <div className="bg-gradient-to-r from-meeting2-royal/5 to-background p-6 rounded-lg">
+                    <h3 className="font-semibold text-meeting2-royal mb-3">Cost Projection Comparison</h3>
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div className="bg-card p-4 rounded-lg border border-border">
+                        <p className="text-sm text-muted-foreground mb-1">Baseline Scenario</p>
+                        <p className="text-2xl font-bold text-destructive">$1,245,000</p>
+                        <p className="text-xs text-muted-foreground mt-1">Annual projected cost</p>
+                      </div>
+                      <div className="bg-card p-4 rounded-lg border border-meeting1-emerald">
+                        <p className="text-sm text-muted-foreground mb-1">Optimized Scenario</p>
+                        <p className="text-2xl font-bold text-meeting1-emerald">$1,087,500</p>
+                        <p className="text-xs text-muted-foreground mt-1">Annual projected cost</p>
+                      </div>
+                    </div>
+                    <div className="bg-meeting1-emerald/10 p-3 rounded border-l-4 border-meeting1-emerald">
+                      <p className="text-sm font-semibold text-meeting1-emerald">Potential Savings: $157,500 (12.6%)</p>
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+
+              {/* Compliance Check Example */}
+              <AccordionItem value="item-2" className="border rounded-lg mb-3 px-4">
+                <AccordionTrigger className="hover:no-underline">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-meeting4-gold/10 flex items-center justify-center">
+                      <CheckCircle2 className="h-5 w-5 text-meeting4-gold" />
+                    </div>
+                    <span className="font-semibold">Compliance Check Example</span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="pt-4">
+                  <div className="bg-gradient-to-r from-meeting4-gold/5 to-background p-6 rounded-lg">
+                    <h3 className="font-semibold text-meeting4-gold mb-4">Compliance Status Overview</h3>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3 p-3 bg-card rounded border-l-4 border-meeting1-emerald">
+                        <CheckCircle2 className="h-5 w-5 text-meeting1-emerald" />
+                        <div>
+                          <p className="font-medium">ACA Section 1557 Compliance</p>
+                          <p className="text-sm text-muted-foreground">Compliant - All requirements met</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 p-3 bg-card rounded border-l-4 border-meeting4-gold">
+                        <CheckCircle2 className="h-5 w-5 text-meeting4-gold" />
+                        <div>
+                          <p className="font-medium">Mental Health Parity</p>
+                          <p className="text-sm text-muted-foreground">Pending - Documentation in review</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 p-3 bg-card rounded border-l-4 border-destructive">
+                        <CheckCircle2 className="h-5 w-5 text-destructive" />
+                        <div>
+                          <p className="font-medium">Transparency in Coverage</p>
+                          <p className="text-sm text-muted-foreground">Missing - Files need to be posted</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+
+              {/* Sniper Marketing Example */}
+              <AccordionItem value="item-3" className="border rounded-lg px-4">
+                <AccordionTrigger className="hover:no-underline">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-meeting3-crimson/10 flex items-center justify-center">
+                      <Target className="h-5 w-5 text-meeting3-crimson" />
+                    </div>
+                    <span className="font-semibold">Sniper Marketing Example</span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="pt-4">
+                  <div className="bg-gradient-to-r from-meeting3-crimson/5 to-background p-6 rounded-lg">
+                    <h3 className="font-semibold text-meeting3-crimson mb-3">Targeted Engagement Strategy</h3>
+                    <div className="bg-card p-4 rounded-lg border mb-4">
+                      <p className="font-medium mb-2">Primary Audience</p>
+                      <p className="text-sm text-muted-foreground">HR Directors at mid-market companies (100-500 employees) experiencing 15%+ annual premium increases</p>
+                    </div>
+                    <div className="bg-card p-4 rounded-lg border">
+                      <p className="font-medium mb-2">Key Message</p>
+                      <p className="text-sm text-muted-foreground">"Take control of healthcare costs with predictive analytics and compliance automation — reduce uncertainty and achieve 10-15% savings."</p>
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           </Card>
 
-          {/* Discovery Form */}
-          <Card className="p-6">
-            <div className="space-y-6">
-              <div>
-                <Label htmlFor="needs">Client Needs & Objectives</Label>
-                <Textarea
-                  id="needs"
-                  placeholder="Describe the client's primary business needs, goals, and challenges..."
-                  value={clientNeeds}
-                  onChange={(e) => setClientNeeds(e.target.value)}
-                  className="mt-2 min-h-32"
-                />
-              </div>
+          {/* Divider */}
+          <div className="flex items-center gap-4">
+            <div className="flex-1 h-px bg-border"></div>
+            <span className="text-sm font-semibold text-meeting1-emerald uppercase tracking-wide">Renewal Verification — Confirm Details Below</span>
+            <div className="flex-1 h-px bg-border"></div>
+          </div>
 
+          {/* Renewal Verification Form */}
+          <Card className="p-8">
+            <h2 className="text-xl font-semibold mb-6 flex items-center gap-2">
+              <FileText className="h-5 w-5 text-meeting1-emerald" />
+              Renewal & Census Verification
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <Label htmlFor="budget">Budget Range</Label>
+                <Label htmlFor="company" className="flex items-center gap-2">
+                  <Building2 className="h-4 w-4" />
+                  Company Name
+                </Label>
                 <Input
-                  id="budget"
-                  type="text"
-                  placeholder="e.g., $50,000 - $100,000"
-                  value={budget}
-                  onChange={(e) => setBudget(e.target.value)}
+                  id="company"
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
                   className="mt-2"
                 />
               </div>
 
               <div>
-                <Label htmlFor="notes">Discovery Notes</Label>
+                <Label htmlFor="broker" className="flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Broker of Record
+                </Label>
+                <Input
+                  id="broker"
+                  value={broker}
+                  onChange={(e) => setBroker(e.target.value)}
+                  className="mt-2"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="effective" className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  Effective Date
+                </Label>
+                <Input
+                  id="effective"
+                  type="date"
+                  value={effectiveDate}
+                  onChange={(e) => setEffectiveDate(e.target.value)}
+                  className="mt-2"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="renewal" className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  Renewal Date
+                </Label>
+                <Input
+                  id="renewal"
+                  type="date"
+                  value={renewalDate}
+                  onChange={(e) => setRenewalDate(e.target.value)}
+                  className="mt-2"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="employees" className="flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Total Employees
+                </Label>
+                <Input
+                  id="employees"
+                  type="number"
+                  value={totalEmployees}
+                  onChange={(e) => setTotalEmployees(e.target.value)}
+                  className="mt-2"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="enrolled" className="flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  Total Enrolled
+                </Label>
+                <Input
+                  id="enrolled"
+                  type="number"
+                  value={totalEnrolled}
+                  onChange={(e) => setTotalEnrolled(e.target.value)}
+                  className="mt-2"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="funding" className="flex items-center gap-2">
+                  <DollarSign className="h-4 w-4" />
+                  Funding Type
+                </Label>
+                <Select value={fundingType} onValueChange={setFundingType}>
+                  <SelectTrigger className="mt-2">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Level Funded">Level Funded</SelectItem>
+                    <SelectItem value="Self Funded">Self Funded</SelectItem>
+                    <SelectItem value="Fully Insured">Fully Insured</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="premium" className="flex items-center gap-2">
+                  <DollarSign className="h-4 w-4" />
+                  Average Monthly Premium (USD)
+                </Label>
+                <Input
+                  id="premium"
+                  type="number"
+                  value={avgMonthlyPremium}
+                  onChange={(e) => setAvgMonthlyPremium(e.target.value)}
+                  className="mt-2"
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <Label htmlFor="notes">Renewal Notes or Pending Items</Label>
                 <Textarea
                   id="notes"
-                  placeholder="Additional notes from the discovery conversation..."
-                  value={discoveryNotes}
-                  onChange={(e) => setDiscoveryNotes(e.target.value)}
-                  className="mt-2 min-h-48"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="Enter any notes about the renewal or pending items..."
+                  className="mt-2 min-h-32"
                 />
               </div>
             </div>
-          </Card>
 
-          {/* MCP Actions */}
-          <Card className="p-6 bg-meeting1-emerald/5 border-meeting1-emerald/20">
-            <h3 className="font-semibold mb-4 flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-meeting1-emerald" />
-              AI-Powered Actions
-            </h3>
-            <div className="flex gap-4">
-              <Button 
-                onClick={handleGenerateSummary}
+            <div className="flex justify-between items-center mt-8 pt-6 border-t">
+              <Button
+                onClick={handleSave}
+                size="lg"
                 className="bg-meeting1-emerald hover:bg-meeting1-emerald/90"
               >
-                <Sparkles className="mr-2 h-4 w-4" />
-                Generate Summary
+                Save Verification Data
               </Button>
+              
+              <Link to="/sales/meeting2">
+                <Button
+                  size="lg"
+                  className="bg-meeting4-gold hover:bg-meeting4-gold/90 text-foreground"
+                >
+                  Continue to Meeting 2 → Education & Simulation
+                </Button>
+              </Link>
             </div>
-            <p className="text-sm text-muted-foreground mt-3">
-              MCP Endpoint: <code className="text-xs bg-background px-2 py-1 rounded">
-                /generateDiscoverySummary
-              </code>
-            </p>
-          </Card>
-
-          {/* Save Actions */}
-          <div className="flex justify-between items-center">
-            <p className="text-sm text-muted-foreground">
-              Firebase: sales_meeting_sessions/{'{client_uid}'}/discovery
-            </p>
-            <Button onClick={handleSave} size="lg">
-              <Save className="mr-2 h-4 w-4" />
-              Save Discovery Data
-            </Button>
-          </div>
-
-          {/* Next Steps */}
-          <Card className="p-6 bg-muted/50">
-            <h3 className="font-semibold mb-3">Next: Meeting 2</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Proceed to the Calculator & Compliance module for Monte Carlo simulations and compliance checks.
-            </p>
-            <Link to="/sales/meeting2">
-              <Button variant="outline" className="border-meeting2-royal text-meeting2-royal hover:bg-meeting2-royal hover:text-white">
-                Continue to Meeting 2
-              </Button>
-            </Link>
           </Card>
         </div>
       </main>
