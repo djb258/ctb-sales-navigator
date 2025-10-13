@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      company_profiles: {
+        Row: {
+          company_id: string
+          company_name: string | null
+          contact_email: string | null
+          contact_name: string | null
+          created_at: string
+          effective_date: string | null
+          funding_type: string | null
+          renewal_date: string | null
+          total_employees: number | null
+          total_enrolled: number | null
+        }
+        Insert: {
+          company_id: string
+          company_name?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          created_at?: string
+          effective_date?: string | null
+          funding_type?: string | null
+          renewal_date?: string | null
+          total_employees?: number | null
+          total_enrolled?: number | null
+        }
+        Update: {
+          company_id?: string
+          company_name?: string | null
+          contact_email?: string | null
+          contact_name?: string | null
+          created_at?: string
+          effective_date?: string | null
+          funding_type?: string | null
+          renewal_date?: string | null
+          total_employees?: number | null
+          total_enrolled?: number | null
+        }
+        Relationships: []
+      }
       meeting_1_verification: {
         Row: {
           business_issues: Json | null
@@ -40,6 +79,33 @@ export type Database = {
           created_at?: string
           id?: string
           renewal_verification?: Json | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      meeting_records: {
+        Row: {
+          company_id: string
+          data: Json
+          id: string
+          meeting_number: number
+          section: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          data?: Json
+          id?: string
+          meeting_number: number
+          section: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          data?: Json
+          id?: string
+          meeting_number?: number
+          section?: string
           updated_at?: string
         }
         Relationships: []

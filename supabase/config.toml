@@ -1,1 +1,4 @@
 project_id = "zfuvggonfjwqpnslhyfu"
+
+[functions.exportToNeon]
+verify_jwt = true
