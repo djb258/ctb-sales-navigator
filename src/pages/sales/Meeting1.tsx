@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Accordion,
   AccordionContent,
@@ -37,6 +38,17 @@ const Meeting1 = () => {
   const [avgMonthlyPremium, setAvgMonthlyPremium] = useState("85000");
   const [broker, setBroker] = useState("Smith Benefits Group");
   const [notes, setNotes] = useState("");
+  
+  // Other Benefits checkboxes
+  const [dentalChecked, setDentalChecked] = useState(false);
+  const [visionChecked, setVisionChecked] = useState(false);
+  const [lifeChecked, setLifeChecked] = useState(false);
+  const [stdChecked, setStdChecked] = useState(false);
+  const [ltdChecked, setLtdChecked] = useState(false);
+  const [other1Checked, setOther1Checked] = useState(false);
+  const [other1Text, setOther1Text] = useState("");
+  const [other2Checked, setOther2Checked] = useState(false);
+  const [other2Text, setOther2Text] = useState("");
   
   // Conditional fields based on funding type
   const [currentCarrier, setCurrentCarrier] = useState("");
@@ -620,6 +632,100 @@ const Meeting1 = () => {
                   placeholder="Enter any notes about the renewal or pending items..."
                   className="mt-2 min-h-32"
                 />
+              </div>
+
+              {/* Other Benefits Section */}
+              <div className="md:col-span-2 mt-6">
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5 text-meeting1-emerald" />
+                  Other Benefits
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="dental"
+                      checked={dentalChecked}
+                      onCheckedChange={(checked) => setDentalChecked(checked as boolean)}
+                    />
+                    <Label htmlFor="dental" className="cursor-pointer">Dental</Label>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="vision"
+                      checked={visionChecked}
+                      onCheckedChange={(checked) => setVisionChecked(checked as boolean)}
+                    />
+                    <Label htmlFor="vision" className="cursor-pointer">Vision</Label>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="life"
+                      checked={lifeChecked}
+                      onCheckedChange={(checked) => setLifeChecked(checked as boolean)}
+                    />
+                    <Label htmlFor="life" className="cursor-pointer">Life</Label>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="std"
+                      checked={stdChecked}
+                      onCheckedChange={(checked) => setStdChecked(checked as boolean)}
+                    />
+                    <Label htmlFor="std" className="cursor-pointer">Short-Term Disability (STD)</Label>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="ltd"
+                      checked={ltdChecked}
+                      onCheckedChange={(checked) => setLtdChecked(checked as boolean)}
+                    />
+                    <Label htmlFor="ltd" className="cursor-pointer">Long-Term Disability (LTD)</Label>
+                  </div>
+
+                  <div className="md:col-span-2 flex items-start gap-3 mt-2">
+                    <Checkbox
+                      id="other1"
+                      checked={other1Checked}
+                      onCheckedChange={(checked) => setOther1Checked(checked as boolean)}
+                      className="mt-3"
+                    />
+                    <div className="flex-1">
+                      <Label htmlFor="other1Input" className="cursor-pointer">Other 1</Label>
+                      <Input
+                        id="other1Input"
+                        value={other1Text}
+                        onChange={(e) => setOther1Text(e.target.value)}
+                        placeholder="Specify other benefit"
+                        className="mt-2"
+                        disabled={!other1Checked}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="md:col-span-2 flex items-start gap-3">
+                    <Checkbox
+                      id="other2"
+                      checked={other2Checked}
+                      onCheckedChange={(checked) => setOther2Checked(checked as boolean)}
+                      className="mt-3"
+                    />
+                    <div className="flex-1">
+                      <Label htmlFor="other2Input" className="cursor-pointer">Other 2</Label>
+                      <Input
+                        id="other2Input"
+                        value={other2Text}
+                        onChange={(e) => setOther2Text(e.target.value)}
+                        placeholder="Specify other benefit"
+                        className="mt-2"
+                        disabled={!other2Checked}
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
