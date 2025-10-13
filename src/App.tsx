@@ -9,6 +9,7 @@ import SalesProcessHub from "./pages/sales/SalesProcessHub";
 import CRMIntakeGateway from "./pages/sales/CRMIntakeGateway";
 import Meeting1 from "./pages/sales/Meeting1";
 import Meeting2 from "./pages/sales/Meeting2";
+import Meeting2Workbench from "./pages/sales/Meeting2Workbench";
 import Meeting3 from "./pages/sales/Meeting3";
 import Meeting4 from "./pages/sales/Meeting4";
 
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/sales/crm-intake" element={<CRMIntakeGateway />} />
           <Route path="/sales/meeting1" element={<Meeting1 />} />
           <Route path="/sales/meeting2" element={<Meeting2 />} />
+          <Route path="/sales/meeting2-workbench" element={<Meeting2Workbench />} />
           <Route path="/sales/meeting3" element={<Meeting3 />} />
           <Route path="/sales/meeting4" element={<Meeting4 />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
