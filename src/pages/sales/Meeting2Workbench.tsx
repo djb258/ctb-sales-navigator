@@ -11,6 +11,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft, Play, Save, Presentation, X, Download } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
+interface CompanyOption {
+  company_id: string;
+  company_name: string;
+}
+
 interface MonteCarloConstant {
   id: string;
   constant_name: string;
@@ -53,6 +58,7 @@ export default function Meeting2Workbench() {
   const [presentationMode, setPresentationMode] = useState(false);
   const [companyId, setCompanyId] = useState<string>("");
   const [meetingId, setMeetingId] = useState<string>("");
+  const [companies, setCompanies] = useState<CompanyOption[]>([]);
   
   // Monte Carlo State
   const [constants, setConstants] = useState<MonteCarloConstant[]>([]);
@@ -74,8 +80,20 @@ export default function Meeting2Workbench() {
 
   useEffect(() => {
     loadConstants();
+    loadCompanies();
     loadSessionData();
   }, []);
+
+  const loadCompanies = async () => {
+    const { data, error } = await supabase
+      .from('company_profiles' as any)
+      .select('company_id, company_name')
+      .order('company_name');
+    
+    if (data) {
+      setCompanies(data as unknown as CompanyOption[]);
+    }
+  };
 
   const loadConstants = async () => {
     const { data, error } = await supabase
@@ -270,6 +288,11 @@ export default function Meeting2Workbench() {
     return Math.round((completed / complianceItems.length) * 100);
   };
 
+  const handleCompanySelect = (selectedCompanyId: string) => {
+    setCompanyId(selectedCompanyId);
+    loadMeetingData(selectedCompanyId);
+  };
+
   if (presentationMode) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted">
@@ -389,35 +412,62 @@ export default function Meeting2Workbench() {
             </Button>
             <h1 className="text-4xl font-bold text-meeting2-royal">Meeting 2 Workbench</h1>
           </div>
-          <div className="flex gap-3">
-            <Button 
-              onClick={handleRunSimulation}
-              variant="outline"
-              className="border-meeting2-royal text-meeting2-royal hover:bg-meeting2-royal hover:text-white"
-            >
-              <Play className="w-4 h-4 mr-2" />
-              Re-run Simulation
-            </Button>
-            <Button 
-              onClick={handleSaveAll}
-              variant="outline"
-              className="border-meeting2-royal text-meeting2-royal hover:bg-meeting2-royal hover:text-white"
-            >
-              <Save className="w-4 h-4 mr-2" />
-              Save All
-            </Button>
-            <Button 
-              onClick={handleEnterPresentation}
-              className="bg-meeting4-gold hover:bg-meeting4-gold/90 text-white"
-            >
-              <Presentation className="w-4 h-4 mr-2" />
-              Enter Presentation Mode
-            </Button>
+          <div className="flex items-center gap-3">
+            <Label htmlFor="company-select" className="text-sm font-medium">Company:</Label>
+            <Select value={companyId} onValueChange={handleCompanySelect}>
+              <SelectTrigger id="company-select" className="w-64">
+                <SelectValue placeholder="Select a company..." />
+              </SelectTrigger>
+              <SelectContent>
+                {companies.map(company => (
+                  <SelectItem key={company.company_id} value={company.company_id}>
+                    {company.company_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
-        {/* Operator Mode - 3 Column Grid */}
-        <div className="grid grid-cols-3 gap-6">
+        {/* Show message if no company selected */}
+        {!companyId && (
+          <Card className="mb-8 border-meeting2-royal/20">
+            <CardContent className="py-12 text-center">
+              <p className="text-muted-foreground">Please select a company to begin working.</p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Only show workbench if company is selected */}
+        {companyId && (
+          <div className="space-y-6">
+            <div className="flex gap-3">
+              <Button 
+                onClick={handleRunSimulation}
+                variant="outline"
+                className="border-meeting2-royal text-meeting2-royal hover:bg-meeting2-royal hover:text-white"
+              >
+                <Play className="w-4 h-4 mr-2" />
+                Re-run Simulation
+              </Button>
+              <Button 
+                onClick={handleSaveAll}
+                variant="outline"
+                className="border-meeting2-royal text-meeting2-royal hover:bg-meeting2-royal hover:text-white"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                Save All
+              </Button>
+              <Button 
+                onClick={handleEnterPresentation}
+                className="bg-meeting4-gold hover:bg-meeting4-gold/90 text-white"
+              >
+                <Presentation className="w-4 h-4 mr-2" />
+                Enter Presentation Mode
+              </Button>
+            </div>
+            {/* Operator Mode - 3 Column Grid */}
+            <div className="grid grid-cols-3 gap-6">
           {/* Monte Carlo Section */}
           <Card className="border-meeting2-royal/20">
             <CardHeader>
@@ -597,6 +647,8 @@ export default function Meeting2Workbench() {
             </CardContent>
           </Card>
         </div>
+          </div>
+        )}
       </div>
     </div>
   );
