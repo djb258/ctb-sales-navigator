@@ -57,6 +57,18 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        "hub-teal": "hsl(var(--hub-teal))",
+        "meeting1-emerald": "hsl(var(--meeting1-emerald))",
+        "meeting2-royal": "hsl(var(--meeting2-royal))",
+        "meeting3-crimson": "hsl(var(--meeting3-crimson))",
+        "meeting4-gold": "hsl(var(--meeting4-gold))",
+      },
+      backgroundImage: {
+        "gradient-hub": "var(--gradient-hub)",
+        "gradient-meeting1": "var(--gradient-meeting1)",
+        "gradient-meeting2": "var(--gradient-meeting2)",
+        "gradient-meeting3": "var(--gradient-meeting3)",
+        "gradient-meeting4": "var(--gradient-meeting4)",
       },
       borderRadius: {
         lg: "var(--radius)",
