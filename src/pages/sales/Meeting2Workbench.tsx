@@ -834,7 +834,7 @@ export default function Meeting2Workbench() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted">
       {/* Table of Contents - Fixed Sidebar */}
-      <div className="fixed left-4 top-20 z-50 w-48 hidden lg:block">
+      <div className="fixed left-4 top-20 z-50 w-48">
         <Card className="border-meeting2-royal/30 shadow-lg">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm text-meeting2-royal">Quick Nav</CardTitle>
@@ -855,7 +855,7 @@ export default function Meeting2Workbench() {
         </Card>
       </div>
 
-      <div className="container mx-auto px-6 py-12 lg:pl-56">
+      <div className="container mx-auto px-6 py-12 pl-56">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
