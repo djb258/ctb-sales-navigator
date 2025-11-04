@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import ClientSelector from "@/components/sales/ClientSelector";
 import ProgressIndicator from "@/components/sales/ProgressIndicator";
+import MeetingNavigation from "@/components/sales/MeetingNavigation";
 import { toast } from "sonner";
 
 const Meeting3 = () => {
@@ -26,6 +27,8 @@ const Meeting3 = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <MeetingNavigation />
+      
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4">
@@ -59,7 +62,7 @@ const Meeting3 = () => {
       </div>
 
       {/* Main Content */}
-      <main className="container mx-auto px-6 py-12">
+      <main className="container mx-auto px-6 py-12 pl-56">
         <div className="max-w-5xl mx-auto space-y-6">
           {/* Introduction Card */}
           <Card className="p-6 border-l-4 border-l-meeting3-crimson">

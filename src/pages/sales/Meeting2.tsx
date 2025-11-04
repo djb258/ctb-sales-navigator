@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import ClientSelector from "@/components/sales/ClientSelector";
 import ProgressIndicator from "@/components/sales/ProgressIndicator";
+import MeetingNavigation from "@/components/sales/MeetingNavigation";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -35,6 +36,8 @@ const Meeting2 = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <MeetingNavigation />
+      
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4">
@@ -68,7 +71,7 @@ const Meeting2 = () => {
       </div>
 
       {/* Main Content */}
-      <main className="container mx-auto px-6 py-12">
+      <main className="container mx-auto px-6 py-12 pl-56">
         <div className="max-w-5xl mx-auto space-y-6">
           {/* Introduction Card */}
           <Card className="p-6 border-l-4 border-l-meeting2-royal">

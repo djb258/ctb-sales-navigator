@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import MeetingNavigation from "@/components/sales/MeetingNavigation";
 import {
   Accordion,
   AccordionContent,
@@ -142,6 +143,8 @@ const Meeting1 = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-meeting1-emerald/5 to-background">
+      <MeetingNavigation />
+      
       {/* Header */}
       <header className="border-b border-border bg-card/95 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-6 py-6">
@@ -160,7 +163,7 @@ const Meeting1 = () => {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-6 py-12 max-w-5xl">
+      <main className="container mx-auto px-6 py-12 max-w-5xl pl-56">
         <div className="space-y-8 animate-fade-in">
           
           {/* Example Previews Section */}
