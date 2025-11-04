@@ -816,9 +816,46 @@ export default function Meeting2Workbench() {
     );
   }
 
+  const tocSections = [
+    { id: "monte-carlo", label: "Monte Carlo" },
+    { id: "compliance", label: "Compliance" },
+    { id: "marketing", label: "Marketing" },
+    { id: "storyboard", label: "Storyboard" },
+    { id: "results", label: "Results" }
+  ];
+
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted">
-      <div className="container mx-auto px-6 py-12">
+      {/* Table of Contents - Fixed Sidebar */}
+      <div className="fixed left-4 top-20 z-50 w-48 hidden lg:block">
+        <Card className="border-meeting2-royal/30 shadow-lg">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm text-meeting2-royal">Quick Nav</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-1">
+            {tocSections.map(section => (
+              <Button
+                key={section.id}
+                variant="ghost"
+                size="sm"
+                className="w-full justify-start text-xs hover:bg-meeting2-royal/10 hover:text-meeting2-royal"
+                onClick={() => scrollToSection(section.id)}
+              >
+                {section.label}
+              </Button>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="container mx-auto px-6 py-12 lg:pl-56">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
@@ -885,7 +922,7 @@ export default function Meeting2Workbench() {
             {/* Operator Mode - 3 Column Grid */}
             <div className="grid grid-cols-3 gap-6">
           {/* Monte Carlo Section */}
-          <Card className="border-meeting2-royal/20">
+          <Card id="monte-carlo" className="border-meeting2-royal/20 scroll-mt-24">
             <CardHeader>
               <CardTitle className="text-meeting2-royal">Monte Carlo Simulation</CardTitle>
               <CardDescription>Configure and run cost projections</CardDescription>
@@ -1200,7 +1237,7 @@ export default function Meeting2Workbench() {
           </Card>
 
           {/* Compliance Section */}
-          <Card className="border-meeting2-royal/20">
+          <Card id="compliance" className="border-meeting2-royal/20 scroll-mt-24">
             <CardHeader>
               <CardTitle className="text-meeting2-royal">Compliance Checklist</CardTitle>
               <CardDescription>Track regulatory requirements</CardDescription>
@@ -1251,7 +1288,7 @@ export default function Meeting2Workbench() {
           </Card>
 
           {/* Sniper Marketing Section */}
-          <Card className="border-meeting2-royal/20">
+          <Card id="marketing" className="border-meeting2-royal/20 scroll-mt-24">
             <CardHeader>
               <CardTitle className="text-meeting2-royal">Sniper Marketing</CardTitle>
               <CardDescription>Generate ROI-focused copy</CardDescription>
@@ -1292,7 +1329,7 @@ export default function Meeting2Workbench() {
         </div>
 
         {/* One-Slide Storyboard */}
-        <Card className="mt-6 border-meeting2-royal/20">
+        <Card id="storyboard" className="mt-6 border-meeting2-royal/20 scroll-mt-24">
           <CardHeader>
             <CardTitle className="text-meeting2-royal">One-Slide Storyboard</CardTitle>
             <CardDescription>The Compliance Hub: One Source, Every Client</CardDescription>
@@ -1404,7 +1441,7 @@ export default function Meeting2Workbench() {
 
         {/* Simulation Results Preview - Review & Adjust Panel */}
         {mcResults && (
-          <Card className="mt-6 border-meeting2-royal/30 shadow-lg">
+          <Card id="results" className="mt-6 border-meeting2-royal/30 shadow-lg scroll-mt-24">
             <CardHeader>
               <div className="flex justify-between items-center">
                 <CardTitle className="text-meeting2-royal">Simulation Results Preview</CardTitle>
