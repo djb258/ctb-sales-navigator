@@ -694,6 +694,116 @@ export default function Meeting2Workbench() {
             </Card>
           )}
 
+          {/* One-Slide Storyboard */}
+          <Card className="mb-8 border-meeting2-royal/20">
+            <CardHeader>
+              <CardTitle className="text-meeting2-royal">The Compliance Hub: One Source, Every Client</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Visual Layout */}
+              <div className="relative p-8 bg-gradient-to-br from-teal-50 to-blue-50 dark:from-teal-950/20 dark:to-blue-950/20 rounded-lg border-2 border-teal-200 dark:border-teal-800">
+                {/* Center Hub */}
+                <div className="flex justify-center mb-8">
+                  <div className="bg-teal-500 text-white rounded-2xl p-6 shadow-xl max-w-md text-center">
+                    <div className="text-2xl font-bold mb-3">Compliance Hub</div>
+                    <div className="text-sm space-y-1">
+                      <div>Master Library · Regulatory Updates</div>
+                      <div>State-Specific Rules · Annual Sync</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Spokes (Clients) */}
+                <div className="grid grid-cols-3 gap-4">
+                  {[1, 2, 3, 4, 5, 6].map((client) => (
+                    <div key={client} className="relative">
+                      {/* Arrow from center */}
+                      <div className="absolute -top-8 left-1/2 -translate-x-1/2 text-center">
+                        <div className="text-xs text-teal-600 dark:text-teal-400 font-medium bg-white dark:bg-background px-2 py-1 rounded border border-teal-300">
+                          One-way pull
+                        </div>
+                      </div>
+                      
+                      <div className="bg-white dark:bg-muted rounded-lg p-4 border-2 border-blue-200 dark:border-blue-800 shadow-md">
+                        <div className="font-semibold text-sm mb-3 text-center">Client Compliance App</div>
+                        <div className="space-y-2">
+                          <div className="flex gap-1">
+                            <div className="flex-1 bg-blue-100 dark:bg-blue-900/30 text-xs p-1 rounded text-center">System</div>
+                            <div className="flex-1 bg-amber-100 dark:bg-amber-900/30 text-xs p-1 rounded text-center">Payroll</div>
+                          </div>
+                          <div className="bg-red-100 dark:bg-red-900/30 text-xs p-1 rounded text-center">HR</div>
+                          <div className="text-xs text-center text-muted-foreground mt-2">
+                            Last Synced: 2024-12-15
+                          </div>
+                          <div className="flex items-center justify-center gap-1 text-xs text-green-600 dark:text-green-400">
+                            <span>🛡️</span>
+                            <span>Audit-Ready</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* CTB Altitude Legend */}
+              <div className="bg-muted/50 rounded-lg p-4 border">
+                <div className="font-semibold text-sm mb-3">CTB Altitude Legend</div>
+                <div className="space-y-2 text-sm">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="font-medium">60k ft – Vision</div>
+                    <div className="text-muted-foreground">One-source compliance for every client</div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="font-medium">40k ft – System</div>
+                    <div className="text-muted-foreground">Hub → Spoke architecture</div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="font-medium">30k ft – Workflow</div>
+                    <div className="text-muted-foreground">Auto-populate → HR completes → Audit trail</div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="font-medium">20k ft – Data Flow</div>
+                    <div className="text-muted-foreground">Supabase → Supabase replication</div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="font-medium">10k ft – Execution</div>
+                    <div className="text-muted-foreground">HR dashboard + annual update</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Sales Talking Points */}
+              <div className="bg-blue-50 dark:bg-blue-950/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+                <div className="font-semibold text-sm mb-3 text-blue-700 dark:text-blue-400">Three Short Sales Talking Points</div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex gap-2">
+                    <span className="text-blue-600 dark:text-blue-400">1.</span>
+                    <span>Every client starts compliant and stays compliant—no manual updates required.</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="text-blue-600 dark:text-blue-400">2.</span>
+                    <span>Our master hub pushes the right rules, forms, and deadlines to each client automatically.</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="text-blue-600 dark:text-blue-400">3.</span>
+                    <span>Color-coded dashboards show exactly what's done, pending, or overdue—so audits never surprise you.</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer Tagline Options */}
+              <div className="text-center pt-4 border-t">
+                <div className="text-sm font-semibold mb-2 text-muted-foreground">Tagline Options (≤ 6 words):</div>
+                <div className="space-y-1 text-sm">
+                  <div className="font-medium">Compliance handled—automatically, every year.</div>
+                  <div className="text-muted-foreground">One source. Zero guesswork. Always current.</div>
+                  <div className="text-muted-foreground">Your compliance—simplified, synced, secure.</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Export Button */}
           <div className="flex justify-center">
             <Button className="bg-meeting4-gold hover:bg-meeting4-gold/90 text-white">
@@ -1180,6 +1290,117 @@ export default function Meeting2Workbench() {
             </CardContent>
           </Card>
         </div>
+
+        {/* One-Slide Storyboard */}
+        <Card className="mt-6 border-meeting2-royal/20">
+          <CardHeader>
+            <CardTitle className="text-meeting2-royal">One-Slide Storyboard</CardTitle>
+            <CardDescription>The Compliance Hub: One Source, Every Client</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Visual Layout */}
+            <div className="relative p-8 bg-gradient-to-br from-teal-50 to-blue-50 dark:from-teal-950/20 dark:to-blue-950/20 rounded-lg border-2 border-teal-200 dark:border-teal-800">
+              {/* Center Hub */}
+              <div className="flex justify-center mb-8">
+                <div className="bg-teal-500 text-white rounded-2xl p-6 shadow-xl max-w-md text-center">
+                  <div className="text-2xl font-bold mb-3">Compliance Hub</div>
+                  <div className="text-sm space-y-1">
+                    <div>Master Library · Regulatory Updates</div>
+                    <div>State-Specific Rules · Annual Sync</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Spokes (Clients) */}
+              <div className="grid grid-cols-3 gap-4">
+                {[1, 2, 3, 4, 5, 6].map((client) => (
+                  <div key={client} className="relative">
+                    {/* Arrow indicator */}
+                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 text-center">
+                      <div className="text-xs text-teal-600 dark:text-teal-400 font-medium bg-white dark:bg-background px-2 py-1 rounded border border-teal-300">
+                        ↓ One-way pull
+                      </div>
+                    </div>
+                    
+                    <div className="bg-white dark:bg-muted rounded-lg p-4 border-2 border-blue-200 dark:border-blue-800 shadow-md">
+                      <div className="font-semibold text-sm mb-3 text-center">Client Compliance App</div>
+                      <div className="space-y-2">
+                        <div className="flex gap-1">
+                          <div className="flex-1 bg-blue-100 dark:bg-blue-900/30 text-xs p-1 rounded text-center">System</div>
+                          <div className="flex-1 bg-amber-100 dark:bg-amber-900/30 text-xs p-1 rounded text-center">Payroll</div>
+                        </div>
+                        <div className="bg-red-100 dark:bg-red-900/30 text-xs p-1 rounded text-center">HR</div>
+                        <div className="text-xs text-center text-muted-foreground mt-2">
+                          Last Synced: 2024-12-15
+                        </div>
+                        <div className="flex items-center justify-center gap-1 text-xs text-green-600 dark:text-green-400">
+                          <span>🛡️</span>
+                          <span>Audit-Ready</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* CTB Altitude Legend */}
+            <div className="bg-muted/50 rounded-lg p-4 border">
+              <div className="font-semibold text-sm mb-3">CTB Altitude Legend</div>
+              <div className="space-y-2 text-sm">
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="font-medium">60k ft – Vision</div>
+                  <div className="text-muted-foreground">One-source compliance for every client</div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="font-medium">40k ft – System</div>
+                  <div className="text-muted-foreground">Hub → Spoke architecture</div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="font-medium">30k ft – Workflow</div>
+                  <div className="text-muted-foreground">Auto-populate → HR completes → Audit trail</div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="font-medium">20k ft – Data Flow</div>
+                  <div className="text-muted-foreground">Supabase → Supabase replication</div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="font-medium">10k ft – Execution</div>
+                  <div className="text-muted-foreground">HR dashboard + annual update</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Sales Talking Points */}
+            <div className="bg-blue-50 dark:bg-blue-950/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+              <div className="font-semibold text-sm mb-3 text-blue-700 dark:text-blue-400">Three Short Sales Talking Points</div>
+              <div className="space-y-2 text-sm">
+                <div className="flex gap-2">
+                  <span className="text-blue-600 dark:text-blue-400">1.</span>
+                  <span>Every client starts compliant and stays compliant—no manual updates required.</span>
+                </div>
+                <div className="flex gap-2">
+                  <span className="text-blue-600 dark:text-blue-400">2.</span>
+                  <span>Our master hub pushes the right rules, forms, and deadlines to each client automatically.</span>
+                </div>
+                <div className="flex gap-2">
+                  <span className="text-blue-600 dark:text-blue-400">3.</span>
+                  <span>Color-coded dashboards show exactly what's done, pending, or overdue—so audits never surprise you.</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer Tagline Options */}
+            <div className="text-center pt-4 border-t">
+              <div className="text-sm font-semibold mb-2 text-muted-foreground">Tagline Options (≤ 6 words):</div>
+              <div className="space-y-1 text-sm">
+                <div className="font-medium">Compliance handled—automatically, every year.</div>
+                <div className="text-muted-foreground">One source. Zero guesswork. Always current.</div>
+                <div className="text-muted-foreground">Your compliance—simplified, synced, secure.</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Simulation Results Preview - Review & Adjust Panel */}
         {mcResults && (
