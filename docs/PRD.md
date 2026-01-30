@@ -257,9 +257,14 @@ All tools are scoped strictly INSIDE this hub's M layer. Spokes do not own tools
 
 | Artifact | Reference |
 |----------|-----------|
+| Canonical ERD | docs/ERD.md |
 | Canonical Doctrine | CANONICAL_ARCHITECTURE_DOCTRINE.md |
 | Hub/Spoke Geometry | CANONICAL_ARCHITECTURE_DOCTRINE.md §3 |
 | Doppler Integration | ADR-002-doppler-secrets.md |
+| Supabase Integration | ADR-004-supabase.md |
+| Kill Switch | docs/KILL_SWITCH.md |
+| Rollback Plan | docs/ROLLBACK_PLAN.md |
+| Observability | docs/OBSERVABILITY.md |
 
 ---
 
