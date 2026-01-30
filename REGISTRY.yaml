@@ -1,0 +1,123 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# REGISTRY — Hub Identity Declaration
+# ═══════════════════════════════════════════════════════════════════════════════
+# Authority: imo-creator (Inherited)
+# Status: ACTIVE — Constitutional rebuild complete
+# ═══════════════════════════════════════════════════════════════════════════════
+
+version: "1.0.0"
+last_updated: "2026-01-30"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# HUB IDENTITY (CC-02)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+hub:
+  hub_id: "HUB-SALES-NAV-20260130"
+  hub_name: "sales-navigator"
+  hub_type: "sales"
+  description: "4-meeting sales process orchestration hub"
+  owner: "SVG Agency"
+  sovereign_reference: "SOV-SVG-AGENCY"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# CONFORMANCE
+# ═══════════════════════════════════════════════════════════════════════════════
+
+conformance:
+  parent: "imo-creator"
+  doctrine_version: "1.5.0"
+  ctb_version: "1.1.0"
+  domain_spec: "doctrine/REPO_DOMAIN_SPEC.md"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# CTB PLACEMENT
+# ═══════════════════════════════════════════════════════════════════════════════
+
+ctb:
+  branches_used:
+    sys: true      # System infrastructure, Doppler integration
+    data: true     # Schema definitions (read-only patterns)
+    app: true      # Sales process workflows
+    ai: true       # AI agents for sales assistance
+    ui: true       # Lovable.dev presentation layer
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ENVIRONMENTS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+environments:
+  - name: "dev"
+    doppler_config: "dev"
+    status: "ACTIVE"
+  - name: "staging"
+    doppler_config: "staging"
+    status: "PENDING"
+  - name: "prod"
+    doppler_config: "prod"
+    status: "PENDING"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# INFRASTRUCTURE
+# ═══════════════════════════════════════════════════════════════════════════════
+
+infrastructure:
+  secrets_provider: "doppler"
+  doppler_project: "sales-navigator"
+  presentation_layer: "lovable.dev"
+  forbidden_patterns:
+    - ".env files with secrets"
+    - "hardcoded API keys"
+    - "non-Doppler environment variables"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SUB-HUBS (CC-03)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+subhubs:
+  - subhub_id: "SUB-MEETING-1"
+    name: "fact-finder"
+    description: "Meeting 1: Fact Finder process"
+    path: "src/app/meetings/meeting1/"
+  - subhub_id: "SUB-MEETING-2"
+    name: "insurance-education"
+    description: "Meeting 2: Insurance Education"
+    path: "src/app/meetings/meeting2/"
+  - subhub_id: "SUB-MEETING-3"
+    name: "systems-education"
+    description: "Meeting 3: Systems Education"
+    path: "src/app/meetings/meeting3/"
+  - subhub_id: "SUB-MEETING-4"
+    name: "financials"
+    description: "Meeting 4: Financials / Numbers"
+    path: "src/app/meetings/meeting4/"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SPOKES (CC-03 Interfaces)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+spokes:
+  ingress:
+    - spoke_id: "SPOKE-I-CRM"
+      name: "CRM Intake Gateway"
+      contract: "Read-only CRM data ingestion"
+    - spoke_id: "SPOKE-I-COMPOSIO"
+      name: "Composio MCP Interface"
+      contract: "External API calls via MCP"
+
+  egress:
+    - spoke_id: "SPOKE-O-UI"
+      name: "Lovable UI"
+      contract: "Presentation layer output"
+    - spoke_id: "SPOKE-O-REPORTS"
+      name: "Report Generator"
+      contract: "Sales reports and analytics"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# DOCUMENT CONTROL
+# ═══════════════════════════════════════════════════════════════════════════════
+
+document_control:
+  created: "2026-01-30"
+  last_modified: "2026-01-30"
+  status: "ACTIVE"
