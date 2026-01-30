@@ -1,16 +1,16 @@
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/ui/components/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/components/card";
+import { Input } from "@/ui/components/input";
+import { Label } from "@/ui/components/label";
+import { Checkbox } from "@/ui/components/checkbox";
+import { Textarea } from "@/ui/components/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/ui/components/select";
+import { useToast } from "@/ui/hooks/use-toast";
+import { supabase } from "@/sys/integrations/supabase/client";
 import { ArrowLeft, Play, Save, Presentation, X, Download } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import MeetingNavigation from "@/components/sales/MeetingNavigation";
+import MeetingNavigation from "@/ui/components/sales/MeetingNavigation";
 
 // Utility functions for number formatting
 const formatCurrency = (value: number): string => {

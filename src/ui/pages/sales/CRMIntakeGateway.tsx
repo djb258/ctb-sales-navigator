@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/ui/components/button";
+import { Input } from "@/ui/components/input";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/components/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/ui/components/dialog";
+import { useToast } from "@/ui/hooks/use-toast";
+import { supabase } from "@/sys/integrations/supabase/client";
 import { Search, Download, ExternalLink, Calendar, Mail, Phone, MapPin, Users, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 

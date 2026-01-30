@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { FileSearch, Calculator, Gauge, PresentationIcon, Search } from "lucide-react";
-import ClientSelector from "@/components/sales/ClientSelector";
-import MeetingCard from "@/components/sales/MeetingCard";
-import ProgressIndicator from "@/components/sales/ProgressIndicator";
-import { Button } from "@/components/ui/button";
+import ClientSelector from "@/ui/components/sales/ClientSelector";
+import MeetingCard from "@/ui/components/sales/MeetingCard";
+import ProgressIndicator from "@/ui/components/sales/ProgressIndicator";
+import { Button } from "@/ui/components/button";
 import { Link } from "react-router-dom";
 
 const SalesProcessHub = () => {

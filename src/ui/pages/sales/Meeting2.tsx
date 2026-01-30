@@ -1,15 +1,15 @@
 import { useState } from "react";
 import { ArrowLeft, Calculator, Play, FileCheck, Download } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import ClientSelector from "@/components/sales/ClientSelector";
-import ProgressIndicator from "@/components/sales/ProgressIndicator";
-import MeetingNavigation from "@/components/sales/MeetingNavigation";
+import { Button } from "@/ui/components/button";
+import { Card } from "@/ui/components/card";
+import { Input } from "@/ui/components/input";
+import { Label } from "@/ui/components/label";
+import ClientSelector from "@/ui/components/sales/ClientSelector";
+import ProgressIndicator from "@/ui/components/sales/ProgressIndicator";
+import MeetingNavigation from "@/ui/components/sales/MeetingNavigation";
 import { toast } from "sonner";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/ui/components/tabs";
 
 const Meeting2 = () => {
   const [selectedClient, setSelectedClient] = useState<string>();

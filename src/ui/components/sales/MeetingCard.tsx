@@ -1,7 +1,7 @@
-import { Card } from "@/components/ui/card";
+import { Card } from "@/ui/components/card";
 import { ArrowRight, LucideIcon } from "lucide-react";
 import { Link } from "react-router-dom";
-import { cn } from "@/lib/utils";
+import { cn } from "@/ui/utils";
 
 interface MeetingCardProps {
   title: string;

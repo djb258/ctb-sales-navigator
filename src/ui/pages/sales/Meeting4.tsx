@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { ArrowLeft, PresentationIcon, Download, CheckCircle2, DollarSign } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import ClientSelector from "@/components/sales/ClientSelector";
-import ProgressIndicator from "@/components/sales/ProgressIndicator";
-import MeetingNavigation from "@/components/sales/MeetingNavigation";
+import { Button } from "@/ui/components/button";
+import { Card } from "@/ui/components/card";
+import ClientSelector from "@/ui/components/sales/ClientSelector";
+import ProgressIndicator from "@/ui/components/sales/ProgressIndicator";
+import MeetingNavigation from "@/ui/components/sales/MeetingNavigation";
 import { toast } from "sonner";
 
 const Meeting4 = () => {

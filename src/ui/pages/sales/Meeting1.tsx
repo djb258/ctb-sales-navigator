@@ -1,26 +1,26 @@
 import { useState } from "react";
 import { ArrowLeft, TrendingUp, CheckCircle2, Target, Calendar, Building2, Users, DollarSign, FileText, AlertCircle } from "lucide-react";
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import MeetingNavigation from "@/components/sales/MeetingNavigation";
+import { Button } from "@/ui/components/button";
+import { Card } from "@/ui/components/card";
+import { Input } from "@/ui/components/input";
+import { Label } from "@/ui/components/label";
+import { Textarea } from "@/ui/components/textarea";
+import { Checkbox } from "@/ui/components/checkbox";
+import MeetingNavigation from "@/ui/components/sales/MeetingNavigation";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion";
+} from "@/ui/components/accordion";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/ui/components/select";
 import { toast } from "sonner";
 
 const Meeting1 = () => {

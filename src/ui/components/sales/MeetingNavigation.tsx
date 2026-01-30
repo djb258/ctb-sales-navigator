@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/ui/components/card";
 import { Users, LineChart, Gauge, PresentationIcon, Wrench } from "lucide-react";
 
 const MeetingNavigation = () => {
