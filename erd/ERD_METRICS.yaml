@@ -1,0 +1,245 @@
+# ERD Metrics - Runtime Data Snapshot
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# PURPOSE: Current state of ERD tables for operational decision-making
+# AUTHORITY: CC-04 (Process/Runtime)
+# UPDATE FREQUENCY: Before any work session, minimum daily
+#
+# THIS FILE IS AUTO-UPDATED. Manual edits will be overwritten.
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# SYNC METADATA
+# ─────────────────────────────────────────────────────────────────────────────────
+sync:
+  last_updated: "2026-01-30T17:00:00Z"
+  updated_by: "claude-code"
+  source: "doppler://sales-navigator/dev"
+  next_sync_due: "2026-01-31T17:00:00Z"
+
+  # Sync configuration
+  frequency: daily
+  stale_after_hours: 24
+  auto_sync_on_session: true
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# HUB IDENTITY
+# ─────────────────────────────────────────────────────────────────────────────────
+hub:
+  hub_id: "HUB-SALES-NAV-20260130"
+  hub_name: "sales-navigator"
+  sovereign_id: "SOV-SVG-AGENCY"
+  erd_version: "1.0.0"
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# TABLE METRICS
+# ─────────────────────────────────────────────────────────────────────────────────
+# For each table defined in ERD.md, record current counts and key statistics.
+
+tables:
+  prospect:
+    description: "Raw prospect data ingested from CRM"
+    pass: "CAPTURE"
+    total_records: 0
+    created_last_24h: 0
+    updated_last_24h: 0
+    active_records: 0
+    by_status:
+      new: 0
+      qualified: 0
+      disqualified: 0
+      deferred: 0
+
+  sales_process:
+    description: "4-meeting sales process tracking"
+    pass: "COMPUTE"
+    total_records: 0
+    created_last_24h: 0
+    updated_last_24h: 0
+    by_status:
+      pending: 0
+      in_progress: 0
+      completed: 0
+      abandoned: 0
+    by_outcome:
+      qualified: 0
+      disqualified: 0
+      deferred: 0
+
+  meeting:
+    description: "Individual meeting instances"
+    pass: "COMPUTE"
+    total_records: 0
+    created_last_24h: 0
+    updated_last_24h: 0
+    by_meeting_number:
+      meeting_1: 0
+      meeting_2: 0
+      meeting_3: 0
+      meeting_4: 0
+    by_status:
+      scheduled: 0
+      in_progress: 0
+      completed: 0
+      skipped: 0
+
+  meeting_outcome:
+    description: "Documented outcomes and action items"
+    pass: "GOVERN"
+    total_records: 0
+    created_last_24h: 0
+    updated_last_24h: 0
+    by_outcome_type:
+      positive: 0
+      neutral: 0
+      negative: 0
+      deferred: 0
+    pending_action_items: 0
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# AGGREGATE METRICS
+# ─────────────────────────────────────────────────────────────────────────────────
+aggregates:
+  total_records_all_tables: 0
+  total_prospects: 0
+  total_sales_processes: 0
+  total_meetings: 0
+  total_outcomes: 0
+
+  # Sales funnel metrics
+  conversion_rate_percent: 0
+  average_meetings_per_prospect: 0
+  completion_rate_percent: 0
+
+  # Pipeline metrics
+  active_prospects: 0
+  prospects_in_meeting_1: 0
+  prospects_in_meeting_2: 0
+  prospects_in_meeting_3: 0
+  prospects_in_meeting_4: 0
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# FILTER/EXCLUSION METRICS
+# ─────────────────────────────────────────────────────────────────────────────────
+filters:
+  total_excluded: 0
+  exclusion_reasons:
+    - reason: "disqualified"
+      count: 0
+    - reason: "abandoned"
+      count: 0
+    - reason: "duplicate"
+      count: 0
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# DATA QUALITY METRICS
+# ─────────────────────────────────────────────────────────────────────────────────
+data_quality:
+  null_rate_percent: 0
+  duplicate_rate_percent: 0
+  last_quality_check: "2026-01-30T17:00:00Z"
+  quality_status: "PASS"
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# SYNC QUERIES (Reference)
+# ─────────────────────────────────────────────────────────────────────────────────
+queries:
+  # PROSPECT table queries
+  prospect_total: |
+    SELECT COUNT(*) FROM prospect;
+
+  prospect_created_last_24h: |
+    SELECT COUNT(*) FROM prospect
+    WHERE created_at > NOW() - INTERVAL '24 hours';
+
+  prospect_by_status: |
+    SELECT status, COUNT(*)
+    FROM prospect
+    GROUP BY status;
+
+  # SALES_PROCESS table queries
+  sales_process_total: |
+    SELECT COUNT(*) FROM sales_process;
+
+  sales_process_by_status: |
+    SELECT overall_status, COUNT(*)
+    FROM sales_process
+    GROUP BY overall_status;
+
+  sales_process_by_outcome: |
+    SELECT final_outcome, COUNT(*)
+    FROM sales_process
+    WHERE final_outcome IS NOT NULL
+    GROUP BY final_outcome;
+
+  # MEETING table queries
+  meeting_total: |
+    SELECT COUNT(*) FROM meeting;
+
+  meeting_by_number: |
+    SELECT meeting_number, COUNT(*)
+    FROM meeting
+    GROUP BY meeting_number
+    ORDER BY meeting_number;
+
+  meeting_by_status: |
+    SELECT status, COUNT(*)
+    FROM meeting
+    GROUP BY status;
+
+  # MEETING_OUTCOME table queries
+  meeting_outcome_total: |
+    SELECT COUNT(*) FROM meeting_outcome;
+
+  meeting_outcome_by_type: |
+    SELECT outcome_type, COUNT(*)
+    FROM meeting_outcome
+    GROUP BY outcome_type;
+
+  # Aggregate queries
+  conversion_rate: |
+    SELECT
+      ROUND(
+        (SELECT COUNT(*) FROM sales_process WHERE final_outcome = 'qualified')::numeric /
+        NULLIF((SELECT COUNT(*) FROM prospect), 0) * 100,
+        2
+      ) AS conversion_rate_percent;
+
+  average_meetings_per_prospect: |
+    SELECT
+      ROUND(
+        (SELECT COUNT(*) FROM meeting)::numeric /
+        NULLIF((SELECT COUNT(*) FROM prospect), 0),
+        2
+      ) AS avg_meetings;
+
+# ─────────────────────────────────────────────────────────────────────────────────
+# ALERTS / THRESHOLDS
+# ─────────────────────────────────────────────────────────────────────────────────
+thresholds:
+  min_prospects_for_healthy_pipeline: 10
+  max_abandoned_rate_percent: 20
+  max_null_rate_percent: 5
+  target_conversion_rate_percent: 25
+  target_completion_rate_percent: 80
+
+alerts: []
+  # Populated by sync script when thresholds are breached
+  # Example:
+  # - type: "threshold_breach"
+  #   field: "abandoned_rate"
+  #   threshold: 20
+  #   actual: 25
+  #   timestamp: "2026-01-30T17:00:00Z"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# DOCUMENT CONTROL
+# ═══════════════════════════════════════════════════════════════════════════════
+document_control:
+  template_version: "1.0.0"
+  template_source: "imo-creator/templates/erd/ERD_METRICS.yaml.template"
+  created: "2026-01-30"
+  authority: "CC-04"
+  change_protocol: "Auto-updated by sync process"
+  note: "Initial setup - metrics require database connection via Doppler for actual values"
