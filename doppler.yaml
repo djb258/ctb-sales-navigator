@@ -1,0 +1,7 @@
+# Doppler Configuration — Sales Navigator Hub
+# Authority: CONSTITUTION.md (Doppler Mandate)
+# Status: REQUIRED
+
+setup:
+  project: sales-navigator
+  config: dev

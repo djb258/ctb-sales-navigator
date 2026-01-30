@@ -1,73 +1,139 @@
-# Welcome to your Lovable project
+# Sales Navigator Hub
 
-## Project info
+**Hub ID**: HUB-SALES-NAV-20260130
+**Authority**: CONSTITUTION.md
+**Parent**: imo-creator
+**Status**: ACTIVE
 
-**URL**: https://lovable.dev/projects/dca5b23a-502f-43ee-9cfd-3812bd55f40c
+---
 
-## How can I edit this code?
+## Transformation Statement
 
-There are several ways of editing your application.
+> **This hub transforms raw prospect data into qualified sales outcomes through a 4-meeting orchestrated process.**
 
-**Use Lovable**
+| Constants (Input) | Variables (Output) |
+|-------------------|-------------------|
+| Raw prospect intake | Qualified/Disqualified status |
+| Unstructured notes | Structured meeting summaries |
+| Unknown fit signals | Clear decision criteria |
+| Manual follow-ups | Automated workflow triggers |
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/dca5b23a-502f-43ee-9cfd-3812bd55f40c) and start prompting.
+---
 
-Changes made via Lovable will be committed automatically to this repo.
+## The 4-Meeting Sales Process
 
-**Use your preferred IDE**
+| # | Meeting | Purpose | Outcome |
+|---|---------|---------|---------|
+| 1 | **Fact Finder** | Gather prospect data | Complete profile |
+| 2 | **Insurance Education** | Educate on insurance options | Needs assessment |
+| 3 | **Systems Education** | Present systems/solutions | Solution fit evaluation |
+| 4 | **Financials** | Review financials, close | Win/Loss decision |
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+---
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## Quick Start
 
-Follow these steps:
+### Prerequisites
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+- Node.js 18+
+- [Doppler CLI](https://docs.doppler.com/docs/install-cli) installed
+- Access to Doppler project `sales-navigator`
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### Setup
 
-# Step 3: Install the necessary dependencies.
-npm i
+```bash
+# 1. Clone the repository
+git clone <repo-url>
+cd sales-navigator
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+# 2. Install dependencies
+npm install
+
+# 3. Configure Doppler (first time only)
+doppler setup --project sales-navigator --config dev
+
+# 4. Run with Doppler
+doppler run -- npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Available Commands
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+| Command | Description |
+|---------|-------------|
+| `doppler run -- npm run dev` | Start development server |
+| `doppler run -- npm run build` | Build for production |
+| `doppler run -- npm run preview` | Preview production build |
 
-**Use GitHub Codespaces**
+---
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## CTB Structure
 
-## What technologies are used for this project?
+This repository follows the Christmas Tree Backbone (CTB) architecture:
 
-This project is built with:
+```
+src/
+├── sys/      # System infrastructure, Doppler integration
+├── data/     # Schemas, data models, types
+├── app/      # Business logic, workflows, services
+├── ai/       # AI agents, prompts, LLM integration
+└── ui/       # User interface, components, pages
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### Forbidden Patterns
 
-## How can I deploy this project?
+The following directories are **constitutionally forbidden**:
 
-Simply open [Lovable](https://lovable.dev/projects/dca5b23a-502f-43ee-9cfd-3812bd55f40c) and click on Share -> Publish.
+- `src/lib/` - Use CTB branches instead
+- `src/utils/` - Use CTB branches instead
+- `src/helpers/` - Use CTB branches instead
+- `src/common/` - Use CTB branches instead
+- `src/shared/` - Use CTB branches instead
 
-## Can I connect a custom domain to my Lovable project?
+---
 
-Yes, you can!
+## Doppler Mandate
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+**Doppler is the sole authorized secrets provider for this hub.**
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+| Rule | Status |
+|------|--------|
+| All secrets via Doppler | MANDATORY |
+| No .env files with secrets | FORBIDDEN |
+| No hardcoded credentials | FORBIDDEN |
+
+See [ADR-002: Doppler Secrets](docs/ADR-002-doppler-secrets.md) for details.
+
+---
+
+## Governance Documents
+
+| Document | Purpose |
+|----------|---------|
+| [CONSTITUTION.md](CONSTITUTION.md) | Supreme law, boundaries, mandates |
+| [DOCTRINE.md](DOCTRINE.md) | IMO-Creator conformance |
+| [REGISTRY.yaml](REGISTRY.yaml) | Hub identity, configuration |
+| [docs/PRD.md](docs/PRD.md) | Product requirements |
+| [docs/ADR-*.md](docs/) | Architecture decisions |
+
+---
+
+## Technology Stack
+
+- **Framework**: React + TypeScript
+- **Build**: Vite
+- **Styling**: Tailwind CSS + shadcn/ui
+- **State**: TanStack Query
+- **Routing**: TanStack Router
+- **Backend**: Supabase
+- **Secrets**: Doppler
+
+---
+
+## Document Control
+
+| Field | Value |
+|-------|-------|
+| Created | 2026-01-30 |
+| Last Modified | 2026-01-30 |
+| Version | 1.0.0 |
+| Authority | CONSTITUTION.md |
