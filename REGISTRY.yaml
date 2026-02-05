@@ -50,12 +50,13 @@ environments:
   - name: "dev"
     doppler_config: "dev"
     status: "ACTIVE"
+    secrets_configured: true
   - name: "staging"
-    doppler_config: "staging"
-    status: "PENDING"
+    doppler_config: "stg"
+    status: "CONFIGURED"
   - name: "prod"
-    doppler_config: "prod"
-    status: "PENDING"
+    doppler_config: "prd"
+    status: "CONFIGURED"
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # INFRASTRUCTURE
