@@ -13,10 +13,10 @@
 # SYNC METADATA
 # ─────────────────────────────────────────────────────────────────────────────────
 sync:
-  last_updated: "2026-01-30T17:00:00Z"
+  last_updated: "2026-02-05T12:45:00Z"
   updated_by: "claude-code"
-  source: "doppler://sales-navigator/dev"
-  next_sync_due: "2026-01-31T17:00:00Z"
+  source: "doppler://sales-navigator/dev → neon://Marketing DB"
+  next_sync_due: "2026-02-06T12:45:00Z"
 
   # Sync configuration
   frequency: daily
@@ -33,25 +33,36 @@ hub:
   erd_version: "1.0.0"
 
 # ─────────────────────────────────────────────────────────────────────────────────
+# DATABASE INFO
+# ─────────────────────────────────────────────────────────────────────────────────
+database:
+  platform: "Neon PostgreSQL"
+  database_name: "Marketing DB"
+  table_prefix: "sn_"
+  connection: "doppler://sales-navigator/dev"
+
+# ─────────────────────────────────────────────────────────────────────────────────
 # TABLE METRICS
 # ─────────────────────────────────────────────────────────────────────────────────
 # For each table defined in ERD.md, record current counts and key statistics.
 
 tables:
-  prospect:
+  sn_prospect:
+    erd_name: "PROSPECT"
     description: "Raw prospect data ingested from CRM"
     pass: "CAPTURE"
     total_records: 0
     created_last_24h: 0
     updated_last_24h: 0
-    active_records: 0
     by_status:
       new: 0
+      contacted: 0
       qualified: 0
       disqualified: 0
       deferred: 0
 
-  sales_process:
+  sn_sales_process:
+    erd_name: "SALES_PROCESS"
     description: "4-meeting sales process tracking"
     pass: "COMPUTE"
     total_records: 0
@@ -67,7 +78,8 @@ tables:
       disqualified: 0
       deferred: 0
 
-  meeting:
+  sn_meeting:
+    erd_name: "MEETING"
     description: "Individual meeting instances"
     pass: "COMPUTE"
     total_records: 0
@@ -83,8 +95,10 @@ tables:
       in_progress: 0
       completed: 0
       skipped: 0
+      cancelled: 0
 
-  meeting_outcome:
+  sn_meeting_outcome:
+    erd_name: "MEETING_OUTCOME"
     description: "Documented outcomes and action items"
     pass: "GOVERN"
     total_records: 0
@@ -138,81 +152,90 @@ filters:
 data_quality:
   null_rate_percent: 0
   duplicate_rate_percent: 0
-  last_quality_check: "2026-01-30T17:00:00Z"
+  last_quality_check: "2026-02-05T12:45:00Z"
   quality_status: "PASS"
 
 # ─────────────────────────────────────────────────────────────────────────────────
 # SYNC QUERIES (Reference)
 # ─────────────────────────────────────────────────────────────────────────────────
 queries:
-  # PROSPECT table queries
+  # sn_prospect table queries
   prospect_total: |
-    SELECT COUNT(*) FROM prospect;
+    SELECT COUNT(*) FROM sn_prospect;
 
   prospect_created_last_24h: |
-    SELECT COUNT(*) FROM prospect
+    SELECT COUNT(*) FROM sn_prospect
     WHERE created_at > NOW() - INTERVAL '24 hours';
 
   prospect_by_status: |
     SELECT status, COUNT(*)
-    FROM prospect
+    FROM sn_prospect
     GROUP BY status;
 
-  # SALES_PROCESS table queries
+  # sn_sales_process table queries
   sales_process_total: |
-    SELECT COUNT(*) FROM sales_process;
+    SELECT COUNT(*) FROM sn_sales_process;
 
   sales_process_by_status: |
     SELECT overall_status, COUNT(*)
-    FROM sales_process
+    FROM sn_sales_process
     GROUP BY overall_status;
 
   sales_process_by_outcome: |
     SELECT final_outcome, COUNT(*)
-    FROM sales_process
+    FROM sn_sales_process
     WHERE final_outcome IS NOT NULL
     GROUP BY final_outcome;
 
-  # MEETING table queries
+  # sn_meeting table queries
   meeting_total: |
-    SELECT COUNT(*) FROM meeting;
+    SELECT COUNT(*) FROM sn_meeting;
 
   meeting_by_number: |
     SELECT meeting_number, COUNT(*)
-    FROM meeting
+    FROM sn_meeting
     GROUP BY meeting_number
     ORDER BY meeting_number;
 
   meeting_by_status: |
     SELECT status, COUNT(*)
-    FROM meeting
+    FROM sn_meeting
     GROUP BY status;
 
-  # MEETING_OUTCOME table queries
+  # sn_meeting_outcome table queries
   meeting_outcome_total: |
-    SELECT COUNT(*) FROM meeting_outcome;
+    SELECT COUNT(*) FROM sn_meeting_outcome;
 
   meeting_outcome_by_type: |
     SELECT outcome_type, COUNT(*)
-    FROM meeting_outcome
+    FROM sn_meeting_outcome
     GROUP BY outcome_type;
 
   # Aggregate queries
   conversion_rate: |
     SELECT
       ROUND(
-        (SELECT COUNT(*) FROM sales_process WHERE final_outcome = 'qualified')::numeric /
-        NULLIF((SELECT COUNT(*) FROM prospect), 0) * 100,
+        (SELECT COUNT(*) FROM sn_sales_process WHERE final_outcome = 'qualified')::numeric /
+        NULLIF((SELECT COUNT(*) FROM sn_prospect), 0) * 100,
         2
       ) AS conversion_rate_percent;
 
   average_meetings_per_prospect: |
     SELECT
       ROUND(
-        (SELECT COUNT(*) FROM meeting)::numeric /
-        NULLIF((SELECT COUNT(*) FROM prospect), 0),
+        (SELECT COUNT(*) FROM sn_meeting)::numeric /
+        NULLIF((SELECT COUNT(*) FROM sn_prospect), 0),
         2
       ) AS avg_meetings;
+
+  pipeline_by_meeting: |
+    SELECT
+      sp.current_meeting,
+      COUNT(*) as prospect_count
+    FROM sn_sales_process sp
+    WHERE sp.overall_status IN ('pending', 'in_progress')
+    GROUP BY sp.current_meeting
+    ORDER BY sp.current_meeting;
 
 # ─────────────────────────────────────────────────────────────────────────────────
 # ALERTS / THRESHOLDS
@@ -231,7 +254,7 @@ alerts: []
   #   field: "abandoned_rate"
   #   threshold: 20
   #   actual: 25
-  #   timestamp: "2026-01-30T17:00:00Z"
+  #   timestamp: "2026-02-05T12:45:00Z"
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # DOCUMENT CONTROL
@@ -239,7 +262,7 @@ alerts: []
 document_control:
   template_version: "1.0.0"
   template_source: "imo-creator/templates/erd/ERD_METRICS.yaml.template"
-  created: "2026-01-30"
+  created: "2026-02-05"
+  schema_migration: "001_create_sales_navigator_schema.sql"
   authority: "CC-04"
   change_protocol: "Auto-updated by sync process"
-  note: "Initial setup - metrics require database connection via Doppler for actual values"
