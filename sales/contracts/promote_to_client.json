@@ -1,0 +1,10 @@
+{
+  "event": "PROMOTE_TO_CLIENT",
+  "trigger_table": "sales.sales_quotes",
+  "condition": "approved_flag = true",
+  "required_fields": [
+    "sales_id",
+    "quote_version",
+    "total_cost"
+  ]
+}

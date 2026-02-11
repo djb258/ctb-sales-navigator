@@ -1,0 +1,177 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# HEIR — Hub Environment Identity Record
+# ═══════════════════════════════════════════════════════════════════════════════
+# Authority: CONSTITUTION.md
+# Status: ACTIVE
+# Schema: HEIR/2.0
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# --- Conformance ---
+conformance:
+  doctrine_version: "2.0.0"
+  ctb_version: "2.0.0"
+  schema_version: "HEIR/2.0"
+
+# --- Sovereign Declaration (CC-01) ---
+sovereign:
+  identity: "SOV-SVG-AGENCY"
+  boundary: "SVG Agency Sales Operations"
+
+# --- Hub Identity (CC-02) ---
+hub:
+  name: "sales-navigator"
+  id: "HUB-SALES-NAV-20260130"
+  purpose: "Transform raw prospect intake into qualified sales outcomes through a 4-meeting orchestrated process"
+  ctb_placement:
+    trunk: "sales-navigator"
+    branch: "sales"
+    leaf: "meetings"
+
+# --- Process Identity (CC-04) ---
+process:
+  id_pattern: "HUB-SALES-NAV-20260130-${TIMESTAMP}-${RANDOM_HEX}"
+  session_pattern: "HUB-SALES-NAV-20260130-session-${SESSION_ID}"
+
+# --- IMO Structure ---
+imo:
+  ingress:
+    description: "CRM Intake Gateway — receives prospect data, validates schema, no logic"
+    spokes:
+      - spoke_id: "SPOKE-I-CRM"
+        name: "CRM Intake Gateway"
+        contract: "Read-only CRM data ingestion"
+      - spoke_id: "SPOKE-I-COMPOSIO"
+        name: "Composio MCP Interface"
+        contract: "External API calls via MCP"
+  middle:
+    description: "Sales process engine — all meeting logic, state, decisions, tool invocations"
+    owns_logic: true
+    owns_state: true
+  egress:
+    description: "Reports and analytics output — read-only views, no logic"
+    spokes:
+      - spoke_id: "SPOKE-O-UI"
+        name: "Lovable UI"
+        contract: "Presentation layer output"
+      - spoke_id: "SPOKE-O-REPORTS"
+        name: "Report Generator"
+        contract: "Sales reports and analytics"
+
+# --- Database Schema ---
+database:
+  schema: "sales"
+  spine_table: "sales.sales_state"
+  universal_join_key: "sales_id"
+  tables:
+    - name: "sales.sales_state"
+      type: "spine"
+      purpose: "Phase router — gates sub-hub access"
+    - name: "sales.sales_factfinder"
+      type: "canonical"
+      sub_hub: "FactFinder"
+    - name: "sales.sales_factfinder_errors"
+      type: "error"
+      sub_hub: "FactFinder"
+    - name: "sales.sales_insurance"
+      type: "canonical"
+      sub_hub: "Insurance"
+    - name: "sales.sales_insurance_errors"
+      type: "error"
+      sub_hub: "Insurance"
+    - name: "sales.sales_systems"
+      type: "canonical"
+      sub_hub: "Systems"
+    - name: "sales.sales_systems_errors"
+      type: "error"
+      sub_hub: "Systems"
+    - name: "sales.sales_quotes"
+      type: "canonical"
+      sub_hub: "Quotes"
+    - name: "sales.sales_quotes_errors"
+      type: "error"
+      sub_hub: "Quotes"
+
+# --- Services (Abstract) ---
+services:
+  - name: "sales-navigator-web"
+    port: "5173"
+    type: "vite-react"
+  - name: "sales-navigator-api"
+    port: "5000"
+    type: "flask"
+
+# --- Environment (Abstract) ---
+environment:
+  secrets_provider: "doppler"
+  doppler_project: "sales-navigator"
+  variables:
+    - key: "COMPOSIO_API_KEY"
+      source: "${DOPPLER:COMPOSIO_API_KEY}"
+    - key: "SUPABASE_URL"
+      source: "${DOPPLER:SUPABASE_URL}"
+    - key: "SUPABASE_ANON_KEY"
+      source: "${DOPPLER:SUPABASE_ANON_KEY}"
+    - key: "ANTHROPIC_API_KEY"
+      source: "${DOPPLER:ANTHROPIC_API_KEY}"
+    - key: "OPENAI_API_KEY"
+      source: "${DOPPLER:OPENAI_API_KEY}"
+    - key: "NEON_DATABASE_URL"
+      source: "${DOPPLER:NEON_DATABASE_URL}"
+
+# --- Contracts ---
+contracts:
+  acceptance:
+    - "All HEIR checks pass in CI"
+    - "Doppler secrets validated at startup"
+    - "CTB branch structure enforced (sys, data, app, ai, ui)"
+    - "No forbidden folders (utils, helpers, common, shared, lib)"
+    - "OSAM query routing verified"
+    - "ORBT error logging active"
+
+# --- Build Actions ---
+build:
+  ci_checks:
+    - "npm run lint"
+    - "npm run typecheck"
+  validation:
+    - "doppler run -- npm run build"
+
+# --- ORBT Integration ---
+orbt:
+  error_table: "shq.orbt_error_log"
+  repo_name: "sales-navigator"
+  layers:
+    - "System"
+    - "Operation"
+    - "Repair"
+    - "Build"
+    - "Training"
+  altitude_levels:
+    - 60000  # Strategic/Shell
+    - 40000  # Hub-as-Application
+    - 30000  # CTB Placement
+    - 20000  # IMO Definition
+    - 10000  # Process Logic
+    - 5000   # Execution/Code
+
+# --- Traceability ---
+traceability:
+  prd: "docs/PRD.md"
+  erd: "docs/ERD.md"
+  osam: "docs/OSAM.md"
+  adrs:
+    - "docs/ADR-001-ctb-structure.md"
+    - "docs/ADR-002-doppler-secrets.md"
+    - "docs/ADR-003-rogue-folders.md"
+    - "docs/ADR-004-supabase.md"
+    - "docs/ADR-005-neon-schema.md"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# DOCUMENT CONTROL
+# ═══════════════════════════════════════════════════════════════════════════════
+document_control:
+  created: "2026-02-11"
+  last_modified: "2026-02-11"
+  version: "1.0.0"
+  status: "ACTIVE"
+  authority: "CONSTITUTION.md"

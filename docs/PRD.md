@@ -4,9 +4,10 @@
 
 | Field | Value |
 |-------|-------|
-| **Doctrine Version** | 1.5.0 |
-| **CTB Version** | 1.1.0 |
+| **Doctrine Version** | 2.0.0 |
+| **CTB Version** | 2.0.0 |
 | **CC Layer** | CC-02 |
+| **HEIR Schema** | HEIR/2.0 |
 
 ---
 
@@ -26,7 +27,7 @@
 | **Hub Name** | sales-navigator |
 | **Hub ID** | HUB-SALES-NAV-20260130 |
 | **Owner** | SVG Agency |
-| **Version** | 1.0.0 |
+| **Version** | 2.0.0 |
 
 ---
 
@@ -40,14 +41,14 @@ This hub orchestrates the SVG Agency 4-meeting sales process. It provides a stru
 
 | Field | Value |
 |-------|-------|
-| **Transformation Summary** | Raw CRM intake → Structured meeting progression → Documented outcomes |
+| **Transformation Summary** | Raw CRM intake → 4-phase meeting progression → Approved quote / promotion to client |
 
 ### Constants (Inputs)
 
 | Constant | Source | Description |
 |----------|--------|-------------|
 | `prospect_data` | CRM Intake Gateway | Raw prospect information from external CRM |
-| `meeting_templates` | Lovable.dev | Structured meeting frameworks |
+| `meeting_templates` | Doctrine | Structured meeting frameworks per sub-hub |
 | `integration_credentials` | Doppler | API keys and secrets (managed externally) |
 | `sales_rules` | Doctrine | Business rules for sales process |
 
@@ -55,24 +56,26 @@ This hub orchestrates the SVG Agency 4-meeting sales process. It provides a stru
 
 | Variable | Destination | Description |
 |----------|-------------|-------------|
-| `meeting_outcomes` | Database | Documented results of each meeting |
-| `prospect_status` | CRM | Updated qualification status |
-| `action_items` | Reports | Follow-up tasks per meeting |
-| `sales_analytics` | Dashboard | Aggregated sales metrics |
+| `current_phase` | `sales.sales_state` | Active meeting phase for the sales process |
+| `factfinder_data` | `sales.sales_factfinder` | Employer info, employee count, renewal month |
+| `insurance_data` | `sales.sales_insurance` | Funding model, strategy selection |
+| `systems_data` | `sales.sales_systems` | Payroll system, admin model, compliance owner |
+| `quote_data` | `sales.sales_quotes` | Quote version, total cost, approval flag |
+| `error_events` | `sales.*_errors` | Append-only error logs per sub-hub |
 
 ### Pass Structure
 
 | Pass | Type | IMO Layer | Description |
 |------|------|-----------|-------------|
-| Intake | CAPTURE | I (Ingress) | Receive prospect data from CRM, validate schema |
-| Process | COMPUTE | M (Middle) | Execute meeting workflows, apply sales logic |
-| Output | GOVERN | O (Egress) | Generate reports, update CRM, enforce governance |
+| Intake | CAPTURE | I (Ingress) | Receive prospect data from CRM, validate schema, mint `sales_id` |
+| Process | COMPUTE | M (Middle) | Execute meeting workflows across 4 sub-hubs, apply sales logic |
+| Output | GOVERN | O (Egress) | Generate reports, fire `PROMOTE_TO_CLIENT` event on approval |
 
 ### Scope Boundary
 
 | Scope | Description |
 |-------|-------------|
-| **IN SCOPE** | 4-meeting sales process, prospect tracking, meeting documentation, sales analytics |
+| **IN SCOPE** | 4-meeting sales process, prospect tracking, meeting documentation, sales analytics, ORBT error logging |
 | **OUT OF SCOPE** | CRM source data mutation, payment processing, contract generation, legal compliance |
 
 ---
@@ -92,8 +95,8 @@ This hub orchestrates the SVG Agency 4-meeting sales process. It provides a stru
 | Layer | Role | Description | CC Layer |
 |-------|------|-------------|----------|
 | **I — Ingress** | Dumb input only | Receives prospect data from CRM; no logic, no state | CC-02 |
-| **M — Middle** | Logic, decisions, state | All meeting processing occurs here inside the hub | CC-02 |
-| **O — Egress** | Output only | Emits reports and analytics; no logic, no state | CC-02 |
+| **M — Middle** | Logic, decisions, state | All meeting processing, phase transitions, ORBT logging | CC-02 |
+| **O — Egress** | Output only | Emits reports, fires promotion events; no logic, no state | CC-02 |
 
 ---
 
@@ -108,47 +111,78 @@ This hub orchestrates the SVG Agency 4-meeting sales process. It provides a stru
 
 ---
 
-## 7. Meeting Definitions (Domain-Specific)
+## 7. Database Schema (Sales CTB Backbone)
 
-### Meeting 1: Fact Finder
+### Spine Table
+
+| Table | PK | Purpose |
+|-------|----|---------|
+| `sales.sales_state` | `sales_id TEXT` | Phase router — gates which sub-hub is active |
+
+### Sub-Hub Tables (2 per sub-hub: canonical + errors)
+
+| # | Sub-Hub | Canonical Table | Error Table | Meeting |
+|---|---------|-----------------|-------------|---------|
+| 1 | FactFinder | `sales.sales_factfinder` | `sales.sales_factfinder_errors` | Meeting 1 |
+| 2 | Insurance | `sales.sales_insurance` | `sales.sales_insurance_errors` | Meeting 2 |
+| 3 | Systems | `sales.sales_systems` | `sales.sales_systems_errors` | Meeting 3 |
+| 4 | Quotes | `sales.sales_quotes` | `sales.sales_quotes_errors` | Meeting 4 |
+
+### Universal Join Key
+
+All tables join on `sales_id TEXT`. See `docs/OSAM.md` for allowed join paths.
+
+### Promotion Contract
+
+When `sales.sales_quotes.approved_flag = true`, the `PROMOTE_TO_CLIENT` event fires. See `sales/contracts/promote_to_client.json`.
+
+---
+
+## 8. Meeting Definitions (Domain-Specific)
+
+### Meeting 1: FactFinder
 
 | Field | Value |
 |-------|-------|
-| **Purpose** | Gather prospect information, establish needs |
+| **Purpose** | Gather employer information, establish needs |
 | **Inputs** | Raw prospect data |
-| **Outputs** | Fact finder worksheet, qualification status |
+| **Outputs** | Employer name, employee count, renewal month, prior broker |
+| **Canonical Table** | `sales.sales_factfinder` |
 | **Pass** | CAPTURE → COMPUTE |
 
 ### Meeting 2: Insurance Education
 
 | Field | Value |
 |-------|-------|
-| **Purpose** | Educate prospect on insurance options |
-| **Inputs** | Fact finder results |
-| **Outputs** | Education notes, interest indicators |
+| **Purpose** | Educate prospect on insurance options, select funding model |
+| **Inputs** | FactFinder results |
+| **Outputs** | Funding model, strategy selection |
+| **Canonical Table** | `sales.sales_insurance` |
 | **Pass** | COMPUTE |
 
 ### Meeting 3: Systems Education
 
 | Field | Value |
 |-------|-------|
-| **Purpose** | Present systems and solutions |
-| **Inputs** | Education outcomes |
-| **Outputs** | System preferences, feature priorities |
+| **Purpose** | Assess operations, payroll, admin model |
+| **Inputs** | Insurance outcomes |
+| **Outputs** | Payroll system, admin model, compliance owner |
+| **Canonical Table** | `sales.sales_systems` |
 | **Pass** | COMPUTE |
 
-### Meeting 4: Financials / Numbers
+### Meeting 4: Financials / Quotes
 
 | Field | Value |
 |-------|-------|
-| **Purpose** | Present financial details, close decision |
+| **Purpose** | Present financials, generate quote, close decision |
 | **Inputs** | All prior meeting outcomes |
-| **Outputs** | Decision outcome, next steps |
+| **Outputs** | Quote version, total cost, approved flag |
+| **Canonical Table** | `sales.sales_quotes` |
 | **Pass** | COMPUTE → GOVERN |
 
 ---
 
-## 8. Constants vs Variables
+## 9. Constants vs Variables
 
 | Element | Type | Mutability | CC Layer |
 |---------|------|------------|----------|
@@ -156,12 +190,15 @@ This hub orchestrates the SVG Agency 4-meeting sales process. It provides a stru
 | Hub Name | Constant | ADR-gated | CC-02 |
 | Meeting Count (4) | Constant | ADR-gated | CC-02 |
 | Meeting Order | Constant | ADR-gated | CC-02 |
-| Prospect Status | Variable | Runtime | CC-04 |
-| Meeting Outcomes | Variable | Runtime | CC-04 |
+| Universal Join Key (`sales_id`) | Constant | Immutable | CC-02 |
+| 2-Table Pattern | Constant | ADR-gated | CC-02 |
+| `current_phase` | Variable | Runtime | CC-04 |
+| Sub-hub canonical data | Variable | Runtime | CC-04 |
+| Error log entries | Variable | Append-only | CC-04 |
 
 ---
 
-## 9. Tools
+## 10. Tools
 
 All tools are scoped strictly INSIDE this hub's M layer. Spokes do not own tools.
 
@@ -169,21 +206,69 @@ All tools are scoped strictly INSIDE this hub's M layer. Spokes do not own tools
 |------|---------------|----------|-----------|---------------|
 | Doppler | Secrets Management | CC-02 | M | ADR-002 |
 | Composio MCP | Integration Gateway | CC-02 | M | Inherited |
-| Supabase | Data Layer | CC-02 | M | Pending |
+| Neon | PostgreSQL Database | CC-02 | M | ADR-005 |
 
 ---
 
-## 10. Guard Rails
+## 11. OSAM Reference
+
+Query routing for this hub is governed by `docs/OSAM.md`.
+
+| OSAM Element | Value |
+|--------------|-------|
+| **Spine Table** | `sales.sales_state` |
+| **Universal Join Key** | `sales_id TEXT` |
+| **Query Surfaces** | 5 (spine + 4 canonical tables) |
+| **AUDIT Tables** | 4 (error tables) + ORBT |
+| **Forbidden Joins** | Cross-sub-hub direct joins |
+
+**No query may be executed unless routed through OSAM.**
+
+---
+
+## 12. HEIR Reference
+
+Hub identity is declared in `heir.doctrine.yaml`.
+
+| HEIR Element | Value |
+|--------------|-------|
+| **Schema Version** | HEIR/2.0 |
+| **Sovereign** | SOV-SVG-AGENCY |
+| **Hub ID** | HUB-SALES-NAV-20260130 |
+| **Secrets Provider** | Doppler |
+| **ORBT Integration** | Active |
+
+---
+
+## 13. ORBT Reference
+
+Error logging follows the ORBT (Operate, Repair, Build, Train) standard.
+
+| ORBT Element | Value |
+|--------------|-------|
+| **Error Table** | `shq.orbt_error_log` |
+| **Repo Name** | `sales-navigator` |
+| **Layers** | System, Operation, Repair, Build, Training |
+| **Altitude Levels** | 60k, 40k, 30k, 20k, 10k, 5k |
+| **Process ID Pattern** | `PRC-SALES-{EPOCH_TIMESTAMP}` |
+| **Unique ID Pattern** | `HEIR-2026-02-SALES-{LAYER}-{SEQ}` |
+
+Sub-hub error tables (`sales.*_errors`) capture domain-specific errors. ORBT captures cross-repo observability.
+
+---
+
+## 14. Guard Rails
 
 | Guard Rail | Type | Threshold | CC Layer |
 |------------|------|-----------|----------|
 | CRM Read Rate | Rate Limit | 100 req/min | CC-03 |
 | Meeting Timeout | Timeout | 30 minutes idle | CC-04 |
 | Input Validation | Validation | Schema compliance | CC-03 |
+| Error Log Size | Alert | 100 errors/hour | CC-04 |
 
 ---
 
-## 11. Kill Switch
+## 15. Kill Switch
 
 | Field | Value |
 |-------|-------|
@@ -193,39 +278,42 @@ All tools are scoped strictly INSIDE this hub's M layer. Spokes do not own tools
 
 ---
 
-## 12. Promotion Gates
+## 16. Promotion Gates
 
 | Gate | Artifact | CC Layer | Requirement |
 |------|----------|----------|-------------|
 | G1 | PRD | CC-02 | Hub definition approved |
-| G2 | ADR | CC-03 | Architecture decisions recorded |
-| G3 | Work Item | CC-04 | Execution item created |
-| G4 | PR | CC-04 | Code reviewed and merged |
-| G5 | Checklist | CC-04 | Compliance verification complete |
+| G2 | OSAM | CC-02 | Query routing declared |
+| G3 | HEIR | CC-02 | Hub identity record created |
+| G4 | ADR | CC-03 | Architecture decisions recorded |
+| G5 | Work Item | CC-04 | Execution item created |
+| G6 | PR | CC-04 | Code reviewed and merged |
+| G7 | Checklist | CC-04 | Compliance verification complete |
 
 ---
 
-## 13. Failure Modes
+## 17. Failure Modes
 
-| Failure | Severity | CC Layer | Remediation |
-|---------|----------|----------|-------------|
-| CRM connection lost | HIGH | CC-03 | Retry with backoff, notify user |
-| Doppler unavailable | CRITICAL | CC-02 | Halt all operations, escalate |
-| Meeting data corruption | CRITICAL | CC-04 | Restore from checkpoint, audit |
+| Failure | Severity | CC Layer | ORBT Layer | Remediation |
+|---------|----------|----------|------------|-------------|
+| CRM connection lost | HIGH | CC-03 | Operation | Retry with backoff, notify user |
+| Doppler unavailable | CRITICAL | CC-02 | System | Halt all operations, escalate |
+| Phase data corruption | CRITICAL | CC-04 | Operation | Restore from checkpoint, audit |
+| ORBT log write failure | HIGH | CC-04 | System | Buffer locally, retry |
 
 ---
 
-## 14. PID Scope (CC-04)
+## 18. PID Scope (CC-04)
 
 | Field | Value |
 |-------|-------|
-| **PID Pattern** | `SALES-NAV-${TIMESTAMP}-${RANDOM_HEX}` |
+| **PID Pattern** | `HUB-SALES-NAV-20260130-${TIMESTAMP}-${RANDOM_HEX}` |
 | **Retry Policy** | New PID per retry |
 | **Audit Trail** | Required |
 
 ---
 
-## 15. Human Override Rules
+## 19. Human Override Rules
 
 - Sales manager may skip meeting (requires reason documentation)
 - Hub owner may pause all processes (emergency only)
@@ -233,13 +321,14 @@ All tools are scoped strictly INSIDE this hub's M layer. Spokes do not own tools
 
 ---
 
-## 16. Observability
+## 20. Observability
 
 | Type | Description | CC Layer |
 |------|-------------|----------|
-| **Logs** | Meeting progress, errors, decisions | CC-04 |
-| **Metrics** | Meeting completion rates, time-to-close | CC-04 |
-| **Alerts** | Failed meetings, system errors | CC-03/CC-04 |
+| **Logs** | Meeting progress, phase transitions, errors | CC-04 |
+| **Metrics** | Meeting completion rates, time-to-close, error rates | CC-04 |
+| **Alerts** | Failed meetings, system errors, ORBT threshold breaches | CC-03/CC-04 |
+| **ORBT** | Cross-repo error classification by layer and altitude | CC-04 |
 
 ---
 
@@ -257,14 +346,17 @@ All tools are scoped strictly INSIDE this hub's M layer. Spokes do not own tools
 
 | Artifact | Reference |
 |----------|-----------|
+| Canonical Architecture | templates/doctrine/ARCHITECTURE.md |
+| OSAM | docs/OSAM.md |
+| HEIR | heir.doctrine.yaml |
 | Canonical ERD | docs/ERD.md |
-| Canonical Doctrine | CANONICAL_ARCHITECTURE_DOCTRINE.md |
-| Hub/Spoke Geometry | CANONICAL_ARCHITECTURE_DOCTRINE.md §3 |
-| Doppler Integration | ADR-002-doppler-secrets.md |
-| Supabase Integration | ADR-004-supabase.md |
+| Sales CTB Backbone | sales/doctrine/SALES_CTB.md |
+| Doppler Integration | docs/ADR-002-doppler-secrets.md |
+| Neon Schema | docs/ADR-005-neon-schema.md |
 | Kill Switch | docs/KILL_SWITCH.md |
 | Rollback Plan | docs/ROLLBACK_PLAN.md |
 | Observability | docs/OBSERVABILITY.md |
+| Promotion Contract | sales/contracts/promote_to_client.json |
 
 ---
 
