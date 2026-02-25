@@ -1,0 +1,489 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# COLUMN REGISTRY — Canonical Schema Spine
+# ═══════════════════════════════════════════════════════════════════════════════
+# Authority: imo-creator (Inherited)
+# Status: ACTIVE — Every hub with data/ branch MUST have a column_registry.yml
+# Version: 1.0.0
+# Purpose: Single source of truth for all table schemas in this hub
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# RULES:
+#   1. This file is the CANONICAL entry point for all data schema
+#   2. Generated files (TypeScript types, Zod schemas) are PROJECTIONS of this file
+#   3. Generated files are NEVER hand-edited
+#   4. After updating this file, run: ./scripts/codegen-generate.sh
+#   5. Pre-commit hook enforces sync between this file and generated output
+#   6. Each table declares owning_subhub per ARCHITECTURE.md OWN-10
+#   7. Each sub-hub has exactly 1 CANONICAL + 1 ERROR table (OWN-10a, OWN-10b)
+#   8. Additional table types require ADR justification (OWN-10c)
+#
+# READING ORDER:
+#   OSAM → column_registry.yml → generated files
+#
+# ═══════════════════════════════════════════════════════════════════════════════
+
+version: "1.0.0"
+last_updated: "2026-02-25"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# HUB IDENTITY
+# ═══════════════════════════════════════════════════════════════════════════════
+
+hub:
+  hub_id: "HUB-SALES-NAV-20260130"
+  hub_name: "sales-navigator"
+  universal_join_key: "sales_id"
+  universal_join_key_type: "TEXT"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SPINE TABLE
+# ═══════════════════════════════════════════════════════════════════════════════
+
+spine_table:
+  schema: "sales"
+  name: "sales_state"
+  description: "Phase router — authoritative source of sales process identity, gates sub-hub access"
+  owning_subhub: null  # Spine is hub-level, not sub-hub-level
+  leaf_type: "CANONICAL"
+  source_of_truth: true
+  row_identity_strategy: "UUID"
+  columns:
+    - name: "sales_id"
+      type: "TEXT"
+      nullable: false
+      description: "Universal join key — minted at intake, propagated to all sub-hub tables"
+      semantic_role: "identifier"
+      format: "STRING"
+    - name: "current_phase"
+      type: "TEXT"
+      nullable: false
+      description: "Active sub-hub gate — one of factfinder, insurance, systems, quotes"
+      semantic_role: "attribute"
+      format: "ENUM"
+    - name: "created_at"
+      type: "TIMESTAMPTZ"
+      nullable: false
+      description: "Process inception timestamp"
+      semantic_role: "attribute"
+      format: "ISO-8601"
+    - name: "updated_at"
+      type: "TIMESTAMPTZ"
+      nullable: false
+      description: "Last phase transition timestamp"
+      semantic_role: "attribute"
+      format: "ISO-8601"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# SUB-HUB TABLES
+# ═══════════════════════════════════════════════════════════════════════════════
+
+subhubs:
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # SUB-HUB 1: FactFinder (Meeting 1)
+  # ─────────────────────────────────────────────────────────────────────────────
+  - subhub_id: "SUB-MEETING-1"
+    name: "factfinder"
+    tables:
+
+      # CANONICAL table (OWN-10a)
+      - schema: "sales"
+        name: "sales_factfinder"
+        description: "Employer data captured during Fact Finder meeting — company name, headcount, renewal timing"
+        leaf_type: "CANONICAL"
+        source_of_truth: true
+        row_identity_strategy: "UUID"
+        columns:
+          - name: "sales_id"
+            type: "TEXT"
+            nullable: false
+            description: "Primary key — join anchor to spine table"
+            semantic_role: "foreign_key"
+            format: "STRING"
+          - name: "employer_name"
+            type: "TEXT"
+            nullable: true
+            description: "Company name captured from prospect"
+            semantic_role: "attribute"
+            format: "STRING"
+          - name: "employee_count"
+            type: "INTEGER"
+            nullable: true
+            description: "Total number of employees at the company"
+            semantic_role: "metric"
+            format: "INTEGER"
+          - name: "renewal_month"
+            type: "INTEGER"
+            nullable: true
+            description: "Benefits renewal month as integer 1-12"
+            semantic_role: "attribute"
+            format: "INTEGER"
+          - name: "prior_broker"
+            type: "TEXT"
+            nullable: true
+            description: "Name of previous insurance broker"
+            semantic_role: "attribute"
+            format: "STRING"
+          - name: "created_at"
+            type: "TIMESTAMPTZ"
+            nullable: true
+            description: "Record creation timestamp"
+            semantic_role: "attribute"
+            format: "ISO-8601"
+          - name: "updated_at"
+            type: "TIMESTAMPTZ"
+            nullable: true
+            description: "Last update timestamp"
+            semantic_role: "attribute"
+            format: "ISO-8601"
+
+      # ERROR table (OWN-10b)
+      - schema: "sales"
+        name: "sales_factfinder_errors"
+        description: "Append-only error log for FactFinder sub-hub — captures validation and process failures"
+        leaf_type: "ERROR"
+        source_of_truth: true
+        row_identity_strategy: "UUID"
+        columns:
+          - name: "id"
+            type: "BIGSERIAL"
+            nullable: false
+            description: "Auto-increment primary key for error record"
+            semantic_role: "identifier"
+            format: "INTEGER"
+          - name: "sales_id"
+            type: "TEXT"
+            nullable: true
+            description: "FK to spine — nullable because error may occur before entity exists"
+            semantic_role: "foreign_key"
+            format: "STRING"
+          - name: "error_code"
+            type: "TEXT"
+            nullable: true
+            description: "Machine-readable error identifier"
+            semantic_role: "attribute"
+            format: "STRING"
+          - name: "payload"
+            type: "JSONB"
+            nullable: true
+            description: "Full error context as structured JSON"
+            semantic_role: "attribute"
+            format: "JSON"
+          - name: "process_id"
+            type: "TEXT"
+            nullable: true
+            description: "Originating process or agent identifier"
+            semantic_role: "attribute"
+            format: "STRING"
+          - name: "created_at"
+            type: "TIMESTAMPTZ"
+            nullable: true
+            description: "When the error was recorded — append timestamp"
+            semantic_role: "attribute"
+            format: "ISO-8601"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # SUB-HUB 2: Insurance (Meeting 2)
+  # ─────────────────────────────────────────────────────────────────────────────
+  - subhub_id: "SUB-MEETING-2"
+    name: "insurance"
+    tables:
+
+      # CANONICAL table (OWN-10a)
+      - schema: "sales"
+        name: "sales_insurance"
+        description: "Insurance education outcomes — funding model and strategy selection from Meeting 2"
+        leaf_type: "CANONICAL"
+        source_of_truth: true
+        row_identity_strategy: "UUID"
+        columns:
+          - name: "sales_id"
+            type: "TEXT"
+            nullable: false
+            description: "Primary key — join anchor to spine table"
+            semantic_role: "foreign_key"
+            format: "STRING"
+          - name: "funding_model"
+            type: "TEXT"
+            nullable: true
+            description: "Insurance funding model selected by prospect"
+            semantic_role: "attribute"
+            format: "STRING"
+          - name: "strategy_selected"
+            type: "TEXT"
+            nullable: true
+            description: "Insurance strategy chosen during education session"
+            semantic_role: "attribute"
+            format: "STRING"
+          - name: "created_at"
+            type: "TIMESTAMPTZ"
+            nullable: true
+            description: "Record creation timestamp"
+            semantic_role: "attribute"
+            format: "ISO-8601"
+          - name: "updated_at"
+            type: "TIMESTAMPTZ"
+            nullable: true
+            description: "Last update timestamp"
+            semantic_role: "attribute"
+            format: "ISO-8601"
+
+      # ERROR table (OWN-10b)
+      - schema: "sales"
+        name: "sales_insurance_errors"
+        description: "Append-only error log for Insurance sub-hub — captures validation and process failures"
+        leaf_type: "ERROR"
+        source_of_truth: true
+        row_identity_strategy: "UUID"
+        columns:
+          - name: "id"
+            type: "BIGSERIAL"
+            nullable: false
+            description: "Auto-increment primary key for error record"
+            semantic_role: "identifier"
+            format: "INTEGER"
+          - name: "sales_id"
+            type: "TEXT"
+            nullable: true
+            description: "FK to spine — nullable because error may occur before entity exists"
+            semantic_role: "foreign_key"
+            format: "STRING"
+          - name: "error_code"
+            type: "TEXT"
+            nullable: true
+            description: "Machine-readable error identifier"
+            semantic_role: "attribute"
+            format: "STRING"
+          - name: "payload"
+            type: "JSONB"
+            nullable: true
+            description: "Full error context as structured JSON"
+            semantic_role: "attribute"
+            format: "JSON"
+          - name: "process_id"
+            type: "TEXT"
+            nullable: true
+            description: "Originating process or agent identifier"
+            semantic_role: "attribute"
+            format: "STRING"
+          - name: "created_at"
+            type: "TIMESTAMPTZ"
+            nullable: true
+            description: "When the error was recorded — append timestamp"
+            semantic_role: "attribute"
+            format: "ISO-8601"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # SUB-HUB 3: Systems (Meeting 3)
+  # ─────────────────────────────────────────────────────────────────────────────
+  - subhub_id: "SUB-MEETING-3"
+    name: "systems"
+    tables:
+
+      # CANONICAL table (OWN-10a)
+      - schema: "sales"
+        name: "sales_systems"
+        description: "Systems and operations assessment — payroll, admin model, compliance from Meeting 3"
+        leaf_type: "CANONICAL"
+        source_of_truth: true
+        row_identity_strategy: "UUID"
+        columns:
+          - name: "sales_id"
+            type: "TEXT"
+            nullable: false
+            description: "Primary key — join anchor to spine table"
+            semantic_role: "foreign_key"
+            format: "STRING"
+          - name: "payroll_system"
+            type: "TEXT"
+            nullable: true
+            description: "Payroll provider used by the prospect company"
+            semantic_role: "attribute"
+            format: "STRING"
+          - name: "admin_model"
+            type: "TEXT"
+            nullable: true
+            description: "Benefits administration model in use"
+            semantic_role: "attribute"
+            format: "STRING"
+          - name: "compliance_owner"
+            type: "TEXT"
+            nullable: true
+            description: "Party responsible for compliance oversight"
+            semantic_role: "attribute"
+            format: "STRING"
+          - name: "created_at"
+            type: "TIMESTAMPTZ"
+            nullable: true
+            description: "Record creation timestamp"
+            semantic_role: "attribute"
+            format: "ISO-8601"
+          - name: "updated_at"
+            type: "TIMESTAMPTZ"
+            nullable: true
+            description: "Last update timestamp"
+            semantic_role: "attribute"
+            format: "ISO-8601"
+
+      # ERROR table (OWN-10b)
+      - schema: "sales"
+        name: "sales_systems_errors"
+        description: "Append-only error log for Systems sub-hub — captures validation and process failures"
+        leaf_type: "ERROR"
+        source_of_truth: true
+        row_identity_strategy: "UUID"
+        columns:
+          - name: "id"
+            type: "BIGSERIAL"
+            nullable: false
+            description: "Auto-increment primary key for error record"
+            semantic_role: "identifier"
+            format: "INTEGER"
+          - name: "sales_id"
+            type: "TEXT"
+            nullable: true
+            description: "FK to spine — nullable because error may occur before entity exists"
+            semantic_role: "foreign_key"
+            format: "STRING"
+          - name: "error_code"
+            type: "TEXT"
+            nullable: true
+            description: "Machine-readable error identifier"
+            semantic_role: "attribute"
+            format: "STRING"
+          - name: "payload"
+            type: "JSONB"
+            nullable: true
+            description: "Full error context as structured JSON"
+            semantic_role: "attribute"
+            format: "JSON"
+          - name: "process_id"
+            type: "TEXT"
+            nullable: true
+            description: "Originating process or agent identifier"
+            semantic_role: "attribute"
+            format: "STRING"
+          - name: "created_at"
+            type: "TIMESTAMPTZ"
+            nullable: true
+            description: "When the error was recorded — append timestamp"
+            semantic_role: "attribute"
+            format: "ISO-8601"
+
+  # ─────────────────────────────────────────────────────────────────────────────
+  # SUB-HUB 4: Quotes (Meeting 4)
+  # ─────────────────────────────────────────────────────────────────────────────
+  - subhub_id: "SUB-MEETING-4"
+    name: "quotes"
+    tables:
+
+      # CANONICAL table (OWN-10a)
+      - schema: "sales"
+        name: "sales_quotes"
+        description: "Financial quotes and approval status — triggers PROMOTE_TO_CLIENT on approval"
+        leaf_type: "CANONICAL"
+        source_of_truth: true
+        row_identity_strategy: "UUID"
+        columns:
+          - name: "sales_id"
+            type: "TEXT"
+            nullable: false
+            description: "Primary key — join anchor to spine table"
+            semantic_role: "foreign_key"
+            format: "STRING"
+          - name: "quote_version"
+            type: "INTEGER"
+            nullable: true
+            description: "Quote iteration number for this sales process"
+            semantic_role: "metric"
+            format: "INTEGER"
+          - name: "total_cost"
+            type: "NUMERIC"
+            nullable: true
+            description: "Total quoted cost for the prospect"
+            semantic_role: "metric"
+            format: "USD_CENTS"
+          - name: "approved_flag"
+            type: "BOOLEAN"
+            nullable: true
+            description: "Approval status — when true, fires PROMOTE_TO_CLIENT event"
+            semantic_role: "attribute"
+            format: "BOOLEAN"
+          - name: "created_at"
+            type: "TIMESTAMPTZ"
+            nullable: true
+            description: "Record creation timestamp"
+            semantic_role: "attribute"
+            format: "ISO-8601"
+          - name: "updated_at"
+            type: "TIMESTAMPTZ"
+            nullable: true
+            description: "Last update timestamp"
+            semantic_role: "attribute"
+            format: "ISO-8601"
+
+      # ERROR table (OWN-10b)
+      - schema: "sales"
+        name: "sales_quotes_errors"
+        description: "Append-only error log for Quotes sub-hub — captures validation and process failures"
+        leaf_type: "ERROR"
+        source_of_truth: true
+        row_identity_strategy: "UUID"
+        columns:
+          - name: "id"
+            type: "BIGSERIAL"
+            nullable: false
+            description: "Auto-increment primary key for error record"
+            semantic_role: "identifier"
+            format: "INTEGER"
+          - name: "sales_id"
+            type: "TEXT"
+            nullable: true
+            description: "FK to spine — nullable because error may occur before entity exists"
+            semantic_role: "foreign_key"
+            format: "STRING"
+          - name: "error_code"
+            type: "TEXT"
+            nullable: true
+            description: "Machine-readable error identifier"
+            semantic_role: "attribute"
+            format: "STRING"
+          - name: "payload"
+            type: "JSONB"
+            nullable: true
+            description: "Full error context as structured JSON"
+            semantic_role: "attribute"
+            format: "JSON"
+          - name: "process_id"
+            type: "TEXT"
+            nullable: true
+            description: "Originating process or agent identifier"
+            semantic_role: "attribute"
+            format: "STRING"
+          - name: "created_at"
+            type: "TIMESTAMPTZ"
+            nullable: true
+            description: "When the error was recorded — append timestamp"
+            semantic_role: "attribute"
+            format: "ISO-8601"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# GENERATED OUTPUT PATHS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+generated_output:
+  hub_types: "src/data/hub/generated/"
+  spoke_types: "src/data/spokes/generated/"
+  data_dictionary: "docs/data/COLUMN_DATA_DICTIONARY.md"
+  marker: "// AUTO-GENERATED FROM column_registry.yml — DO NOT EDIT"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# DOCUMENT CONTROL
+# ═══════════════════════════════════════════════════════════════════════════════
+
+document_control:
+  created: "2026-02-25"
+  last_modified: "2026-02-25"
+  status: "ACTIVE"
+  authority: "imo-creator (Inherited)"
+  change_protocol: "Update registry → run codegen-generate.sh → commit both"

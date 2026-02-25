@@ -26,8 +26,8 @@ hub:
 
 conformance:
   parent: "imo-creator"
-  doctrine_version: "1.5.0"
-  ctb_version: "1.1.0"
+  doctrine_version: "3.3.0"
+  ctb_version: "3.3.0"
   domain_spec: "doctrine/REPO_DOMAIN_SPEC.md"
 
 # ═══════════════════════════════════════════════════════════════════════════════

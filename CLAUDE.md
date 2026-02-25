@@ -7,18 +7,35 @@
 
 ---
 
-## First Read (Mandatory)
+## Session Startup (Mandatory)
 
-Before any work, read these in order:
+Follow `templates/child/STARTUP_PROTOCOL.md`. In short:
+
+### Tier 1 — Load These Three Files First
 
 ```
-1. CONSTITUTION.md — Hub boundaries and mandates
-2. REGISTRY.yaml — Hub identity and configuration
-3. IMO_CONTROL.json — Governance contract
-4. templates/IMO_SYSTEM_SPEC.md — System index
-5. templates/AI_EMPLOYEE_OPERATING_CONTRACT.md — Agent constraints
-6. doctrine/REPO_DOMAIN_SPEC.md — Domain bindings (REQUIRED)
+1. IMO_CONTROL.json — Hub identity, governance contract
+2. CC_OPERATIONAL_DIGEST.md — ALL operational rules (~500 lines)
+3. CLAUDE.md — This file (AI permissions, repo-specific rules)
 ```
+
+### Tier 2 — Load On-Demand When Work Requires
+
+```
+CONSTITUTION.md — Hub boundaries and mandates
+REGISTRY.yaml — Hub identity and configuration
+templates/IMO_SYSTEM_SPEC.md — System index
+templates/AI_EMPLOYEE_OPERATING_CONTRACT.md — Agent constraints
+doctrine/REPO_DOMAIN_SPEC.md — Domain bindings (REQUIRED)
+column_registry.yml — Canonical schema spine
+docs/PRD.md — Product requirements
+docs/ERD.md — Entity relationships
+docs/OSAM.md — Query routing
+```
+
+### Checkpoint Gate
+
+Before coding, verify `DOCTRINE_CHECKPOINT.yaml` is current (<24 hours). If stale, refresh it.
 
 ---
 
@@ -141,6 +158,48 @@ doppler run -- npm run dev
 
 ---
 
+## Agent System (Planner / Builder / Auditor)
+
+This repo uses a 3-agent governance model. Agents communicate via a folder-based message bus. No direct agent-to-agent communication.
+
+### Agents
+
+| Agent | Role | Input | Output |
+|-------|------|-------|--------|
+| **Planner** | Generates WORK_PACKETs from user requests | User request + doctrine | `work_packets/outbox/` |
+| **Builder** | Executes approved WORK_PACKETs | `work_packets/inbox/` | Code + `changesets/outbox/` |
+| **Auditor** | Verifies compliance | `work_packets/inbox/` + `changesets/inbox/` | `audit_reports/outbox/` |
+| **Control Panel** | Read-only diagnostic | All inboxes/outboxes | Structured report |
+
+### Message Bus
+
+```
+work_packets/inbox/     — Builder reads from here
+work_packets/outbox/    — Planner writes here
+changesets/inbox/       — Auditor reads from here
+changesets/outbox/      — Builder writes here
+audit_reports/inbox/    — (reserved)
+audit_reports/outbox/   — Auditor writes here
+audit/                  — Pressure test reports
+```
+
+### Flow
+
+```
+User Request → Planner → WORK_PACKET → (human approval if architectural) → Builder → CHANGESET → Auditor → AUDIT_REPORT
+```
+
+### Contracts
+
+All artifacts must conform to schemas in `agents/contracts/`:
+- `work_packet.schema.json`
+- `changeset.schema.json`
+- `audit_report.schema.json`
+- `arch_pressure_report.schema.json` (when pressure test required)
+- `flow_pressure_report.schema.json` (when pressure test required)
+
+---
+
 ## What You MUST Do
 
 1. **Read CONSTITUTION.md first** in this repo
@@ -149,6 +208,7 @@ doppler run -- npm run dev
 4. **Reference doctrine** — do not interpret it
 5. **Use Doppler** for all secrets
 6. **Route external APIs through Composio MCP**
+7. **Follow agent boundaries** — Planner plans, Builder builds, Auditor audits
 
 ---
 
@@ -205,9 +265,20 @@ npm run lint
 | DOCTRINE.md | IMO-Creator conformance | repo root |
 | REGISTRY.yaml | Hub identity | repo root |
 | IMO_CONTROL.json | Governance contract | repo root |
+| CC_OPERATIONAL_DIGEST.md | Operational field manual (Tier 1) | repo root |
+| DOCTRINE_CHECKPOINT.yaml | Plan-before-build gate | repo root |
+| column_registry.yml | Canonical schema spine | repo root |
 | docs/PRD.md | Product requirements | docs/ |
+| docs/ERD.md | Entity relationships | docs/ |
+| docs/OSAM.md | Query routing | docs/ |
 | docs/ADR-*.md | Architecture decisions | docs/ |
 | doctrine/REPO_DOMAIN_SPEC.md | Domain bindings | doctrine/ |
+| heir.doctrine.yaml | HEIR/2.0 identity record | repo root |
+| agents/planner/master_prompt.md | Planner agent prompt | agents/ |
+| agents/builder/master_prompt.md | Builder agent prompt | agents/ |
+| agents/auditor/master_prompt.md | Auditor agent prompt | agents/ |
+| agents/control_panel/master_prompt.md | Control Panel prompt | agents/ |
+| agents/contracts/*.schema.json | Agent contract schemas | agents/contracts/ |
 
 ---
 
@@ -216,8 +287,8 @@ npm run lint
 | Field | Value |
 |-------|-------|
 | Created | 2026-01-30 |
-| Last Modified | 2026-01-30 |
-| Version | 1.0.0 |
+| Last Modified | 2026-02-25 |
+| Version | 2.0.0 |
 | Status | ACTIVE |
 | Authority | CONSTITUTION.md |
 | Parent | imo-creator |

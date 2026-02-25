@@ -10,8 +10,8 @@ This repository is governed by **IMO-Creator**.
 |-------|-------|
 | **Parent** | imo-creator |
 | **Sovereignty** | INHERITED |
-| **Doctrine Version** | 1.5.0 |
-| **CTB Version** | 1.1.0 |
+| **Doctrine Version** | 3.3.0 |
+| **CTB Version** | 3.3.0 |
 
 ---
 
@@ -62,6 +62,10 @@ This repository conforms to the following doctrine files from IMO-Creator:
 | SNAP_ON_TOOLBOX.yaml | Tool registry | imo-creator/templates/ |
 | IMO_SYSTEM_SPEC.md | System index | imo-creator/templates/ |
 | AI_EMPLOYEE_OPERATING_CONTRACT.md | Agent constraints | imo-creator/templates/ |
+| CC_OPERATIONAL_DIGEST.md | Operational field manual | imo-creator/templates/child/ |
+| DOCTRINE_CHECKPOINT.yaml | Plan-before-build gate | imo-creator/templates/child/ |
+| column_registry.yml | Canonical schema spine | imo-creator/templates/child/ |
+| STARTUP_PROTOCOL.md | Session startup sequence | imo-creator/templates/child/ |
 
 ---
 
@@ -91,5 +95,5 @@ This file maps generic roles to Sales-specific tables and concepts.
 | Field | Value |
 |-------|-------|
 | Created | 2026-01-30 |
-| Last Modified | 2026-01-30 |
+| Last Modified | 2026-02-25 |
 | Status | ACTIVE |
