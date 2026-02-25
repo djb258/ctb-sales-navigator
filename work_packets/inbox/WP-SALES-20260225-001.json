@@ -1,0 +1,58 @@
+{
+  "id": "WP-SALES-20260225-001",
+  "change_type": "feature",
+  "architectural_flag": false,
+  "requires_pressure_test": false,
+  "allowed_paths": [
+    "src/data/queries/",
+    "src/data/types/",
+    "src/app/meetings/meeting1/",
+    "src/ui/pages/sales/Meeting1.tsx",
+    "src/sys/integrations/supabase/"
+  ],
+  "summary": "Wire the existing Fact Finder meeting form (Meeting1.tsx) to persist data to the sales.sales_factfinder table via the data layer. Currently all form state is local useState with hardcoded defaults and no save behavior. This work packet creates: (1) TypeScript types for the factfinder schema in src/data/types/, (2) query functions in src/data/queries/ to insert/update sales_factfinder rows keyed by sales_id, (3) a service module in src/app/meetings/meeting1/ that orchestrates the save — minting a sales_id via sales.sales_state if one does not exist, then upserting the factfinder row, (4) updates to Meeting1.tsx to call the service on form submission and load existing data when a sales_id is present. Error handling writes to sales.sales_factfinder_errors. All database access flows through src/data/ — no direct Supabase calls from UI.",
+  "doctrine_version": "3.3.0",
+  "timestamp": "2026-02-25T12:00:00Z",
+  "payload": {
+    "sub_hub": "SUB-MEETING-1",
+    "sub_hub_name": "factfinder",
+    "target_tables": {
+      "spine": "sales.sales_state",
+      "canonical": "sales.sales_factfinder",
+      "error": "sales.sales_factfinder_errors"
+    },
+    "universal_join_key": "sales_id",
+    "form_fields_to_persist": {
+      "employer_name": "companyName state variable → sales_factfinder.employer_name",
+      "employee_count": "totalEmployees state variable → sales_factfinder.employee_count (cast to INT)",
+      "renewal_month": "renewalMonth state variable → sales_factfinder.renewal_month (cast to INT)",
+      "prior_broker": "broker state variable → sales_factfinder.prior_broker"
+    },
+    "form_fields_not_persisted_yet": {
+      "note": "The current form captures ~30 fields (address, contact info, funding type, benefits, compliance items, tier costs, etc.) but the canonical table only has 4 data columns. Additional columns require a column_registry.yml update + ADR if schema expansion is needed. This work packet wires only the 4 declared columns.",
+      "deferred_fields": [
+        "address, state, zip",
+        "contactName, contactEmail, workPhone, mobilePhone",
+        "totalEnrolled, fundingType, avgMonthlyPremium",
+        "currentCarrier, currentTPA, currentPBM, currentNetwork",
+        "dental/vision/life/std/ltd benefit details",
+        "compliance checklist items",
+        "health tier costs",
+        "notes"
+      ]
+    },
+    "imo_layer_mapping": {
+      "ingress": "Meeting1.tsx form submission — schema validation via Zod before passing to M layer",
+      "middle": "src/app/meetings/meeting1/ — orchestrates sales_id minting + factfinder upsert + error logging",
+      "egress": "Toast notification to UI on success/failure — no external egress"
+    },
+    "implementation_notes": [
+      "Use Supabase client from src/sys/integrations/supabase/client.ts for database access",
+      "Wrap database calls in src/data/queries/ — UI never imports Supabase directly",
+      "Service in src/app/meetings/meeting1/ owns the transaction logic (mint sales_id → upsert factfinder)",
+      "On error, append to sales.sales_factfinder_errors with process_id and payload",
+      "Use react-query mutation in the UI for optimistic updates and cache invalidation",
+      "Load existing factfinder data when sales_id is available (read path)"
+    ]
+  }
+}

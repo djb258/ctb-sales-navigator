@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { ArrowLeft, TrendingUp, CheckCircle2, Target, Calendar, Building2, Users, DollarSign, FileText, AlertCircle } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
+import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/ui/components/button";
 import { Card } from "@/ui/components/card";
 import { Input } from "@/ui/components/input";
@@ -22,8 +23,21 @@ import {
   SelectValue,
 } from "@/ui/components/select";
 import { toast } from "sonner";
+import { saveFactfinder, loadFactfinder } from "@/app/meetings/meeting1/service";
+import { FactfinderFormInput } from "@/data/types/factfinder";
 
 const Meeting1 = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const salesIdRef = useRef(searchParams.get("salesId") ?? crypto.randomUUID());
+  const salesId = salesIdRef.current;
+
+  // Persist salesId in URL so reloads keep the same session
+  useEffect(() => {
+    if (!searchParams.has("salesId")) {
+      setSearchParams({ salesId }, { replace: true });
+    }
+  }, [salesId, searchParams, setSearchParams]);
+
   const [companyName, setCompanyName] = useState("ABC Corporation");
   const [address, setAddress] = useState("123 Main Street");
   const [state, setState] = useState("TX");
@@ -135,10 +149,57 @@ const Meeting1 = () => {
     }
   };
 
-  const handleSave = () => {
-    toast.success("Verification data saved", {
-      description: "Data synced to Firebase: meeting_1_verification"
+  // --- Load existing factfinder data on mount ---
+  const hydrateForm = useCallback((row: {
+    employer_name?: string | null;
+    employee_count?: number | null;
+    renewal_month?: number | null;
+    prior_broker?: string | null;
+  }) => {
+    if (row.employer_name) setCompanyName(row.employer_name);
+    if (row.employee_count != null) setTotalEmployees(String(row.employee_count));
+    if (row.renewal_month != null) setRenewalMonth(String(row.renewal_month));
+    if (row.prior_broker) setBroker(row.prior_broker);
+  }, []);
+
+  useEffect(() => {
+    loadFactfinder(salesId).then(({ data }) => {
+      if (data) hydrateForm(data);
     });
+  }, [salesId, hydrateForm]);
+
+  // --- Save mutation ---
+  const saveMutation = useMutation({
+    mutationFn: async () => {
+      const parsed = FactfinderFormInput.safeParse({
+        companyName,
+        totalEmployees,
+        renewalMonth,
+        broker,
+      });
+      if (!parsed.success) {
+        throw new Error(parsed.error.issues[0]?.message ?? "Validation failed");
+      }
+      const result = await saveFactfinder(salesId, parsed.data);
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+      return result;
+    },
+    onSuccess: () => {
+      toast.success("Verification data saved", {
+        description: `Persisted to sales.sales_factfinder (${salesId.slice(0, 8)}…)`,
+      });
+    },
+    onError: (err: Error) => {
+      toast.error("Save failed", {
+        description: err.message,
+      });
+    },
+  });
+
+  const handleSave = () => {
+    saveMutation.mutate();
   };
 
   return (
@@ -989,10 +1050,11 @@ const Meeting1 = () => {
             <div className="flex justify-end items-center mt-8 pt-6 border-t">
               <Button
                 onClick={handleSave}
+                disabled={saveMutation.isPending}
                 size="lg"
                 className="bg-meeting1-emerald hover:bg-meeting1-emerald/90"
               >
-                Save Verification Data
+                {saveMutation.isPending ? "Saving…" : "Save Verification Data"}
               </Button>
             </div>
           </Card>
