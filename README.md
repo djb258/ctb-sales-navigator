@@ -123,8 +123,8 @@ See [ADR-002: Doppler Secrets](docs/ADR-002-doppler-secrets.md) for details.
 - **Build**: Vite
 - **Styling**: Tailwind CSS + shadcn/ui
 - **State**: TanStack Query
-- **Routing**: TanStack Router
-- **Backend**: Supabase
+- **Routing**: react-router-dom v6
+- **Database**: Neon PostgreSQL (see ADR-005)
 - **Secrets**: Doppler
 
 ---
@@ -134,6 +134,6 @@ See [ADR-002: Doppler Secrets](docs/ADR-002-doppler-secrets.md) for details.
 | Field | Value |
 |-------|-------|
 | Created | 2026-01-30 |
-| Last Modified | 2026-01-30 |
-| Version | 1.0.0 |
+| Last Modified | 2026-02-25 |
+| Version | 2.0.0 |
 | Authority | CONSTITUTION.md |

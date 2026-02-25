@@ -49,6 +49,8 @@ export function validateDopplerSecrets(): void {
     'COMPOSIO_API_KEY',
     'SUPABASE_URL',
     'SUPABASE_ANON_KEY',
+    'VITE_SUPABASE_URL',
+    'VITE_SUPABASE_PUBLISHABLE_KEY',
   ];
 
   const missing = required.filter(key => !process.env[key]);

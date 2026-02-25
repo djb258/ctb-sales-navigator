@@ -144,7 +144,7 @@ CRM (External)
 | Integration | Purpose | Doppler Secret Key |
 |-------------|---------|-------------------|
 | Composio MCP | External API gateway | `COMPOSIO_API_KEY` |
-| Supabase | Data persistence | `SUPABASE_URL`, `SUPABASE_ANON_KEY` |
+| Neon PostgreSQL | Data persistence (see ADR-005) | `NEON_DATABASE_URL` |
 | Anthropic | AI processing | `ANTHROPIC_API_KEY` |
 | OpenAI | AI processing | `OPENAI_API_KEY` |
 
@@ -177,7 +177,7 @@ CRM (External)
 | Field | Value |
 |-------|-------|
 | Created | 2026-01-30 |
-| Last Modified | 2026-01-30 |
-| Version | 1.0.0 |
+| Last Modified | 2026-02-25 |
+| Version | 1.1.0 |
 | Status | ACTIVE |
 | Authority | IMO-Creator (Inherited) |

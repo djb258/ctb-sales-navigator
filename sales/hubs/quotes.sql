@@ -10,8 +10,8 @@ CREATE TABLE sales.sales_quotes (
     quote_version INT,
     total_cost NUMERIC,
     approved_flag BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE sales.sales_quotes_errors (
@@ -20,5 +20,5 @@ CREATE TABLE sales.sales_quotes_errors (
     error_code TEXT,
     payload JSONB,
     process_id TEXT,
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );

@@ -1,6 +1,6 @@
 # ADR-004: Supabase as Data Layer
 
-**Status**: APPROVED
+**Status**: SUPERSEDED by [ADR-005](ADR-005-neon-schema.md)
 **Date**: 2026-01-30
 **CC Layer**: CC-03
 
@@ -116,5 +116,5 @@ Supabase provides:
 | Created | 2026-01-30 |
 | Last Modified | 2026-01-30 |
 | Version | 1.0.0 |
-| Status | APPROVED |
+| Status | SUPERSEDED |
 | Authority | CC-03 |

@@ -12,7 +12,7 @@
  * - Read-only data patterns
  *
  * All database access flows through this layer.
- * No direct Supabase calls from UI components.
+ * No direct database calls from UI components.
  */
 
 // Re-export types when created

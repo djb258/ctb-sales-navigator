@@ -1,14 +1,18 @@
 -- ═══════════════════════════════════════════════════════════════════════════════
--- MIGRATION: 001_create_sales_navigator_schema.sql
+-- DEPRECATED — SUPERSEDED by sales/migrations/001_sales_schema.sql (ADR-005)
 -- ═══════════════════════════════════════════════════════════════════════════════
+--
+-- MIGRATION: 001_create_sales_navigator_schema.sql
 --
 -- Hub: HUB-SALES-NAV-20260130
 -- Authority: docs/ERD.md
 -- CC Layer: CC-04 (Process/Execution)
 -- Created: 2026-02-05
+-- Status: DEPRECATED (2026-02-25) — Canonical schema is now sales/migrations/001_sales_schema.sql
 --
--- This migration creates the Sales Navigator schema as defined in the canonical ERD.
--- Tables are prefixed with 'sn_' to namespace within the shared Marketing DB.
+-- This migration used the sn_* prefix convention. The canonical schema now uses
+-- the sales.* schema convention per ADR-005 and column_registry.yml.
+-- This file is retained for historical reference only. Do NOT execute.
 --
 -- ═══════════════════════════════════════════════════════════════════════════════
 

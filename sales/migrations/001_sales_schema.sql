@@ -21,8 +21,8 @@ CREATE SCHEMA IF NOT EXISTS sales;
 CREATE TABLE sales.sales_state (
     sales_id TEXT PRIMARY KEY,
     current_phase TEXT NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -35,8 +35,8 @@ CREATE TABLE sales.sales_factfinder (
     employee_count INT,
     renewal_month INT,
     prior_broker TEXT,
-    created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE sales.sales_factfinder_errors (
@@ -45,7 +45,7 @@ CREATE TABLE sales.sales_factfinder_errors (
     error_code TEXT,
     payload JSONB,
     process_id TEXT,
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -56,8 +56,8 @@ CREATE TABLE sales.sales_insurance (
     sales_id TEXT PRIMARY KEY,
     funding_model TEXT,
     strategy_selected TEXT,
-    created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE sales.sales_insurance_errors (
@@ -66,7 +66,7 @@ CREATE TABLE sales.sales_insurance_errors (
     error_code TEXT,
     payload JSONB,
     process_id TEXT,
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -78,8 +78,8 @@ CREATE TABLE sales.sales_systems (
     payroll_system TEXT,
     admin_model TEXT,
     compliance_owner TEXT,
-    created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE sales.sales_systems_errors (
@@ -88,7 +88,7 @@ CREATE TABLE sales.sales_systems_errors (
     error_code TEXT,
     payload JSONB,
     process_id TEXT,
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -100,8 +100,8 @@ CREATE TABLE sales.sales_quotes (
     quote_version INT,
     total_cost NUMERIC,
     approved_flag BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE sales.sales_quotes_errors (
@@ -110,7 +110,7 @@ CREATE TABLE sales.sales_quotes_errors (
     error_code TEXT,
     payload JSONB,
     process_id TEXT,
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- ═══════════════════════════════════════════════════════════════════════════════

@@ -9,8 +9,8 @@ CREATE TABLE sales.sales_insurance (
     sales_id TEXT PRIMARY KEY,
     funding_model TEXT,
     strategy_selected TEXT,
-    created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE sales.sales_insurance_errors (
@@ -19,5 +19,5 @@ CREATE TABLE sales.sales_insurance_errors (
     error_code TEXT,
     payload JSONB,
     process_id TEXT,
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );

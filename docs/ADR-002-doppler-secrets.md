@@ -30,8 +30,7 @@ Previously, secrets may have been stored in `.env` files, hardcoded in source, o
 | Secret Key | Purpose | Required In |
 |------------|---------|-------------|
 | `COMPOSIO_API_KEY` | MCP integration | All |
-| `SUPABASE_URL` | Database connection | All |
-| `SUPABASE_ANON_KEY` | Database auth | All |
+| `NEON_DATABASE_URL` | Neon PostgreSQL connection (see ADR-005) | All |
 | `ANTHROPIC_API_KEY` | AI integration | All |
 | `OPENAI_API_KEY` | AI integration | All |
 
