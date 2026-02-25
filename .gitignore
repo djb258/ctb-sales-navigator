@@ -59,11 +59,11 @@ lerna-debug.log*
 # ═══════════════════════════════════════════════════════════════════════════════
 # EDITOR & OS
 # ═══════════════════════════════════════════════════════════════════════════════
-.vscode/*
-!.vscode/extensions.json
-!.vscode/settings.json
+.vscode/
+.claude/
 .idea
 .DS_Store
+nul
 *.suo
 *.ntvs*
 *.njsproj
