@@ -59,11 +59,11 @@
 
 | Branch | Contains | Never Contains |
 |--------|----------|----------------|
-| `sys/` | Doppler integration, Supabase client, observability | Business logic |
+| `sys/` | Doppler integration, CF Workers client, observability | Business logic |
 | `data/` | Schemas, migrations, column_registry.yml, repositories | UI components |
 | `app/` | Meeting workflows, sales process logic, IMO layers | Infrastructure |
 | `ai/` | Sales assistant agents, meeting summarizers, LLM prompts | Raw data access |
-| `ui/` | Lovable.dev pages, shadcn components, layouts, styles | Backend logic |
+| `ui/` | Figma UI pages, shadcn components, layouts, styles | Backend logic |
 
 ### Forbidden Folders (Automatic Violation)
 

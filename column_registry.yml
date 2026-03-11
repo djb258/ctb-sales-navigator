@@ -17,6 +17,15 @@
 #   7. Each sub-hub has exactly 1 CANONICAL + 1 ERROR table (OWN-10a, OWN-10b)
 #   8. Additional table types require ADR justification (OWN-10c)
 #
+# D1 TYPE MAPPING (BAR-100):
+#   Types declared here target Neon vault (PostgreSQL). CF D1 (SQLite) equivalents:
+#     BIGSERIAL  -> INTEGER AUTOINCREMENT
+#     UUID       -> TEXT (app-generated UUIDs)
+#     TIMESTAMPTZ -> TEXT (ISO-8601 strings)
+#     JSONB      -> TEXT (JSON validation in application layer)
+#     NUMERIC    -> REAL
+#     BOOLEAN    -> INTEGER (0/1)
+#
 # READING ORDER:
 #   OSAM → column_registry.yml → generated files
 #

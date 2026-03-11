@@ -106,7 +106,7 @@ This hub orchestrates the SVG Agency 4-meeting sales process. It provides a stru
 |------------|------|-----------|----------|----------|
 | CRM Intake Gateway | I | Inbound | Read-only prospect data | CC-03 |
 | Composio MCP Interface | I | Inbound | External API access | CC-03 |
-| Lovable UI | O | Outbound | Presentation layer | CC-03 |
+| Figma UI | O | Outbound | Presentation layer via CF Workers/Pages | CC-03 |
 | Report Generator | O | Outbound | Sales analytics output | CC-03 |
 
 ---

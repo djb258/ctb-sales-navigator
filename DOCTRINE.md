@@ -32,7 +32,10 @@ This repository is governed by **IMO-Creator**.
 |-------------|----------|--------|
 | **Secrets Management** | Doppler | REQUIRED |
 | **Environment Config** | Doppler | REQUIRED |
-| **Presentation Layer** | Lovable.dev | DECLARED |
+| **Presentation Layer** | Figma UI (design) + CF Workers/Pages (hosting) | DECLARED |
+| **Working Database** | CF D1/KV | DECLARED |
+| **Vault Database** | Neon PostgreSQL (archive only) | DECLARED |
+| **Compute Layer** | CF Workers | DECLARED |
 
 ### Doppler Mandate
 

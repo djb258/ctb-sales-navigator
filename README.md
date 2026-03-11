@@ -124,7 +124,10 @@ See [ADR-002: Doppler Secrets](docs/ADR-002-doppler-secrets.md) for details.
 - **Styling**: Tailwind CSS + shadcn/ui
 - **State**: TanStack Query
 - **Routing**: react-router-dom v6
-- **Database**: Neon PostgreSQL (see ADR-005)
+- **Working Database**: CF D1/KV (Cloudflare Workers)
+- **Vault Database**: Neon PostgreSQL (archive only, see ADR-005)
+- **Compute/Hosting**: CF Workers/Pages
+- **Design**: Figma UI
 - **Secrets**: Doppler
 
 ---

@@ -88,7 +88,11 @@
       "environment variables not from Doppler",
       "local credential files"
     ],
-    "presentation_layer": "lovable.dev"
+    "presentation_layer": "figma-ui",
+    "working_database": "cf-d1-kv",
+    "vault_database": "neon-postgresql",
+    "compute_layer": "cf-workers",
+    "hosting": "cf-workers-pages"
   },
 
   "ctb_enforcement": {
@@ -122,7 +126,7 @@
         "required": true
       },
       "ui": {
-        "purpose": "Lovable.dev components, pages, styles",
+        "purpose": "Figma UI components, pages, styles",
         "required": true
       }
     }

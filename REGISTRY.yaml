@@ -40,7 +40,7 @@ ctb:
     data: true     # Schema definitions (read-only patterns)
     app: true      # Sales process workflows
     ai: true       # AI agents for sales assistance
-    ui: true       # Lovable.dev presentation layer
+    ui: true       # Figma UI design, CF Workers/Pages hosting
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # ENVIRONMENTS
@@ -65,7 +65,11 @@ environments:
 infrastructure:
   secrets_provider: "doppler"
   doppler_project: "sales-navigator"
-  presentation_layer: "lovable.dev"
+  presentation_layer: "figma-ui"
+  working_database: "cf-d1-kv"
+  vault_database: "neon-postgresql"
+  compute_layer: "cf-workers"
+  hosting: "cf-workers-pages"
   forbidden_patterns:
     - ".env files with secrets"
     - "hardcoded API keys"
@@ -108,8 +112,8 @@ spokes:
 
   egress:
     - spoke_id: "SPOKE-O-UI"
-      name: "Lovable UI"
-      contract: "Presentation layer output"
+      name: "Figma UI"
+      contract: "Presentation layer output via CF Workers/Pages"
     - spoke_id: "SPOKE-O-REPORTS"
       name: "Report Generator"
       contract: "Sales reports and analytics"

@@ -135,7 +135,7 @@ CRM (External)
 | `src/data/` | Meeting schemas, prospect data models, query definitions |
 | `src/app/` | Meeting workflows, sales process logic, state management |
 | `src/ai/` | Sales assistant agents, meeting summarizers, LLM prompts |
-| `src/ui/` | Lovable.dev components, meeting pages, sales dashboard |
+| `src/ui/` | Figma UI components, meeting pages, sales dashboard |
 
 ---
 
@@ -157,7 +157,7 @@ CRM (External)
 | Meeting sequence must be 1→2→3→4 | MANDATORY |
 | Prospect data is read-only | MANDATORY |
 | All secrets from Doppler | MANDATORY |
-| UI via Lovable.dev patterns | RECOMMENDED |
+| UI via Figma UI design patterns | RECOMMENDED |
 
 ---
 

@@ -16,9 +16,9 @@ This document defines the observability strategy for the Sales Navigator hub, co
 
 | Component | Tool | Purpose |
 |-----------|------|---------|
-| Logging | Vercel Logs + Custom Logger | Application and audit logs |
-| Metrics | Vercel Analytics | Performance and usage metrics |
-| Alerting | Vercel + Doppler | Error and threshold alerts |
+| Logging | CF Workers Logs + Custom Logger | Application and audit logs |
+| Metrics | CF Analytics | Performance and usage metrics |
+| Alerting | CF Workers + Doppler | Error and threshold alerts |
 | Tracing | Process ID (PID) | Request tracing |
 
 ---
@@ -165,7 +165,7 @@ export const logger = {
 // src/sys/observability/metrics.ts
 export const metrics = {
   increment: (name: string, labels?: Record<string, string>) => {
-    // Log metric for Vercel Analytics ingestion
+    // Log metric for CF Analytics ingestion
     console.log(JSON.stringify({
       type: 'metric',
       name,
@@ -215,7 +215,7 @@ export const metrics = {
 
 | Channel | Use Case | Configuration |
 |---------|----------|---------------|
-| Vercel | Deployment failures | Built-in |
+| CF Workers | Deployment failures | Built-in |
 | Email | Critical alerts | Doppler: `ALERT_EMAIL` |
 | Slack | All alerts | Doppler: `SLACK_WEBHOOK_URL` |
 | PagerDuty | Critical after-hours | Doppler: `PAGERDUTY_KEY` |
@@ -287,21 +287,20 @@ export function withPID<T>(fn: (pid: string) => T): T {
 
 ## Dashboards
 
-### Vercel Dashboard
+### CF Dashboard
 
 | View | URL | Purpose |
 |------|-----|---------|
-| Deployments | vercel.com/dashboard | Deployment status |
-| Analytics | vercel.com/analytics | Web vitals, traffic |
-| Logs | vercel.com/logs | Application logs |
+| Workers | dash.cloudflare.com/workers | Worker deployment status |
+| D1 | dash.cloudflare.com/d1 | Database metrics, queries |
+| Analytics | dash.cloudflare.com/analytics | Web vitals, traffic |
 
-### Supabase Dashboard
+### Neon Dashboard (Vault)
 
 | View | Purpose |
 |------|---------|
-| Database | Query performance, connections |
-| Auth | Authentication metrics |
-| Storage | File storage usage |
+| Database | Vault query performance, connections |
+| Monitoring | Archive storage usage |
 
 ---
 

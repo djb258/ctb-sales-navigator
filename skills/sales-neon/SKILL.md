@@ -1,12 +1,13 @@
 ---
 name: sales-neon
 description: >
-  Neon PostgreSQL configuration, schema, and operational patterns for the Sales Navigator hub
+  Neon PostgreSQL vault/archive configuration, schema, and operational patterns for the Sales Navigator hub
   (HUB-SALES-NAV-20260130). Use this skill whenever querying, migrating, debugging, or making
   data-layer decisions in the sales-navigator repo. Trigger on: Neon, PostgreSQL, Postgres,
   database, schema, sales_state, sales_factfinder, sales_insurance, sales_systems, sales_quotes,
-  column_registry, migration, connection pooling, NEON_DATABASE_URL, VITE_NEON_DATABASE_URL,
-  pipeline tracking, prospect data, meeting data, or any reference to the sales data layer.
+  column_registry, migration, connection pooling, NEON_DATABASE_URL,
+  pipeline tracking, prospect data, meeting data, CF D1, CF KV, Cloudflare Workers,
+  or any reference to the sales data layer.
   Also trigger when discussing CRM intake, 4-meeting process state, quote approval, or
   PROMOTE_TO_CLIENT events. If the question touches relational data in this repo, this skill
   applies even if the user does not mention Neon by name.
@@ -14,12 +15,19 @@ master_skill: IMO-Creator/skills/neon/SKILL.md
 hub_id: HUB-SALES-NAV-20260130
 ---
 
-# Sales Navigator -- Neon Skill
+# Sales Navigator -- Neon + CF D1 Skill
 
-Neon is the primary database for Sales Navigator. All prospect, meeting, and quote data lives
-in a Neon Serverless PostgreSQL instance under the `sales` schema. There is no Cloudflare layer
-in this repo -- the Vite/React frontend talks to Neon via Supabase client bindings and the
-Neon serverless driver.
+## Architecture (BAR-100 Shift)
+
+The data layer follows a two-tier model:
+
+| Tier | Technology | Role |
+|------|-----------|------|
+| **Working** | CF D1 / CF KV | Active queries, runtime state, application traffic |
+| **Vault** | Neon Serverless PostgreSQL | Archival storage, migrations, canonical schema authority |
+
+CF Workers serve as the compute layer. The Figma UI design layer connects to CF Workers,
+which read/write CF D1 for working data and sync to Neon vault for long-term persistence.
 
 ## What This Repo Uses
 
@@ -27,13 +35,15 @@ Neon serverless driver.
 |-----------|-------|
 | Hub ID | HUB-SALES-NAV-20260130 |
 | Hub Name | sales-navigator |
-| Database | Neon Serverless PostgreSQL |
+| Working Database | CF D1 (Cloudflare Workers runtime) |
+| Vault Database | Neon Serverless PostgreSQL |
+| Working KV | CF KV (session state, caches) |
 | Schema | `sales` (canonical), `sn_*` prefix (deprecated) |
-| ORM / Driver | `@supabase/supabase-js` ^2.75.0 (client-side queries) |
+| Compute Layer | CF Workers |
+| Design Layer | Figma UI |
 | Secrets Provider | Doppler (`doppler run -- npm run dev`) |
-| UI Layer | Lovable.dev (React + Vite) |
 | Column Registry | `column_registry.yml` (canonical schema spine) |
-| Canonical Migration | `sales/migrations/001_sales_schema.sql` (per ADR-005) |
+| Canonical Migration | `sales/migrations/001_sales_schema.sql` (targets Neon vault, per ADR-005) |
 | Deprecated Migration | `src/data/migrations/001_create_sales_navigator_schema.sql` (sn_* prefix, DO NOT execute) |
 
 ## Connection Configuration
@@ -42,20 +52,23 @@ All secrets are injected via Doppler. No `.env` files with real values are permi
 
 | Variable | Purpose | Injected By |
 |----------|---------|-------------|
-| `NEON_DATABASE_URL` | Server-side / migration connection string | Doppler |
-| `VITE_NEON_DATABASE_URL` | Client-side connection string (exposed to Vite build) | Doppler |
+| `NEON_DATABASE_URL` | Neon vault connection string (migrations, archive sync) | Doppler |
+| `CF_D1_DATABASE_ID` | CF D1 working database identifier | Doppler |
+| `CF_ACCOUNT_ID` | Cloudflare account identifier | Doppler |
+| `CF_API_TOKEN` | Cloudflare API token for Workers/D1/KV | Doppler |
 | `COMPOSIO_API_KEY` | External API calls via Composio MCP | Doppler |
 
-**Connection pattern:**
+**Neon vault connection pattern (migrations and archive only):**
 ```
-# Pooled (application traffic)
+# Pooled (archive reads, sync operations)
 postgresql://user:pass@ep-xxx-pooler.region.aws.neon.tech/dbname?sslmode=require
 
-# Direct (migrations, admin)
+# Direct (migrations, admin, pg_dump)
 postgresql://user:pass@ep-xxx.region.aws.neon.tech/dbname?sslmode=require
 ```
 
-**Critical:** Use pooled endpoint for all application queries. Use direct endpoint only for
+**Critical:** Neon is vault/archive ONLY. All application-level queries go through CF D1.
+Use the Neon pooled endpoint for archive sync operations. Use the direct endpoint only for
 migrations and `pg_dump`. See master skill `IMO-Creator/skills/neon/SKILL.md` for full
 connection pooling rules and PgBouncer transaction-mode constraints.
 
@@ -94,37 +107,38 @@ The `sales.sales_state.current_phase` column gates which sub-hub is active:
 factfinder -> insurance -> systems -> quotes -> [PROMOTE_TO_CLIENT]
 ```
 
-### Query Pattern (Client-Side)
-The frontend uses `@supabase/supabase-js` for queries. All data access goes through
-Supabase client bindings which connect to the Neon pooled endpoint underneath.
+### Query Pattern (Working Layer)
+Application queries go through CF Workers reading/writing CF D1. For vault operations
+(reporting, archival queries), CF Workers connect to Neon via the pooled endpoint.
 
 ### Schema Changes
 1. Update `column_registry.yml`
 2. Run `./scripts/codegen-generate.sh`
 3. Generated output lands in `src/data/hub/generated/` and `src/data/spokes/generated/`
 4. Pre-commit hook enforces sync between registry and generated output
+5. Apply migration to Neon vault, then sync D1 schema
 
 ### Error Tables
-All error tables are append-only. Columns: `id` (BIGSERIAL), `sales_id` (nullable FK),
-`error_code`, `payload` (JSONB), `process_id`, `created_at`.
+All error tables are append-only. Columns: `id` (BIGSERIAL in Neon vault; INTEGER AUTOINCREMENT in D1),
+`sales_id` (nullable FK), `error_code`, `payload` (JSONB in Neon; TEXT/JSON in D1), `process_id`, `created_at`.
 
 ## Known Issues
 
 - **Deprecated sn_* prefix**: The original migration (`001_create_sales_navigator_schema.sql`)
   used `sn_prospect`, `sn_sales_process`, `sn_meeting`, `sn_meeting_outcome` tables. These
   are superseded by the `sales.*` schema per ADR-005. Do not execute the deprecated migration.
-- **No Cloudflare**: This repo has NO Cloudflare Workers, D1, or Hyperdrive. Do not suggest
-  Cloudflare integration patterns. The Neon serverless driver or Supabase client handles all
-  database access directly.
-- **VITE_NEON_DATABASE_URL exposure**: This variable is exposed to the client build. Ensure
-  the Neon connection string uses a role with minimal read permissions for client-side access.
+- **D1 type mapping**: CF D1 uses SQLite under the hood. BIGSERIAL maps to INTEGER AUTOINCREMENT,
+  JSONB maps to TEXT (with JSON validation in application layer), TIMESTAMPTZ maps to TEXT (ISO-8601).
+  The `column_registry.yml` declares Neon vault types; D1 equivalents are derived at migration time.
 
 ## Cost Profile
 
 | Resource | Expected Usage | Plan Consideration |
 |----------|---------------|-------------------|
-| Compute | Low -- sales process is human-paced, not high-throughput | Free tier likely sufficient during development |
-| Storage | < 0.5GB for prospect/meeting data | Free tier covers this |
-| Branches | Dev/staging branches for safe migration testing | Launch plan if > default branch limit |
+| CF D1 | Low -- sales process is human-paced, not high-throughput | Free tier likely sufficient during development |
+| CF KV | Minimal -- session state, caches | Free tier covers this |
+| CF Workers | Low compute -- API routing and D1 queries | Free tier (100k req/day) covers dev |
+| Neon Vault | < 0.5GB for prospect/meeting archive data | Free tier covers this |
+| Neon Branches | Dev/staging branches for safe migration testing | Launch plan if > default branch limit |
 
-See master skill `IMO-Creator/skills/neon/references/pricing.md` for full pricing breakdown.
+See master skill `IMO-Creator/skills/neon/references/pricing.md` for full Neon pricing breakdown.

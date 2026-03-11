@@ -56,12 +56,13 @@ interface KillSwitchResponse {
 
 ### 2. Database Kill Switch
 
-**Endpoint**: Supabase Dashboard → Pause Project
+**Endpoint**: CF Dashboard → Disable D1 bindings / Neon Dashboard → Pause Project
 
 **Actions Performed**:
-1. Suspend all database connections
-2. Preserve data in read-only state
-3. Block all write operations
+1. Disable CF D1 bindings on Workers (working layer)
+2. Suspend Neon vault connections if needed
+3. Preserve data in read-only state
+4. Block all write operations
 
 ### 3. Doppler Kill Switch
 
@@ -89,7 +90,7 @@ IF trigger requires CC-02 AND operator is not Hub Owner:
 
 ```bash
 # Via API
-curl -X POST https://sales-navigator.vercel.app/api/admin/kill-switch \
+curl -X POST https://sales-navigator.workers.dev/api/admin/kill-switch \
   -H "Authorization: Bearer ${ADMIN_TOKEN}" \
   -H "Content-Type: application/json" \
   -d '{
@@ -107,7 +108,7 @@ doppler secrets set KILL_SWITCH_ACTIVE=true --project sales-navigator --config p
 
 ```bash
 # Check health endpoint (should return 503)
-curl https://sales-navigator.vercel.app/api/health
+curl https://sales-navigator.workers.dev/api/health
 # Expected: { "status": "shutdown", "reason": "kill_switch_active" }
 ```
 
@@ -134,15 +135,15 @@ curl https://sales-navigator.vercel.app/api/health
 # 1. Disable kill switch
 doppler secrets set KILL_SWITCH_ACTIVE=false --project sales-navigator --config prod
 
-# 2. Restart application
-vercel redeploy --prod
+# 2. Redeploy CF Worker
+wrangler deploy --env production
 
 # 3. Verify restoration
-curl https://sales-navigator.vercel.app/api/health
+curl https://sales-navigator.workers.dev/api/health
 # Expected: { "status": "healthy" }
 
 # 4. Resume database (if paused)
-# Via Supabase Dashboard → Resume Project
+# Re-enable CF D1 bindings / Neon Dashboard → Resume Project
 ```
 
 ---
@@ -159,7 +160,7 @@ curl https://sales-navigator.vercel.app/api/health
 
 ```bash
 # Test in staging only
-curl -X POST https://sales-navigator-staging.vercel.app/api/admin/kill-switch/test \
+curl -X POST https://sales-navigator-staging.workers.dev/api/admin/kill-switch/test \
   -H "Authorization: Bearer ${STAGING_ADMIN_TOKEN}"
 ```
 
@@ -178,9 +179,9 @@ curl -X POST https://sales-navigator-staging.vercel.app/api/admin/kill-switch/te
 ## Audit Trail
 
 All kill switch activations are logged to:
-- Supabase `audit_log` table
+- CF D1 `audit_log` table
 - Doppler activity log
-- Vercel deployment log
+- CF Workers deployment log
 
 ---
 

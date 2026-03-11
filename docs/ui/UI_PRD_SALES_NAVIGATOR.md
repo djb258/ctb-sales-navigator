@@ -67,10 +67,10 @@ This UI does NOT:
 
 | Output | Source | Display Purpose |
 |--------|--------|-----------------|
-| Prospect list | Supabase via hub | Show available prospects |
-| Meeting status | Supabase via hub | Show progress indicators |
-| Prospect profile | Supabase via hub | Show prospect details |
-| Meeting notes | Supabase via hub | Show historical notes |
+| Prospect list | CF D1 via CF Workers | Show available prospects |
+| Meeting status | CF D1 via CF Workers | Show progress indicators |
+| Prospect profile | CF D1 via CF Workers | Show prospect details |
+| Meeting notes | CF D1 via CF Workers | Show historical notes |
 | Qualification status | Hub M layer | Show final outcome |
 
 ---
@@ -122,7 +122,7 @@ This UI does NOT:
 
 | Behavior | Status |
 |----------|--------|
-| Direct Supabase queries in components | FORBIDDEN |
+| Direct database queries in components | FORBIDDEN |
 | Business logic in components | FORBIDDEN |
 | State persistence beyond session | FORBIDDEN |
 | Direct external API calls | FORBIDDEN |

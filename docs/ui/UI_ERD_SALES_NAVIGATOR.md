@@ -163,10 +163,10 @@ erDiagram
 ## Data Flow Pattern
 
 ```
-Supabase (Source of Truth)
+CF D1 (Working Database — Source of Truth)
         |
         v
-Hub Data Layer (src/data/)
+CF Workers (API Layer)
         |
         v
 Hub App Layer (src/app/)
@@ -187,7 +187,7 @@ Event Emission (Intent only)
 Hub App Layer (processes intent)
         |
         v
-Supabase (mutation)
+CF Workers -> CF D1 (mutation) + Neon vault (archive sync)
 ```
 
 ---

@@ -51,8 +51,8 @@ imo:
     description: "Reports and analytics output — read-only views, no logic"
     spokes:
       - spoke_id: "SPOKE-O-UI"
-        name: "Lovable UI"
-        contract: "Presentation layer output"
+        name: "Figma UI"
+        contract: "Presentation layer output via CF Workers/Pages"
       - spoke_id: "SPOKE-O-REPORTS"
         name: "Report Generator"
         contract: "Sales reports and analytics"
@@ -95,11 +95,11 @@ database:
 # --- Services (Abstract) ---
 services:
   - name: "sales-navigator-web"
-    port: "5173"
+    port: "8080"
     type: "vite-react"
-  - name: "sales-navigator-api"
-    port: "5000"
-    type: "flask"
+  - name: "sales-navigator-worker"
+    type: "cf-worker"
+    description: "CF Workers compute + D1/KV data layer"
 
 # --- Environment (Abstract) ---
 environment:
@@ -108,10 +108,12 @@ environment:
   variables:
     - key: "COMPOSIO_API_KEY"
       source: "${DOPPLER:COMPOSIO_API_KEY}"
-    - key: "SUPABASE_URL"
-      source: "${DOPPLER:SUPABASE_URL}"
-    - key: "SUPABASE_ANON_KEY"
-      source: "${DOPPLER:SUPABASE_ANON_KEY}"
+    - key: "CF_D1_DATABASE_ID"
+      source: "${DOPPLER:CF_D1_DATABASE_ID}"
+    - key: "CF_ACCOUNT_ID"
+      source: "${DOPPLER:CF_ACCOUNT_ID}"
+    - key: "CF_API_TOKEN"
+      source: "${DOPPLER:CF_API_TOKEN}"
     - key: "ANTHROPIC_API_KEY"
       source: "${DOPPLER:ANTHROPIC_API_KEY}"
     - key: "OPENAI_API_KEY"
