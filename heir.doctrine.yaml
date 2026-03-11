@@ -62,6 +62,7 @@ database:
   schema: "sales"
   spine_table: "sales.sales_state"
   universal_join_key: "sales_id"
+  universal_join_key_type: "UUID"
   tables:
     - name: "sales.sales_state"
       type: "spine"
@@ -171,7 +172,7 @@ traceability:
 # ═══════════════════════════════════════════════════════════════════════════════
 document_control:
   created: "2026-02-11"
-  last_modified: "2026-02-11"
-  version: "1.0.0"
+  last_modified: "2026-03-11"
+  version: "1.1.0"
   status: "ACTIVE"
   authority: "CONSTITUTION.md"

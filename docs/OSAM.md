@@ -71,7 +71,7 @@ FactFinder (CC-03) Insurance (CC-03) Systems (CC-03)   Quotes (CC-03)
 ```yaml
 universal_join_key:
   name: "sales_id"
-  type: "TEXT"
+  type: "UUID"
   source_table: "sales.sales_state"
   description: "The single key that connects all tables in this hub"
 ```

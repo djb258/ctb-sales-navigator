@@ -2,7 +2,7 @@
 # ═══════════════════════════════════════════════════════════════════════════════
 #
 # PURPOSE: Current state of ERD tables for operational decision-making
-# AUTHORITY: CC-04 (Process/Runtime)
+# AUTHORITY: CC-04 (Process/Runtime), column_registry.yml
 # UPDATE FREQUENCY: Before any work session, minimum daily
 #
 # THIS FILE IS AUTO-UPDATED. Manual edits will be overwritten.
@@ -13,10 +13,10 @@
 # SYNC METADATA
 # ─────────────────────────────────────────────────────────────────────────────────
 sync:
-  last_updated: "2026-02-05T12:45:00Z"
+  last_updated: "2026-02-25T12:00:00Z"
   updated_by: "claude-code"
   source: "doppler://sales-navigator/dev → neon://Marketing DB"
-  next_sync_due: "2026-02-06T12:45:00Z"
+  next_sync_due: "2026-02-26T12:00:00Z"
 
   # Sync configuration
   frequency: daily
@@ -30,7 +30,7 @@ hub:
   hub_id: "HUB-SALES-NAV-20260130"
   hub_name: "sales-navigator"
   sovereign_id: "SOV-SVG-AGENCY"
-  erd_version: "1.0.0"
+  erd_version: "2.0.0"
 
 # ─────────────────────────────────────────────────────────────────────────────────
 # DATABASE INFO
@@ -38,113 +38,116 @@ hub:
 database:
   platform: "Neon PostgreSQL"
   database_name: "Marketing DB"
-  table_prefix: "sn_"
+  schema: "sales"
+  universal_join_key: "sales_id"
   connection: "doppler://sales-navigator/dev"
 
 # ─────────────────────────────────────────────────────────────────────────────────
 # TABLE METRICS
 # ─────────────────────────────────────────────────────────────────────────────────
-# For each table defined in ERD.md, record current counts and key statistics.
+# Tables aligned with column_registry.yml (sales.* schema)
+# Spine + 4 sub-hubs × (1 canonical + 1 error) = 9 tables
 
 tables:
-  sn_prospect:
-    erd_name: "PROSPECT"
-    description: "Raw prospect data ingested from CRM"
-    pass: "CAPTURE"
+  # ── Spine ──
+  sales_state:
+    schema_table: "sales.sales_state"
+    description: "Phase router — authoritative source of sales process identity"
+    role: "SPINE"
     total_records: 0
     created_last_24h: 0
     updated_last_24h: 0
-    by_status:
-      new: 0
-      contacted: 0
-      qualified: 0
-      disqualified: 0
-      deferred: 0
+    by_phase:
+      factfinder: 0
+      insurance: 0
+      systems: 0
+      quotes: 0
 
-  sn_sales_process:
-    erd_name: "SALES_PROCESS"
-    description: "4-meeting sales process tracking"
-    pass: "COMPUTE"
+  # ── Sub-Hub 1: FactFinder (Meeting 1) ──
+  sales_factfinder:
+    schema_table: "sales.sales_factfinder"
+    description: "Employer data captured during Fact Finder meeting"
+    role: "CANONICAL"
+    subhub: "SUB-MEETING-1"
     total_records: 0
     created_last_24h: 0
     updated_last_24h: 0
-    by_status:
-      pending: 0
-      in_progress: 0
-      completed: 0
-      abandoned: 0
-    by_outcome:
-      qualified: 0
-      disqualified: 0
-      deferred: 0
 
-  sn_meeting:
-    erd_name: "MEETING"
-    description: "Individual meeting instances"
-    pass: "COMPUTE"
+  sales_factfinder_errors:
+    schema_table: "sales.sales_factfinder_errors"
+    description: "Append-only error log for FactFinder sub-hub"
+    role: "ERROR"
+    subhub: "SUB-MEETING-1"
     total_records: 0
     created_last_24h: 0
-    updated_last_24h: 0
-    by_meeting_number:
-      meeting_1: 0
-      meeting_2: 0
-      meeting_3: 0
-      meeting_4: 0
-    by_status:
-      scheduled: 0
-      in_progress: 0
-      completed: 0
-      skipped: 0
-      cancelled: 0
 
-  sn_meeting_outcome:
-    erd_name: "MEETING_OUTCOME"
-    description: "Documented outcomes and action items"
-    pass: "GOVERN"
+  # ── Sub-Hub 2: Insurance (Meeting 2) ──
+  sales_insurance:
+    schema_table: "sales.sales_insurance"
+    description: "Insurance education outcomes — funding model and strategy"
+    role: "CANONICAL"
+    subhub: "SUB-MEETING-2"
     total_records: 0
     created_last_24h: 0
     updated_last_24h: 0
-    by_outcome_type:
-      positive: 0
-      neutral: 0
-      negative: 0
-      deferred: 0
-    pending_action_items: 0
+
+  sales_insurance_errors:
+    schema_table: "sales.sales_insurance_errors"
+    description: "Append-only error log for Insurance sub-hub"
+    role: "ERROR"
+    subhub: "SUB-MEETING-2"
+    total_records: 0
+    created_last_24h: 0
+
+  # ── Sub-Hub 3: Systems (Meeting 3) ──
+  sales_systems:
+    schema_table: "sales.sales_systems"
+    description: "Systems and operations assessment — payroll, admin, compliance"
+    role: "CANONICAL"
+    subhub: "SUB-MEETING-3"
+    total_records: 0
+    created_last_24h: 0
+    updated_last_24h: 0
+
+  sales_systems_errors:
+    schema_table: "sales.sales_systems_errors"
+    description: "Append-only error log for Systems sub-hub"
+    role: "ERROR"
+    subhub: "SUB-MEETING-3"
+    total_records: 0
+    created_last_24h: 0
+
+  # ── Sub-Hub 4: Quotes (Meeting 4) ──
+  sales_quotes:
+    schema_table: "sales.sales_quotes"
+    description: "Financial quotes and approval status"
+    role: "CANONICAL"
+    subhub: "SUB-MEETING-4"
+    total_records: 0
+    created_last_24h: 0
+    updated_last_24h: 0
+
+  sales_quotes_errors:
+    schema_table: "sales.sales_quotes_errors"
+    description: "Append-only error log for Quotes sub-hub"
+    role: "ERROR"
+    subhub: "SUB-MEETING-4"
+    total_records: 0
+    created_last_24h: 0
 
 # ─────────────────────────────────────────────────────────────────────────────────
 # AGGREGATE METRICS
 # ─────────────────────────────────────────────────────────────────────────────────
 aggregates:
   total_records_all_tables: 0
-  total_prospects: 0
   total_sales_processes: 0
-  total_meetings: 0
-  total_outcomes: 0
+  total_errors_all_subhubs: 0
 
-  # Sales funnel metrics
-  conversion_rate_percent: 0
-  average_meetings_per_prospect: 0
-  completion_rate_percent: 0
-
-  # Pipeline metrics
-  active_prospects: 0
-  prospects_in_meeting_1: 0
-  prospects_in_meeting_2: 0
-  prospects_in_meeting_3: 0
-  prospects_in_meeting_4: 0
-
-# ─────────────────────────────────────────────────────────────────────────────────
-# FILTER/EXCLUSION METRICS
-# ─────────────────────────────────────────────────────────────────────────────────
-filters:
-  total_excluded: 0
-  exclusion_reasons:
-    - reason: "disqualified"
-      count: 0
-    - reason: "abandoned"
-      count: 0
-    - reason: "duplicate"
-      count: 0
+  # Pipeline metrics (from sales_state.current_phase)
+  prospects_in_factfinder: 0
+  prospects_in_insurance: 0
+  prospects_in_systems: 0
+  prospects_in_quotes: 0
 
 # ─────────────────────────────────────────────────────────────────────────────────
 # DATA QUALITY METRICS
@@ -152,117 +155,61 @@ filters:
 data_quality:
   null_rate_percent: 0
   duplicate_rate_percent: 0
-  last_quality_check: "2026-02-05T12:45:00Z"
+  last_quality_check: "2026-02-25T12:00:00Z"
   quality_status: "PASS"
 
 # ─────────────────────────────────────────────────────────────────────────────────
-# SYNC QUERIES (Reference)
+# SYNC QUERIES (Reference — sales.* schema)
 # ─────────────────────────────────────────────────────────────────────────────────
 queries:
-  # sn_prospect table queries
-  prospect_total: |
-    SELECT COUNT(*) FROM sn_prospect;
+  spine_total: |
+    SELECT COUNT(*) FROM sales.sales_state;
 
-  prospect_created_last_24h: |
-    SELECT COUNT(*) FROM sn_prospect
-    WHERE created_at > NOW() - INTERVAL '24 hours';
+  spine_by_phase: |
+    SELECT current_phase, COUNT(*)
+    FROM sales.sales_state
+    GROUP BY current_phase;
 
-  prospect_by_status: |
-    SELECT status, COUNT(*)
-    FROM sn_prospect
-    GROUP BY status;
+  factfinder_total: |
+    SELECT COUNT(*) FROM sales.sales_factfinder;
 
-  # sn_sales_process table queries
-  sales_process_total: |
-    SELECT COUNT(*) FROM sn_sales_process;
+  insurance_total: |
+    SELECT COUNT(*) FROM sales.sales_insurance;
 
-  sales_process_by_status: |
-    SELECT overall_status, COUNT(*)
-    FROM sn_sales_process
-    GROUP BY overall_status;
+  systems_total: |
+    SELECT COUNT(*) FROM sales.sales_systems;
 
-  sales_process_by_outcome: |
-    SELECT final_outcome, COUNT(*)
-    FROM sn_sales_process
-    WHERE final_outcome IS NOT NULL
-    GROUP BY final_outcome;
+  quotes_total: |
+    SELECT COUNT(*) FROM sales.sales_quotes;
 
-  # sn_meeting table queries
-  meeting_total: |
-    SELECT COUNT(*) FROM sn_meeting;
-
-  meeting_by_number: |
-    SELECT meeting_number, COUNT(*)
-    FROM sn_meeting
-    GROUP BY meeting_number
-    ORDER BY meeting_number;
-
-  meeting_by_status: |
-    SELECT status, COUNT(*)
-    FROM sn_meeting
-    GROUP BY status;
-
-  # sn_meeting_outcome table queries
-  meeting_outcome_total: |
-    SELECT COUNT(*) FROM sn_meeting_outcome;
-
-  meeting_outcome_by_type: |
-    SELECT outcome_type, COUNT(*)
-    FROM sn_meeting_outcome
-    GROUP BY outcome_type;
-
-  # Aggregate queries
-  conversion_rate: |
-    SELECT
-      ROUND(
-        (SELECT COUNT(*) FROM sn_sales_process WHERE final_outcome = 'qualified')::numeric /
-        NULLIF((SELECT COUNT(*) FROM sn_prospect), 0) * 100,
-        2
-      ) AS conversion_rate_percent;
-
-  average_meetings_per_prospect: |
-    SELECT
-      ROUND(
-        (SELECT COUNT(*) FROM sn_meeting)::numeric /
-        NULLIF((SELECT COUNT(*) FROM sn_prospect), 0),
-        2
-      ) AS avg_meetings;
-
-  pipeline_by_meeting: |
-    SELECT
-      sp.current_meeting,
-      COUNT(*) as prospect_count
-    FROM sn_sales_process sp
-    WHERE sp.overall_status IN ('pending', 'in_progress')
-    GROUP BY sp.current_meeting
-    ORDER BY sp.current_meeting;
+  errors_all: |
+    SELECT 'factfinder' AS subhub, COUNT(*) FROM sales.sales_factfinder_errors
+    UNION ALL
+    SELECT 'insurance', COUNT(*) FROM sales.sales_insurance_errors
+    UNION ALL
+    SELECT 'systems', COUNT(*) FROM sales.sales_systems_errors
+    UNION ALL
+    SELECT 'quotes', COUNT(*) FROM sales.sales_quotes_errors;
 
 # ─────────────────────────────────────────────────────────────────────────────────
 # ALERTS / THRESHOLDS
 # ─────────────────────────────────────────────────────────────────────────────────
 thresholds:
-  min_prospects_for_healthy_pipeline: 10
-  max_abandoned_rate_percent: 20
+  max_error_rate_percent: 5
   max_null_rate_percent: 5
-  target_conversion_rate_percent: 25
   target_completion_rate_percent: 80
 
 alerts: []
-  # Populated by sync script when thresholds are breached
-  # Example:
-  # - type: "threshold_breach"
-  #   field: "abandoned_rate"
-  #   threshold: 20
-  #   actual: 25
-  #   timestamp: "2026-02-05T12:45:00Z"
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # DOCUMENT CONTROL
 # ═══════════════════════════════════════════════════════════════════════════════
 document_control:
-  template_version: "1.0.0"
+  template_version: "2.0.0"
   template_source: "imo-creator/templates/erd/ERD_METRICS.yaml.template"
   created: "2026-02-05"
-  schema_migration: "001_create_sales_navigator_schema.sql"
+  last_modified: "2026-02-25"
+  schema_migration: "sales/migrations/001_sales_schema.sql"
+  canonical_registry: "column_registry.yml"
   authority: "CC-04"
   change_protocol: "Auto-updated by sync process"

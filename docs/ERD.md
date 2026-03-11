@@ -2,7 +2,7 @@
 
 **Status**: ACTIVE
 **Authority**: CONSTITUTION.md
-**Version**: 2.0.0
+**Version**: 2.1.0
 **Hub**: HUB-SALES-NAV-20260130
 **OSAM**: docs/OSAM.md
 
@@ -21,7 +21,7 @@ Every table must trace to a declared constant and produce a declared variable. E
 ## Schema: `sales`
 
 **Pattern**: 2 tables per sub-hub (canonical + append-only errors)
-**Universal Join Key**: `sales_id TEXT`
+**Universal Join Key**: `sales_id UUID`
 **Spine**: `sales.sales_state`
 
 ---
@@ -40,14 +40,19 @@ erDiagram
     SALES_STATE ||--o{ SALES_QUOTES_ERRORS : "1:N via sales_id"
 
     SALES_STATE {
-        text sales_id PK "Universal join key"
+        uuid sales_id PK "Universal join key"
+        text legal_name "Company legal name"
+        text domicile_state "State of domicile"
         text current_phase "Active sub-hub gate"
+        text status "Sales process status"
+        text source "Record origin"
+        int version "Optimistic concurrency"
         timestamp created_at "Process inception"
         timestamp updated_at "Last phase transition"
     }
 
     SALES_FACTFINDER {
-        text sales_id PK "Join anchor"
+        uuid sales_id PK "Join anchor"
         text employer_name "Company name"
         int employee_count "Total employees"
         int renewal_month "Benefits renewal month"
@@ -58,7 +63,7 @@ erDiagram
 
     SALES_FACTFINDER_ERRORS {
         bigserial id PK "Auto-increment"
-        text sales_id "Links to canonical"
+        uuid sales_id "Links to canonical"
         text error_code "Machine-readable error"
         jsonb payload "Full error context"
         text process_id "Originating process"
@@ -66,7 +71,7 @@ erDiagram
     }
 
     SALES_INSURANCE {
-        text sales_id PK "Join anchor"
+        uuid sales_id PK "Join anchor"
         text funding_model "Insurance funding model"
         text strategy_selected "Selected strategy"
         timestamp created_at "Record creation"
@@ -75,7 +80,7 @@ erDiagram
 
     SALES_INSURANCE_ERRORS {
         bigserial id PK "Auto-increment"
-        text sales_id "Links to canonical"
+        uuid sales_id "Links to canonical"
         text error_code "Machine-readable error"
         jsonb payload "Full error context"
         text process_id "Originating process"
@@ -83,7 +88,7 @@ erDiagram
     }
 
     SALES_SYSTEMS {
-        text sales_id PK "Join anchor"
+        uuid sales_id PK "Join anchor"
         text payroll_system "Payroll provider"
         text admin_model "Administration model"
         text compliance_owner "Compliance responsible party"
@@ -93,7 +98,7 @@ erDiagram
 
     SALES_SYSTEMS_ERRORS {
         bigserial id PK "Auto-increment"
-        text sales_id "Links to canonical"
+        uuid sales_id "Links to canonical"
         text error_code "Machine-readable error"
         jsonb payload "Full error context"
         text process_id "Originating process"
@@ -101,7 +106,7 @@ erDiagram
     }
 
     SALES_QUOTES {
-        text sales_id PK "Join anchor"
+        uuid sales_id PK "Join anchor"
         int quote_version "Quote iteration number"
         numeric total_cost "Total quoted cost"
         boolean approved_flag "Approval status"
@@ -111,7 +116,7 @@ erDiagram
 
     SALES_QUOTES_ERRORS {
         bigserial id PK "Auto-increment"
-        text sales_id "Links to canonical"
+        uuid sales_id "Links to canonical"
         text error_code "Machine-readable error"
         jsonb payload "Full error context"
         text process_id "Originating process"
@@ -127,12 +132,17 @@ erDiagram
 
 **Purpose**: Authoritative source of sales process identity. Gates sub-hub access via `current_phase`.
 
-| Column | Type | Nullable | Description |
-|--------|------|----------|-------------|
-| sales_id | TEXT | NO | Primary key — universal join key |
-| current_phase | TEXT | NO | Active phase (factfinder, insurance, systems, quotes) |
-| created_at | TIMESTAMP | NO | Process inception |
-| updated_at | TIMESTAMP | NO | Last phase transition |
+| Column | Type | Nullable | Default | Description |
+|--------|------|----------|---------|-------------|
+| sales_id | UUID | NO | gen_random_uuid() | Primary key — universal join key |
+| legal_name | TEXT | NO | — | Company legal name |
+| domicile_state | TEXT | YES | — | State of domicile |
+| current_phase | TEXT | NO | 'factfinder' | Active phase (factfinder, insurance, systems, quotes) |
+| status | TEXT | NO | 'active' | Sales process status |
+| source | TEXT | YES | — | Record origin |
+| version | INT | NO | 1 | Optimistic concurrency counter |
+| created_at | TIMESTAMPTZ | NO | NOW() | Process inception |
+| updated_at | TIMESTAMPTZ | NO | NOW() | Last phase transition (auto-updated by trigger) |
 
 **OSAM Classification**: QUERY (query surface = YES)
 
@@ -155,7 +165,7 @@ erDiagram
 
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
-| sales_id | TEXT | NO | Primary key — join anchor |
+| sales_id | UUID | NO | Primary key — join anchor |
 | employer_name | TEXT | YES | Company name |
 | employee_count | INT | YES | Total employees |
 | renewal_month | INT | YES | Benefits renewal month |
@@ -185,7 +195,7 @@ erDiagram
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
 | id | BIGSERIAL | NO | Auto-increment PK |
-| sales_id | TEXT | YES | Links to canonical row |
+| sales_id | UUID | YES | Links to canonical row |
 | error_code | TEXT | YES | Machine-readable error identifier |
 | payload | JSONB | YES | Full error context |
 | process_id | TEXT | YES | Originating process/agent |
@@ -204,7 +214,7 @@ erDiagram
 
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
-| sales_id | TEXT | NO | Primary key — join anchor |
+| sales_id | UUID | NO | Primary key — join anchor |
 | funding_model | TEXT | YES | Insurance funding model |
 | strategy_selected | TEXT | YES | Selected strategy |
 | created_at | TIMESTAMP | YES | Record creation |
@@ -232,7 +242,7 @@ erDiagram
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
 | id | BIGSERIAL | NO | Auto-increment PK |
-| sales_id | TEXT | YES | Links to canonical row |
+| sales_id | UUID | YES | Links to canonical row |
 | error_code | TEXT | YES | Machine-readable error identifier |
 | payload | JSONB | YES | Full error context |
 | process_id | TEXT | YES | Originating process/agent |
@@ -251,7 +261,7 @@ erDiagram
 
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
-| sales_id | TEXT | NO | Primary key — join anchor |
+| sales_id | UUID | NO | Primary key — join anchor |
 | payroll_system | TEXT | YES | Payroll provider |
 | admin_model | TEXT | YES | Administration model |
 | compliance_owner | TEXT | YES | Compliance responsible party |
@@ -280,7 +290,7 @@ erDiagram
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
 | id | BIGSERIAL | NO | Auto-increment PK |
-| sales_id | TEXT | YES | Links to canonical row |
+| sales_id | UUID | YES | Links to canonical row |
 | error_code | TEXT | YES | Machine-readable error identifier |
 | payload | JSONB | YES | Full error context |
 | process_id | TEXT | YES | Originating process/agent |
@@ -299,7 +309,7 @@ erDiagram
 
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
-| sales_id | TEXT | NO | Primary key — join anchor |
+| sales_id | UUID | NO | Primary key — join anchor |
 | quote_version | INT | YES | Quote iteration number |
 | total_cost | NUMERIC | YES | Total quoted cost |
 | approved_flag | BOOLEAN | YES | Approval status (triggers promotion) |
@@ -330,7 +340,7 @@ erDiagram
 | Column | Type | Nullable | Description |
 |--------|------|----------|-------------|
 | id | BIGSERIAL | NO | Auto-increment PK |
-| sales_id | TEXT | YES | Links to canonical row |
+| sales_id | UUID | YES | Links to canonical row |
 | error_code | TEXT | YES | Machine-readable error identifier |
 | payload | JSONB | YES | Full error context |
 | process_id | TEXT | YES | Originating process/agent |
@@ -434,7 +444,7 @@ All joins declared in this ERD match OSAM exactly:
 | 9 | All joins declared in OSAM | PASS |
 | 10 | No cross-sub-hub direct joins | PASS |
 | 11 | Error tables are append-only | PASS |
-| 12 | Universal join key consistent (sales_id TEXT) | PASS |
+| 12 | Universal join key consistent (sales_id UUID) | PASS |
 
 **ERD VALIDATION RESULT**: PASS
 
@@ -445,8 +455,8 @@ All joins declared in this ERD match OSAM exactly:
 | Field | Value |
 |-------|-------|
 | Created | 2026-01-30 |
-| Last Modified | 2026-02-11 |
-| Version | 2.0.0 |
+| Last Modified | 2026-03-11 |
+| Version | 2.1.0 |
 | Status | ACTIVE |
 | Authority | CONSTITUTION.md |
 | Hub | HUB-SALES-NAV-20260130 |

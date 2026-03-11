@@ -70,7 +70,7 @@ Zod schemas are projections of this file and must never be hand-edited.
 |-------|---------|
 | `sales.sales_state` | Phase router -- authoritative identity, gates sub-hub access |
 
-Columns: `sales_id` (TEXT, universal join key), `current_phase` (TEXT: factfinder/insurance/systems/quotes), `created_at`, `updated_at`
+Columns: `sales_id` (UUID PK, universal join key), `legal_name` (TEXT), `domicile_state` (TEXT), `current_phase` (TEXT: factfinder/insurance/systems/quotes), `status` (TEXT), `source` (TEXT), `version` (INT), `created_at`, `updated_at`
 
 ### Sub-Hub Tables (4 meetings)
 

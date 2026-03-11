@@ -22,8 +22,8 @@
 #
 # ═══════════════════════════════════════════════════════════════════════════════
 
-version: "1.0.0"
-last_updated: "2026-02-25"
+version: "1.1.0"
+last_updated: "2026-03-11"
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # HUB IDENTITY
@@ -33,7 +33,7 @@ hub:
   hub_id: "HUB-SALES-NAV-20260130"
   hub_name: "sales-navigator"
   universal_join_key: "sales_id"
-  universal_join_key_type: "TEXT"
+  universal_join_key_type: "UUID"
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # SPINE TABLE
@@ -49,10 +49,23 @@ spine_table:
   row_identity_strategy: "UUID"
   columns:
     - name: "sales_id"
-      type: "TEXT"
+      type: "UUID"
       nullable: false
       description: "Universal join key — minted at intake, propagated to all sub-hub tables"
       semantic_role: "identifier"
+      format: "UUID"
+      default: "gen_random_uuid()"
+    - name: "legal_name"
+      type: "TEXT"
+      nullable: false
+      description: "Company legal name — mirrors cl.company_identity.company_name"
+      semantic_role: "attribute"
+      format: "STRING"
+    - name: "domicile_state"
+      type: "TEXT"
+      nullable: true
+      description: "State of domicile for the prospect company"
+      semantic_role: "attribute"
       format: "STRING"
     - name: "current_phase"
       type: "TEXT"
@@ -60,6 +73,27 @@ spine_table:
       description: "Active sub-hub gate — one of factfinder, insurance, systems, quotes"
       semantic_role: "attribute"
       format: "ENUM"
+      default: "'factfinder'"
+    - name: "status"
+      type: "TEXT"
+      nullable: false
+      description: "Sales process status — active, paused, closed_won, closed_lost"
+      semantic_role: "attribute"
+      format: "ENUM"
+      default: "'active'"
+    - name: "source"
+      type: "TEXT"
+      nullable: true
+      description: "Origin of the sales record — manual_sales_bootstrap, crm_intake, etc."
+      semantic_role: "attribute"
+      format: "STRING"
+    - name: "version"
+      type: "INTEGER"
+      nullable: false
+      description: "Optimistic concurrency version counter"
+      semantic_role: "attribute"
+      format: "INTEGER"
+      default: "1"
     - name: "created_at"
       type: "TIMESTAMPTZ"
       nullable: false
@@ -69,7 +103,7 @@ spine_table:
     - name: "updated_at"
       type: "TIMESTAMPTZ"
       nullable: false
-      description: "Last phase transition timestamp"
+      description: "Last phase transition timestamp — auto-updated by trigger"
       semantic_role: "attribute"
       format: "ISO-8601"
 
@@ -95,11 +129,11 @@ subhubs:
         row_identity_strategy: "UUID"
         columns:
           - name: "sales_id"
-            type: "TEXT"
+            type: "UUID"
             nullable: false
             description: "Primary key — join anchor to spine table"
             semantic_role: "foreign_key"
-            format: "STRING"
+            format: "UUID"
           - name: "employer_name"
             type: "TEXT"
             nullable: true
@@ -152,11 +186,11 @@ subhubs:
             semantic_role: "identifier"
             format: "INTEGER"
           - name: "sales_id"
-            type: "TEXT"
+            type: "UUID"
             nullable: true
             description: "FK to spine — nullable because error may occur before entity exists"
             semantic_role: "foreign_key"
-            format: "STRING"
+            format: "UUID"
           - name: "error_code"
             type: "TEXT"
             nullable: true
@@ -198,11 +232,11 @@ subhubs:
         row_identity_strategy: "UUID"
         columns:
           - name: "sales_id"
-            type: "TEXT"
+            type: "UUID"
             nullable: false
             description: "Primary key — join anchor to spine table"
             semantic_role: "foreign_key"
-            format: "STRING"
+            format: "UUID"
           - name: "funding_model"
             type: "TEXT"
             nullable: true
@@ -243,11 +277,11 @@ subhubs:
             semantic_role: "identifier"
             format: "INTEGER"
           - name: "sales_id"
-            type: "TEXT"
+            type: "UUID"
             nullable: true
             description: "FK to spine — nullable because error may occur before entity exists"
             semantic_role: "foreign_key"
-            format: "STRING"
+            format: "UUID"
           - name: "error_code"
             type: "TEXT"
             nullable: true
@@ -289,11 +323,11 @@ subhubs:
         row_identity_strategy: "UUID"
         columns:
           - name: "sales_id"
-            type: "TEXT"
+            type: "UUID"
             nullable: false
             description: "Primary key — join anchor to spine table"
             semantic_role: "foreign_key"
-            format: "STRING"
+            format: "UUID"
           - name: "payroll_system"
             type: "TEXT"
             nullable: true
@@ -340,11 +374,11 @@ subhubs:
             semantic_role: "identifier"
             format: "INTEGER"
           - name: "sales_id"
-            type: "TEXT"
+            type: "UUID"
             nullable: true
             description: "FK to spine — nullable because error may occur before entity exists"
             semantic_role: "foreign_key"
-            format: "STRING"
+            format: "UUID"
           - name: "error_code"
             type: "TEXT"
             nullable: true
@@ -386,11 +420,11 @@ subhubs:
         row_identity_strategy: "UUID"
         columns:
           - name: "sales_id"
-            type: "TEXT"
+            type: "UUID"
             nullable: false
             description: "Primary key — join anchor to spine table"
             semantic_role: "foreign_key"
-            format: "STRING"
+            format: "UUID"
           - name: "quote_version"
             type: "INTEGER"
             nullable: true
@@ -437,11 +471,11 @@ subhubs:
             semantic_role: "identifier"
             format: "INTEGER"
           - name: "sales_id"
-            type: "TEXT"
+            type: "UUID"
             nullable: true
             description: "FK to spine — nullable because error may occur before entity exists"
             semantic_role: "foreign_key"
-            format: "STRING"
+            format: "UUID"
           - name: "error_code"
             type: "TEXT"
             nullable: true
@@ -483,7 +517,7 @@ generated_output:
 
 document_control:
   created: "2026-02-25"
-  last_modified: "2026-02-25"
+  last_modified: "2026-03-11"
   status: "ACTIVE"
   authority: "imo-creator (Inherited)"
   change_protocol: "Update registry → run codegen-generate.sh → commit both"
