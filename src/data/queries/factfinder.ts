@@ -1,3 +1,4 @@
+// TODO: BAR-113 — rewrite supabase queries to CF Worker/D1 endpoints
 /**
  * Factfinder Queries — Sales Navigator
  *
