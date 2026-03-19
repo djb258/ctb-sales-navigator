@@ -351,8 +351,8 @@ Sub-hub error tables (`sales.*_errors`) capture domain-specific errors. ORBT cap
 | HEIR | heir.doctrine.yaml |
 | Canonical ERD | docs/ERD.md |
 | Sales CTB Backbone | sales/doctrine/SALES_CTB.md |
-| Doppler Integration | docs/ADR-002-doppler-secrets.md |
-| Neon Schema | docs/ADR-005-neon-schema.md |
+| Doppler Integration | docs/adr/ADR-002-doppler-secrets.md |
+| Neon Schema | docs/adr/ADR-005-neon-schema.md |
 | Kill Switch | docs/KILL_SWITCH.md |
 | Rollback Plan | docs/ROLLBACK_PLAN.md |
 | Observability | docs/OBSERVABILITY.md |

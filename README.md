@@ -101,7 +101,7 @@ The following directories are **constitutionally forbidden**:
 | No .env files with secrets | FORBIDDEN |
 | No hardcoded credentials | FORBIDDEN |
 
-See [ADR-002: Doppler Secrets](docs/ADR-002-doppler-secrets.md) for details.
+See [ADR-002: Doppler Secrets](docs/adr/ADR-002-doppler-secrets.md) for details.
 
 ---
 

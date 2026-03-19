@@ -46,9 +46,9 @@ This attestation documents the constitutional rebuild of the sales-navigator rep
 - [x] Declared Doppler as required infrastructure
 
 ### Phase 3: Architectural Decisions (CC-03)
-- [x] Created `docs/ADR-001-ctb-structure.md` — CTB adoption
-- [x] Created `docs/ADR-002-doppler-secrets.md` — Doppler mandate
-- [x] Created `docs/ADR-003-rogue-folders.md` — Quarantine documentation
+- [x] Created `docs/adr/ADR-001-ctb-structure.md` — CTB adoption
+- [x] Created `docs/adr/ADR-002-doppler-secrets.md` — Doppler mandate
+- [x] Created `docs/adr/ADR-003-rogue-folders.md` — Quarantine documentation
 
 ### Phase 4: Domain & Data Declaration
 - [x] Created `doctrine/REPO_DOMAIN_SPEC.md` — Sales domain bindings
@@ -94,9 +94,9 @@ This attestation documents the constitutional rebuild of the sales-navigator rep
 | `REGISTRY.yaml` | ✅ PRESENT |
 | `IMO_CONTROL.json` | ✅ PRESENT |
 | `docs/PRD.md` | ✅ PRESENT |
-| `docs/ADR-001-*.md` | ✅ PRESENT |
-| `docs/ADR-002-*.md` | ✅ PRESENT |
-| `docs/ADR-003-*.md` | ✅ PRESENT |
+| `docs/adr/ADR-001-*.md` | ✅ PRESENT |
+| `docs/adr/ADR-002-*.md` | ✅ PRESENT |
+| `docs/adr/ADR-003-*.md` | ✅ PRESENT |
 | `doctrine/REPO_DOMAIN_SPEC.md` | ✅ PRESENT |
 
 ### CTB Structure

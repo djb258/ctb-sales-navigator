@@ -163,12 +163,11 @@ traceability:
   erd: "docs/ERD.md"
   osam: "docs/OSAM.md"
   adrs:
-    - "docs/ADR-001-ctb-structure.md"
-    - "docs/ADR-002-doppler-secrets.md"
-    - "docs/ADR-003-rogue-folders.md"
-# TODO: BAR-113 INVESTIGATE — ADR-004 references Supabase, review after CF migration
-    - "docs/ADR-004-supabase.md"
-    - "docs/ADR-005-neon-schema.md"
+    - "docs/adr/ADR-001-ctb-structure.md"
+    - "docs/adr/ADR-002-doppler-secrets.md"
+    - "docs/adr/ADR-003-rogue-folders.md"
+    - "docs/adr/ADR-004-supabase.md"
+    - "docs/adr/ADR-005-neon-schema.md"
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # DOCUMENT CONTROL

@@ -1,78 +1,51 @@
-# Claude Bootstrap — Sales Navigator Hub
+# CLAUDE.md — Sales Navigator Hub
 
-**Hub ID**: HUB-SALES-NAV-20260130
-**Parent**: imo-creator
-**Authority**: CONSTITUTION.md
-**Status**: CHILD REPO
+## Identity
 
----
+This is a **blueprint repo** — schema, doctrine, definitions, meeting process structure. ZERO runtime code.
+All executable processes live in **Barton-Processes**.
 
-## Session Startup (Mandatory)
-
-Follow `templates/child/STARTUP_PROTOCOL.md`. In short:
-
-### Tier 1 — Load These Three Files First
-
-```
-1. IMO_CONTROL.json — Hub identity, governance contract
-2. CC_OPERATIONAL_DIGEST.md — ALL operational rules (~500 lines)
-3. CLAUDE.md — This file (AI permissions, repo-specific rules)
-```
-
-### Tier 2 — Load On-Demand When Work Requires
-
-```
-CONSTITUTION.md — Hub boundaries and mandates
-REGISTRY.yaml — Hub identity and configuration
-templates/IMO_SYSTEM_SPEC.md — System index
-templates/AI_EMPLOYEE_OPERATING_CONTRACT.md — Agent constraints
-doctrine/REPO_DOMAIN_SPEC.md — Domain bindings (REQUIRED)
-column_registry.yml — Canonical schema spine
-docs/PRD.md — Product requirements
-docs/ERD.md — Entity relationships
-docs/OSAM.md — Query routing
-```
-
-### Checkpoint Gate
-
-Before coding, verify `DOCTRINE_CHECKPOINT.yaml` is current (<24 hours). If stale, refresh it.
-
----
-
-## Parent-Child Relationship
-
-```
-IMO-Creator (PARENT)
-    │
-    └── templates/ — Generic doctrine (READ-ONLY)
-            │
-            ▼ binds to
-            │
-Sales Navigator (THIS HUB — CHILD)
-    │
-    └── doctrine/REPO_DOMAIN_SPEC.md — Domain-specific bindings
-```
-
-### Inheritance Rules
-
-| Rule | Enforcement |
-|------|-------------|
-| Parent doctrine is READ-ONLY | MANDATORY |
-| Domain specifics in REPO_DOMAIN_SPEC.md | REQUIRED |
-| Parent wins on conflicts | ALWAYS |
-| Child cannot modify parent | FORBIDDEN |
-
----
-
-## Hub Identity
+**Authority**: Inherited from imo-creator-v2 (Sovereign)
+**Engine**: `law/doctrine/TIER0_DOCTRINE.md` (in imo-creator-v2)
 
 | Field | Value |
 |-------|-------|
-| Hub ID | HUB-SALES-NAV-20260130 |
-| Hub Name | sales-navigator |
-| Hub Type | SALES |
-| Sovereign Reference | SOV-SVG-AGENCY |
-| Parent | imo-creator |
+| **Repository** | djb258/ctb-sales-navigator |
+| **Hub ID** | HUB-SALES-NAV-20260130 |
+| **Hub Name** | sales-navigator |
+| **Parent Sovereign** | imo-creator-v2 |
+| **Doctrine Version** | 2.0.0 |
+
+---
+
+## CANONICAL REFERENCE
+
+| Template | imo-creator-v2 Path | Version |
+|----------|---------------------|---------|
+| Architecture | law/doctrine/ARCHITECTURE.md | 2.1.0 |
+| Tier 0 | law/doctrine/TIER0_DOCTRINE.md | LOCKED |
+| Critical Thinking | law/doctrine/CRITICAL_THINKING_FRAMEWORK.md | LOCKED |
+| Tools | law/integrations/TOOLS.md | 1.1.0 |
+| OSAM | law/semantic/OSAM.md | 1.1.0 |
+| PRD | fleet/car-template/docs/PRD_HUB.md | 1.0.0 |
+| ADR | fleet/adr-templates/ADR.md | 1.0.0 |
+| Checklist | fleet/checklists/HUB_COMPLIANCE.md | 1.0.0 |
+
+---
+
+## Blueprint, Not Muscle
+
+This repo defines WHAT. Barton-Processes defines HOW.
+
+| This Repo (Blueprint) | Barton-Processes (Muscle) |
+|------------------------|--------------------------|
+| Schema (column registry) | CF Workers |
+| OSAM (query routing) | D1 working tables |
+| PRD (transformation statement) | Neon vault migrations |
+| Meeting process definitions | Runtime execution |
+| Doctrine, governance, ADRs | Data movement |
+
+**No executable code belongs here.** If it runs, it goes in Barton-Processes.
 
 ---
 
@@ -89,196 +62,152 @@ Sales Navigator (THIS HUB — CHILD)
 
 ---
 
+## Data Hierarchy
+
+```
+CL (Company Lifecycle — sovereign ID)
+├── Outreach ID (sub-hub)
+├── Sales ID (sub-hub) ← THIS REPO
+│   ├── Sales State (SPINE — phase router)
+│   ├── FactFinder (Meeting 1)
+│   ├── Insurance (Meeting 2)
+│   ├── Systems (Meeting 3)
+│   └── Quotes (Meeting 4)
+└── Client ID (sub-hub)
+```
+
+**CL sovereign ID is the spine.** Sales ID is minted when a prospect enters the sales process. When a sale closes, the Sales ID promotes to Client ID via the sovereign.
+
+---
+
 ## The 4-Meeting Sales Process
 
-| # | Meeting | Purpose | CTB Branch |
-|---|---------|---------|------------|
-| 1 | Fact Finder | Gather prospect data | app/meetings/ |
-| 2 | Insurance Education | Educate on insurance options | app/meetings/ |
-| 3 | Systems Education | Present systems/solutions | app/meetings/ |
-| 4 | Financials | Review financials, close | app/meetings/ |
+| # | Meeting | Purpose | Sub-Hub |
+|---|---------|---------|---------|
+| 1 | Fact Finder | Gather prospect data | FactFinder |
+| 2 | Insurance Education | Educate on insurance options | Insurance |
+| 3 | Systems Education | Present systems/solutions | Systems |
+| 4 | Financials | Review financials, close | Quotes |
+
+Each meeting maps to a sub-hub with 1 CANONICAL + 1 ERROR table.
 
 ---
 
-## CTB Structure (Enforced)
+## Schema (8 Tables, 4 Sub-Hubs + Spine)
 
-```
-src/
-├── sys/      # System infrastructure, Doppler integration
-├── data/     # Schemas, data models, types
-├── app/      # Business logic, workflows, services
-├── ai/       # AI agents, prompts, LLM integration
-└── ui/       # User interface, components, pages
-```
+Single source of truth: `column_registry.yml`
 
-### Forbidden Patterns
+| Sub-Hub | CANONICAL | ERROR |
+|---------|-----------|-------|
+| Spine | sales_state | — |
+| FactFinder | sales_factfinder | sales_factfinder_errors |
+| Insurance | sales_insurance | sales_insurance_errors |
+| Systems | sales_systems | sales_systems_errors |
+| Quotes | sales_quotes | sales_quotes_errors |
 
-| Pattern | Status |
-|---------|--------|
-| `src/lib/` | FORBIDDEN |
-| `src/utils/` | FORBIDDEN |
-| `src/helpers/` | FORBIDDEN |
-| `src/common/` | FORBIDDEN |
-| `src/shared/` | FORBIDDEN |
+**Universal join key:** `sales_id` (from sales.sales_state)
+**Schema:** `sales`
 
 ---
 
-## Infrastructure Mandates
+## Infrastructure Layers
 
-### Doppler (REQUIRED)
+| Layer | Technology | Role |
+|-------|-----------|------|
+| Working | CF D1 | Active sales operations |
+| Config | CF KV | Meeting templates, workflow config |
+| Compute | CF Workers | All processing logic |
+| Vault | Neon PostgreSQL | Long-term canonical storage |
+| Secrets | Doppler (imo-creator project) | All runtime configuration |
 
-**Doppler is the sole authorized secrets provider.**
-
-```bash
-# Setup (first time)
-doppler setup --project sales-navigator --config dev
-
-# Run commands
-doppler run -- npm run dev
-doppler run -- npm run build
-```
-
-| Mandate | Status |
-|---------|--------|
-| All secrets via Doppler | MANDATORY |
-| No .env files with secrets | FORBIDDEN |
-| No hardcoded credentials | FORBIDDEN |
-
-### Composio MCP (REQUIRED)
-
-All external API calls go through Composio MCP server.
-
-```bash
-# Start MCP server first
-cd path/to/composio-mcp && node server.js
-
-# Then run app
-doppler run -- npm run dev
-```
+**CF does the work. Neon is the vault.**
 
 ---
 
-## Agent System (Planner / Builder / Auditor)
+## IMO Model
 
-This repo uses a 3-agent governance model. Agents communicate via a folder-based message bus. No direct agent-to-agent communication.
-
-### Agents
-
-| Agent | Role | Input | Output |
-|-------|------|-------|--------|
-| **Planner** | Generates WORK_PACKETs from user requests | User request + doctrine | `work_packets/outbox/` |
-| **Builder** | Executes approved WORK_PACKETs | `work_packets/inbox/` | Code + `changesets/outbox/` |
-| **Auditor** | Verifies compliance | `work_packets/inbox/` + `changesets/inbox/` | `audit_reports/outbox/` |
-| **Control Panel** | Read-only diagnostic | All inboxes/outboxes | Structured report |
-
-### Message Bus
-
-```
-work_packets/inbox/     — Builder reads from here
-work_packets/outbox/    — Planner writes here
-changesets/inbox/       — Auditor reads from here
-changesets/outbox/      — Builder writes here
-audit_reports/inbox/    — (reserved)
-audit_reports/outbox/   — Auditor writes here
-audit/                  — Pressure test reports
-```
-
-### Flow
-
-```
-User Request → Planner → WORK_PACKET → (human approval if architectural) → Builder → CHANGESET → Auditor → AUDIT_REPORT
-```
-
-### Contracts
-
-All artifacts must conform to schemas in `agents/contracts/`:
-- `work_packet.schema.json`
-- `changeset.schema.json`
-- `audit_report.schema.json`
-- `arch_pressure_report.schema.json` (when pressure test required)
-- `flow_pressure_report.schema.json` (when pressure test required)
+| Layer | Role | Rules |
+|-------|------|-------|
+| **I - Ingress** | CRM intake, prospect data | No logic, no state, no decisions |
+| **M - Middle** | Sales process engine — meetings, state, decisions | ALL logic lives here |
+| **O - Egress** | Reports, analytics, UI views | Read-only, no logic |
 
 ---
 
-## What You MUST Do
+## Governance Files
 
-1. **Read CONSTITUTION.md first** in this repo
-2. **Check for violations** before any work
-3. **Halt and report** if violations exist
-4. **Reference doctrine** — do not interpret it
-5. **Use Doppler** for all secrets
-6. **Route external APIs through Composio MCP**
-7. **Follow agent boundaries** — Planner plans, Builder builds, Auditor audits
-
----
-
-## What You MUST NOT Do
-
-1. **Modify doctrine files in templates/** — PROHIBITED
-2. **Create forbidden folders** — PROHIBITED
-3. **Hardcode secrets** — PROHIBITED
-4. **Bypass Doppler** — PROHIBITED
-5. **Make direct external API calls** — PROHIBITED
-6. **Add logic to spokes/UI** — PROHIBITED
-7. **Proceed despite violations** — PROHIBITED
+| File | Purpose |
+|------|---------|
+| `CONSTITUTION.md` | Boundary declaration |
+| `REGISTRY.yaml` | Hub identity |
+| `IMO_CONTROL.json` | Governance contract |
+| `column_registry.yml` | Canonical schema spine |
+| `heir.doctrine.yaml` | HEIR identity record |
+| `doctrine/REPO_DOMAIN_SPEC.md` | Domain bindings |
+| `docs/PRD.md` | Hub definition |
+| `docs/ERD.md` | Entity relationships |
+| `docs/OSAM.md` | Query routing |
 
 ---
 
-## Halt Conditions
+## Sales-Specific Artifacts
 
-Stop immediately and report if:
-
-| Condition | Action |
-|-----------|--------|
-| CONSTITUTION.md missing | HALT |
-| IMO_CONTROL.json missing | HALT |
-| Forbidden folders exist | HALT |
-| Doctrine violation detected | HALT |
-| Secrets hardcoded | HALT |
-| Asked to modify doctrine | REFUSE |
+| File | Purpose |
+|------|---------|
+| `sales/hubs/sales_state.sql` | Spine table definition |
+| `sales/hubs/factfinder.sql` | Meeting 1 sub-hub |
+| `sales/hubs/insurance.sql` | Meeting 2 sub-hub |
+| `sales/hubs/systems.sql` | Meeting 3 sub-hub |
+| `sales/hubs/quotes.sql` | Meeting 4 sub-hub |
+| `sales/contracts/promote_to_client.json` | Promotion contract (sales → client) |
+| `sales/migrations/` | Neon vault migrations |
 
 ---
 
-## Quick Commands
+## Secrets Management (Doppler)
 
-```bash
-# Development
-doppler run -- npm run dev
+**All secrets live in the imo-creator Doppler project.** This is the sovereign vault.
 
-# Build
-doppler run -- npm run build
+Relevant keys:
+- `SALES_DATABASE_URL` — Neon connection string
+- `SALES_HUB_ID` — HUB-SALES-NAV-20260130
+- `SALES_NEON_HOST`, `SALES_NEON_USER`, `SALES_NEON_PASSWORD`, `SALES_NEON_DATABASE`
+- `SALES_SOVEREIGN_ID` — SOV-SVG-AGENCY
 
-# Type check
-npm run typecheck
-
-# Lint
-npm run lint
+```
+FORBIDDEN:
+- .env files (any variant)
+- Hardcoded secrets in code
+- secrets.json, credentials.json
+- Environment variables not from Doppler
 ```
 
 ---
 
-## Governance Documents
+## Never Do These Things
 
-| Document | Purpose | Location |
-|----------|---------|----------|
-| CONSTITUTION.md | Supreme law | repo root |
-| DOCTRINE.md | IMO-Creator conformance | repo root |
-| REGISTRY.yaml | Hub identity | repo root |
-| IMO_CONTROL.json | Governance contract | repo root |
-| CC_OPERATIONAL_DIGEST.md | Operational field manual (Tier 1) | repo root |
-| DOCTRINE_CHECKPOINT.yaml | Plan-before-build gate | repo root |
-| column_registry.yml | Canonical schema spine | repo root |
-| docs/PRD.md | Product requirements | docs/ |
-| docs/ERD.md | Entity relationships | docs/ |
-| docs/OSAM.md | Query routing | docs/ |
-| docs/ADR-*.md | Architecture decisions | docs/ |
-| doctrine/REPO_DOMAIN_SPEC.md | Domain bindings | doctrine/ |
-| heir.doctrine.yaml | HEIR/2.0 identity record | repo root |
-| agents/planner/master_prompt.md | Planner agent prompt | agents/ |
-| agents/builder/master_prompt.md | Builder agent prompt | agents/ |
-| agents/auditor/master_prompt.md | Auditor agent prompt | agents/ |
-| agents/control_panel/master_prompt.md | Control Panel prompt | agents/ |
-| agents/contracts/*.schema.json | Agent contract schemas | agents/contracts/ |
+```
+HARD PROHIBITIONS:
+- Put executable code in this repo (it goes in Barton-Processes)
+- Modify parent doctrine (imo-creator-v2)
+- Put logic in Ingress or Egress layers
+- Use .env files or hardcode secrets
+- Create forbidden folders (utils, helpers, lib, etc.)
+- Create schema without ADR
+- Skip the CC descent sequence
+```
+
+---
+
+## Golden Rules
+
+1. **This repo is a blueprint. Barton-Processes is the muscle.**
+2. **Tier 0 is the engine. Everything else is fuel.**
+3. **CF does the work. Neon is the vault.**
+4. **CL sovereign ID is the spine. Sales ID is minted from it.**
+5. **4 meetings, 4 sub-hubs. Each has 1 CANONICAL + 1 ERROR.**
+6. **Sales closes → promotes to Client via CL sovereign.**
+7. **Determinism first. LLM is tail, not spine.**
 
 ---
 
@@ -287,8 +216,7 @@ npm run lint
 | Field | Value |
 |-------|-------|
 | Created | 2026-01-30 |
-| Last Modified | 2026-02-25 |
+| Last Modified | 2026-03-19 |
 | Version | 2.0.0 |
 | Status | ACTIVE |
-| Authority | CONSTITUTION.md |
-| Parent | imo-creator |
+| Authority | imo-creator-v2 (Inherited) |

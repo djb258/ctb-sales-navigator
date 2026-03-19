@@ -147,7 +147,7 @@
       },
       "CC-03": {
         "name": "Architectural Decisions",
-        "artifacts": ["docs/ADR-*.md"],
+        "artifacts": ["docs/adr/ADR-*.md"],
         "status": "PENDING"
       },
       "CC-04": {
