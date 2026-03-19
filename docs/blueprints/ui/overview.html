@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Navigator — Blueprint Overview</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>Sales Navigator — 4-Meeting Process</h1>
+                <span class="badge">HUB-SALES-NAV-20260130</span>
+            </div>
+        </header>
+
+        <div class="actions">
+            <button onclick="window.open('input.html')">Meeting 1: Fact Finder</button>
+            <button onclick="window.open('middle.html')">Meeting 2-3: Education</button>
+            <button onclick="window.open('output.html')">Meeting 4: Financials</button>
+        </div>
+
+        <div class="bucket-cards">
+            <div class="card">
+                <h3>Ingress (Meeting 1)</h3>
+                <p>Fact Finder — pull outreach data, validate with prospect, fill gaps</p>
+                <ul style="font-size:13px;color:#888;margin-top:8px;">
+                    <li>Company profile (outreach.company_target)</li>
+                    <li>DOL filings (outreach.dol)</li>
+                    <li>Contacts — CEO/CFO/HR (people.company_slot)</li>
+                    <li>Blog signals (outreach.blog)</li>
+                    <li>BIT score (outreach.bit_scores)</li>
+                </ul>
+                <a href="input.html" style="display:inline-block;margin-top:12px;">Open Fact Finder →</a>
+            </div>
+            <div class="card">
+                <h3>Middle (Meetings 2-3)</h3>
+                <p>Insurance Education + Systems Education — slide decks + Monte Carlo</p>
+                <ul style="font-size:13px;color:#888;margin-top:8px;">
+                    <li>Meeting 2: Monte Carlo simulation results + insurance education</li>
+                    <li>Meeting 3: SVG Agency systems + service model presentation</li>
+                </ul>
+                <a href="middle.html" style="display:inline-block;margin-top:12px;">Open Education →</a>
+            </div>
+            <div class="card">
+                <h3>Egress (Meeting 4)</h3>
+                <p>Financials — quote presentation, carrier comparisons, close</p>
+                <ul style="font-size:13px;color:#888;margin-top:8px;">
+                    <li>Quotes by benefit type (medical, dental, vision, life)</li>
+                    <li>Carrier comparison (rates per tier)</li>
+                    <li>Total annual cost vs current premium</li>
+                    <li>Promotion to client on close</li>
+                </ul>
+                <a href="output.html" style="display:inline-block;margin-top:12px;">Open Financials →</a>
+            </div>
+        </div>
+
+        <div class="mermaid-container">
+            <pre class="mermaid">
+flowchart LR
+    classDef done fill:#22c55e,stroke:#15803d,color:#fff;
+    classDef wip fill:#f59e0b,stroke:#b45309,color:#111;
+    classDef todo fill:#ef4444,stroke:#7f1d1d,color:#fff;
+
+    subgraph OUTREACH["OUTREACH (5 Sub-Hubs)"]
+        company["Company Target"]:::done
+        dol["DOL Filings"]:::done
+        people["People/Contacts"]:::done
+        blog["Blog Signals"]:::done
+        bit["BIT Scores"]:::done
+    end
+
+    subgraph SALES["SALES (4 Meetings)"]
+        m1["Meeting 1: Fact Finder"]:::wip
+        mc["Monte Carlo Simulation"]:::todo
+        m2["Meeting 2: Insurance Ed"]:::todo
+        m3["Meeting 3: Systems Ed"]:::todo
+        m4["Meeting 4: Financials"]:::todo
+        m1 --> mc
+        mc --> m2
+        m2 --> m3
+        m3 --> m4
+    end
+
+    subgraph CLIENT["CLIENT (Promotion)"]
+        mint["Mint Client ID"]:::todo
+        intake["Data Intake"]:::todo
+        mint --> intake
+    end
+
+    OUTREACH --> m1
+    m4 -->|"Close → Promote"| mint
+            </pre>
+        </div>
+
+        <div class="navigation">
+            <a href="input.html">Meeting 1: Fact Finder →</a>
+            <a href="middle.html">Meetings 2-3: Education →</a>
+            <a href="output.html">Meeting 4: Financials →</a>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        mermaid.initialize({ startOnLoad: true });
+    </script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meetings 2-3: Education — Sales Navigator</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>Meetings 2-3: Education</h1>
+                <span class="badge">MIDDLE — Read-Only Presentations</span>
+            </div>
+        </header>
+
+        <div class="navigation" style="margin-bottom:24px;">
+            <a href="input.html">← Meeting 1</a>
+            <a href="overview.html">Overview</a>
+            <a href="output.html">Meeting 4 →</a>
+        </div>
+
+        <div class="bucket-cards">
+            <div class="card">
+                <h3>Meeting 2: Insurance Education</h3>
+                <p>Slide deck + Monte Carlo simulation results</p>
+                <ul style="font-size:13px;color:#888;margin-top:8px;">
+                    <li><strong>Slide 1:</strong> Current situation summary (from Fact Finder)</li>
+                    <li><strong>Slide 2:</strong> Monte Carlo results — projected claims, confidence range, recommended funding</li>
+                    <li><strong>Slide 3:</strong> Insurance education — fully insured vs level funded vs self-funded, stop-loss, risk corridor</li>
+                </ul>
+                <p style="margin-top:12px;font-size:13px;"><strong>Data:</strong> sales.sales_factfinder + sales.sales_insurance (Monte Carlo results)</p>
+            </div>
+
+            <div class="card">
+                <h3>Meeting 3: Systems Education</h3>
+                <p>SVG Agency approach, technology, service model</p>
+                <ul style="font-size:13px;color:#888;margin-top:8px;">
+                    <li><strong>Slide 1:</strong> Our approach — data-driven, continuous monitoring, transparency, technology-first</li>
+                    <li><strong>Slide 2:</strong> Technology platform — client portal, claims analytics, vendor management, employee self-service</li>
+                    <li><strong>Slide 3:</strong> Service model — quarterly reviews, monthly monitoring, annual renewal, ongoing support</li>
+                </ul>
+                <p style="margin-top:12px;font-size:13px;"><strong>Data:</strong> sales.sales_systems (presentation tracking)</p>
+            </div>
+        </div>
+
+        <div class="mermaid-container">
+            <pre class="mermaid">
+flowchart TD
+    classDef done fill:#22c55e,stroke:#15803d,color:#fff;
+    classDef wip fill:#f59e0b,stroke:#b45309,color:#111;
+    classDef todo fill:#ef4444,stroke:#7f1d1d,color:#fff;
+
+    ff["Fact Finder Complete"]:::wip
+    mc["Monte Carlo Simulation"]:::todo
+    m2["Meeting 2: Present Insurance Ed"]:::todo
+    m3["Meeting 3: Present Systems Ed"]:::todo
+    next["→ Meeting 4: Financials"]:::todo
+
+    ff --> mc --> m2 --> m3 --> next
+            </pre>
+        </div>
+
+        <div class="card">
+            <h3>Monte Carlo Simulation (Between M1 and M2)</h3>
+            <p><strong>Engine:</strong> Layer 0 or dedicated simulation worker (FUTURE BUILD)</p>
+            <p><strong>Input:</strong> Fact Finder data — employee count, current premium, funding type, stop-loss details</p>
+            <p><strong>Output:</strong> Projected annual claims, 90% confidence range, recommended funding type</p>
+            <p><strong>Stored in:</strong> sales.sales_insurance (monte_carlo_run_id, projected_claims, confidence_low/high, recommended_funding)</p>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>mermaid.initialize({ startOnLoad: true });</script>
+</body>
+</html>

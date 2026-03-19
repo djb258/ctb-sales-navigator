@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meeting 4: Financials — Sales Navigator</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>Meeting 4: Financials</h1>
+                <span class="badge">EGRESS — Read-Only Quote Presentation</span>
+            </div>
+        </header>
+
+        <div class="navigation" style="margin-bottom:24px;">
+            <a href="middle.html">← Meetings 2-3</a>
+            <a href="overview.html">Overview</a>
+        </div>
+
+        <div class="bucket-cards">
+            <div class="card">
+                <h3>Quote Presentation</h3>
+                <p>All quoted costs per insurance line, carrier comparison, close meeting.</p>
+                <ul style="font-size:13px;color:#888;margin-top:8px;">
+                    <li>Summary cards: company, employees, current premium, quotes received</li>
+                    <li>Quotes grouped by benefit type (medical, dental, vision, life)</li>
+                    <li>Per-carrier rates: EE, ES, EC, FAM tiers + annual cost</li>
+                    <li>Total cost comparison: carrier totals vs current premium with delta</li>
+                </ul>
+                <p style="margin-top:12px;font-size:13px;"><strong>Data:</strong> sales.sales_quotes + sales.sales_factfinder (for current premium baseline)</p>
+            </div>
+
+            <div class="card">
+                <h3>On Close: Promote to Client</h3>
+                <p>When the sale closes, the sales_id promotes to client_id via the CL sovereign.</p>
+                <ul style="font-size:13px;color:#888;margin-top:8px;">
+                    <li>CL sovereign ID joins sales → client</li>
+                    <li>Process 800 (Client Mint) mints new client_id</li>
+                    <li>Fact Finder data seeds the client record</li>
+                    <li>Selected quotes become the initial plan setup</li>
+                </ul>
+                <p style="margin-top:12px;font-size:13px;"><strong>Contract:</strong> sales/contracts/promote_to_client.json</p>
+            </div>
+        </div>
+
+        <div class="mermaid-container">
+            <pre class="mermaid">
+flowchart TD
+    classDef done fill:#22c55e,stroke:#15803d,color:#fff;
+    classDef wip fill:#f59e0b,stroke:#b45309,color:#111;
+    classDef todo fill:#ef4444,stroke:#7f1d1d,color:#fff;
+
+    quotes["Load Quotes by Benefit Type"]:::todo
+    present["Present Carrier Comparisons"]:::todo
+    compare["Show Total Cost vs Current"]:::todo
+    decision{"Client Decision"}:::todo
+    close["Close — Promote to Client"]:::todo
+    lost["Lost — Archive"]:::todo
+
+    quotes --> present --> compare --> decision
+    decision -->|"Yes"| close
+    decision -->|"No"| lost
+            </pre>
+        </div>
+
+        <div class="card">
+            <h3>Promotion Flow</h3>
+            <table style="width:100%;font-size:13px;">
+                <tr><th>Step</th><th>Process</th><th>What Happens</th></tr>
+                <tr><td>1</td><td>900 Sales Portal</td><td>Mark sale as closed, advance phase</td></tr>
+                <tr><td>2</td><td>800 Client Mint</td><td>CL sovereign ID → mint client_id</td></tr>
+                <tr><td>3</td><td>810 Client Intake</td><td>Fact Finder data + selected quotes → client schema</td></tr>
+                <tr><td>4</td><td>820 Vendor Export</td><td>Generate carrier setup files</td></tr>
+                <tr><td>5</td><td>830 Client Portal</td><td>Client pages go live</td></tr>
+            </table>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>mermaid.initialize({ startOnLoad: true });</script>
+</body>
+</html>

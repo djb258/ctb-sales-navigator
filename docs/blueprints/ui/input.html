@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meeting 1: Fact Finder — Sales Navigator</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>Meeting 1: Fact Finder</h1>
+                <span class="badge">INGRESS — Read-Write Form</span>
+            </div>
+        </header>
+
+        <div class="navigation" style="margin-bottom:24px;">
+            <a href="overview.html">← Overview</a>
+            <a href="middle.html">Meetings 2-3 →</a>
+        </div>
+
+        <div class="bucket-cards">
+            <div class="card">
+                <h3>Data Sources (Pre-populated from Outreach)</h3>
+                <table style="width:100%;font-size:13px;">
+                    <tr><th>Source</th><th>Data</th><th>Table</th></tr>
+                    <tr><td>Company Target</td><td>Name, state, industry, employees, domain</td><td>outreach.company_target</td></tr>
+                    <tr><td>DOL Filings</td><td>EIN, carrier, broker, renewal month, funding type</td><td>outreach.dol</td></tr>
+                    <tr><td>People</td><td>CEO/CFO/HR names, emails, LinkedIn URLs</td><td>people.company_slot + people_master</td></tr>
+                    <tr><td>Blog</td><td>Blog URL, context summary</td><td>outreach.blog</td></tr>
+                    <tr><td>BIT Score</td><td>Score, tier, signal count</td><td>outreach.bit_scores</td></tr>
+                </table>
+            </div>
+
+            <div class="card">
+                <h3>Form Fields (Validated/Filled by Dave)</h3>
+                <table style="width:100%;font-size:13px;">
+                    <tr><th>Section</th><th>Fields</th></tr>
+                    <tr><td>Company Info</td><td>Legal name, state, EIN, employee count, industry</td></tr>
+                    <tr><td>Current Benefits</td><td>Carrier, broker, renewal date, funding type, annual premium, stop-loss carrier, stop-loss deductible</td></tr>
+                    <tr><td>Discovery</td><td>Pain points, decision timeline, decision makers, notes</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="mermaid-container">
+            <pre class="mermaid">
+flowchart TD
+    classDef done fill:#22c55e,stroke:#15803d,color:#fff;
+    classDef wip fill:#f59e0b,stroke:#b45309,color:#111;
+    classDef todo fill:#ef4444,stroke:#7f1d1d,color:#fff;
+
+    seed["Seed outreach_snapshot from Neon"]:::wip
+    form["Pre-populate Fact Finder form"]:::wip
+    validate["Dave validates with prospect"]:::todo
+    fill["Fill gaps — what we don't have"]:::todo
+    save["Save to sales_factfinder (D1)"]:::todo
+    advance["Advance phase: factfinder → insurance"]:::todo
+
+    seed --> form --> validate --> fill --> save --> advance
+            </pre>
+        </div>
+
+        <div class="card">
+            <h3>Output</h3>
+            <p><strong>Table:</strong> sales.sales_factfinder (D1 working, vaults to Neon)</p>
+            <p><strong>Next Step:</strong> Monte Carlo simulation runs against fact finder data → feeds Meeting 2</p>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>mermaid.initialize({ startOnLoad: true });</script>
+</body>
+</html>
