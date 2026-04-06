@@ -44,6 +44,20 @@ The concierge checks the hospital map, picks the cheapest path, pushes to that v
 
 **Research per prospect:** Pull every hospital within 30-50 mile radius of their zip code. Flag which are 501(c)(3) nonprofits (501R eligible), which accept RBP, which are PPO in-network. This data feeds Gate 2 video.
 
+### The Concierge Introduction Process (100% engagement rate)
+
+The concierge / medical shopper is the human layer in front of the vendor routing (PDF 03). The employee never navigates the vendor network — they just know someone helped them.
+
+**Two-step warm intro:**
+1. **Email from HR** — looks like it comes from the employee's own HR department, not a random vendor. "We have a service that helps with your situation." Trusted source. Employee expects what's coming.
+2. **Concierge calls** — employee is already warmed up. Concierge builds the relationship, understands the situation, then routes to the best-priced vendor.
+
+**Result: 100% engagement rate.** Compare that to a vendor calling an employee cold out of the blue — they don't answer, don't trust it, think it's a scam. Dave's way: HR email (familiar) → concierge (personal) → vendor handoff (warm). Three layers of trust before a vendor ever touches the employee.
+
+The HR email is automated outreach — SID/MID territory. Template is the constant, employee name and situation is the variable.
+
+---
+
 ### Drug Claims (AFTER the claim happens)
 
 High-dollar drug shows up in claims → concierge identifies it → reaches out to employee → routes to cheapest source:
