@@ -259,6 +259,25 @@ PDFs go in `Sales Process/docs/reference/`. To be ingested into svg-brain for in
 
 ---
 
+## The Competitive Position — Why Nobody Can Replicate This
+
+To replicate this model you have to be all four things at once:
+
+1. **Next to the client** — advisor relationship, face to face, trust. A TPA can't do this — they're back-office, processing claims, no CEO relationship.
+2. **Building the platform** — operations, dashboards, routing, automation, ticketing. A traditional broker can't do this — they're on spreadsheets and email.
+3. **Managing the vendors** — concierge, pre-cert routing, drug management, continuous vendor evaluation. A tech company can't do this — they don't know 501R from RBP and they've never managed a captive.
+4. **Not on commission** — aligned incentives, fully transparent. Most brokers can't do this — their business model depends on carrier commissions.
+
+Miss any one of those four and the model falls apart:
+- **TPA** could try operations but they're not the advisor — no client relationship, no product control
+- **Tech company** could build the platform but they don't understand insurance domain
+- **Another broker** could try but they're on commission and don't have the tech stack
+- **Sales navigator/consultant** might have the relationship but no platform, no vendor network
+
+The moat is the intersection: advisor + operator + technologist + domain expert, sitting right next to the client with zero financial conflicts. That position doesn't exist anywhere else in the food chain.
+
+---
+
 ## The Theme — Insurance Informatics
 
 **Insurance + IT = Insurance Informatics.** That's the brand. Combining insurance domain knowledge with technology systems.
