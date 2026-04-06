@@ -14,6 +14,21 @@ Any group splits into two populations:
 
 The 90% get one plan — simple, low-admin. The 10% get the concierge, the routing, the vendor network, the active management.
 
+### The Two Plans
+
+| | 90% Plan (MEC) | 10% Plan (High-Dollar) |
+|---|---|---|
+| Structure | Copay plan, $0 deductible | 80/20 coinsurance, ACA max OOP |
+| Network | PPO / 140% Medicare | Concierge-routed (501R/RBP/PPO) |
+| Management | Self-clearing, routine | Active — concierge, vendor routing |
+
+The 80/20 on the 10% plan is the incentive engine. Everyone's interest aligns:
+- **Employer** wants price low — protects claims fund, captive returns premiums
+- **Employee** wants price low — they pay 20% of whatever it is
+- **Operations** wants price low — captive returns = happy client = retention
+
+When the concierge routes a $100K claim through 501R and it goes to $0, the plan pays 80% of $0 and the employee pays 20% of $0. Claims fund untouched. Captive returns premiums. Everyone wins.
+
 **One-liner:** "You can't stop claims. Claims are going to happen no matter what. The trick is to manage them, not overpay."
 
 **One-liner:** "Health insurance is nothing more than a bill-paying system. We have to manage the cost."
