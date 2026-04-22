@@ -26,3 +26,11 @@ Legend:
 - Cron trigger: the vendor loop runs asynchronously until all invoice-backed rows are parsed.
 - Precondition trigger: Gate 4 waits until the database is fully filled.
 
+## Peer Cross-Links (per dispatch DISPATCH_UT_SALES_REPAIR_2026-04-22.md)
+
+| Peer Artifact | Role | Path |
+|---------------|------|------|
+| Blueprint UT | 30k hub-level manual | `Sales Process/UT_BLUEPRINT.md` |
+| Process UT | 10k operational manual | `Barton-Processes/factory/sales/UT_PROCESS.md` |
+| Dispatch | Governing work order | `imo-creator-v2/factory/dispatch/DISPATCH_UT_SALES_REPAIR_2026-04-22.md` |
+| Audit Report | Gate 3 audit verdict | `imo-creator-v2/law/doctrine/AUDITS/SALES_UT_AUDIT_2026-04-22.md` |

@@ -136,7 +136,9 @@ The purpose block must answer what the blueprint delivers, what starves without 
 
 | Resource | URL | What it shows |
 |----------|-----|---------------|
-| Mission Control sales layers | N/A - runtime dashboard is outside this blueprint | Sales-state layers, stage progression, and the `sales_id` spine when the live surfaces are online |
+| Mission Control MapEngine - Sales Layers | `https://mission-control.svg-outreach.workers.dev/map-engine` (layer filters: `SVG-SALES`, `SALE-G1`, `SALE-G2`, `SALE-G3`, `SALE-G4`, `SALE-WON`, `SALE-LOST`, `SALE-STALLED`) | Live view of every sales_state record on geographic + gate-color layers. Driven by `map_layer_registry` rows (Sub-hub 29, BAR-329). |
+| Prospect Portals | `svg.agency/p/{sales_slug}` (one URL per `sales_id`) | Per-prospect portal with progressive-unlock gates, meeting minutes, and Gate 4 proposal surface. |
+| CF Stream Library | `fleet/content/videos/MANIFEST.md` + iframe embeds `https://iframe.videodelivery.net/{uid}` | The 4 sales-cycle videos (Gate 1-4) with watch-% telemetry feeding `video_watched` on `meeting_checklist`. |
 
 ### Dependencies
 
@@ -179,6 +181,15 @@ The purpose block must answer what the blueprint delivers, what starves without 
 |--------|----------------|--------|---------|
 | `SALES_DATABASE_URL` | imo-creator | dev | Sales vault / schema references |
 | `NEON_URL` | sales-navigator | dev | Upstream outreach reads and snapshot pulls |
+
+### Peer Cross-Links (per dispatch DISPATCH_UT_SALES_REPAIR_2026-04-22.md)
+
+| Peer Artifact | Role | Path |
+|---------------|------|------|
+| Process UT | Operational sibling - 10k altitude execution manual for the 4-gate cycle | `Barton-Processes/factory/sales/UT_PROCESS.md` |
+| Blueprint Diagram | Visual companion - mermaid flowchart of the cycle | `Sales Process/docs/blueprints/sales-cycle-flow.md` |
+| Dispatch (this) | Work order that governs these artifacts | `imo-creator-v2/factory/dispatch/DISPATCH_UT_SALES_REPAIR_2026-04-22.md` |
+| Audit Report | Gate 3 audit verdict + findings | `imo-creator-v2/law/doctrine/AUDITS/SALES_UT_AUDIT_2026-04-22.md` |
 
 ### Fill Rule
 
@@ -561,4 +572,3 @@ Intentionally empty during BUILD. The auditor fills the birth certificate after 
 | US Validated | pending |
 | Governing Engine | `law/doctrine/FOUNDATIONAL_BEDROCK.md` + `law/doctrine/DMJ.md` + `law/doctrine/DATABASE_FILL_INSTRUCTIONS.md` |
 | Parent | `law/UNIFIED_TEMPLATE.md` |
-
