@@ -130,6 +130,7 @@ The purpose block must answer what the blueprint delivers, what starves without 
 | [Barton-Processes/factory/client/820-vendor-export/PROCESS.md](../Barton-Processes/factory/client/820-vendor-export/PROCESS.md) | PROC-820 · leaf · CC-04 | BUILD | amber | Downstream vendor export after client handoff |
 | [Barton-Processes/factory/client/830-client-portal/PROCESS.md](../Barton-Processes/factory/client/830-client-portal/PROCESS.md) | PROC-830 · leaf · CC-04 | BUILD | amber | Downstream client portal and service surface |
 | [docs/blueprints/sales-cycle-flow.md](./docs/blueprints/sales-cycle-flow.md) | DIAG-SALES-CYCLE · leaf · CC-02 | BUILD | amber | Visual companion for the full sales cycle |
+| [docs/architecture/SALES-STACK.md](../imo-creator-v2/docs/architecture/SALES-STACK.md) | DOC-SALES-STACK · hub · CC-02 | BUILD | amber | Parent architecture reference for the 6-layer sales stack under CL |
 | vendor_capability_registry | SALES-VENDOR-REGISTRY · branch · CC-03 | BUILD | amber | Planned read surface for vendor capability metadata |
 
 ### Live Dashboard
